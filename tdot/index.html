@@ -1,0 +1,48 @@
+<html>
+<head>
+<style>
+@import url(https://fonts.googleapis.com/css?family=Raleway+Mono:400,300italic|Raleway:500,700|Raleway+Condensed:400,700,400italic&subset=latin,greek);
+
+body {
+  font-family: Raleway, sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+.showcase {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.showcase div {
+  width: 300px;
+  margin: 10px;
+}
+
+img {
+  width: 100%;
+  box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.2);
+}
+
+img:hover {
+  box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.5);
+}
+
+</style>
+</head>
+<body>
+  
+  <p>Here is a collection of video-feedback loops generated within <a href="http://cindyjs.org">CindyJS</a></p>
+  <p>
+    In order to run these examples you require a webcam that points to your screen. You might use an external screen and your internal webcam, an USB-connected camera or you can use your smartphone as webcam together with an app like DroidCam.
+  </p>
+  <p>
+    In those examples you can press <b>C</b> to toggle the code.
+  </p>
+  <div class="showcase">
+  <div><a href="julia.html"><img src="julia.png">Julia</a></div>
+  <div><a href="barnsley.html"><img src="barnsley.png">Barnsleys farn</a></div>
+  <div><a href="identity.html"><img src="sierpinski.png">The identety</a></div>
+  <div><a href="apollian.html"><img src="apollian.png">Apollian gasket</a></div>
+  </div>
+</body>
+</html>
