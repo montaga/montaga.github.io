@@ -39,6 +39,8 @@ calibrate = false;
 M = [[1,0,0],[0,1,0],[0,0,1]];
 plotcmd() := ();
 hidden = false;
+lastsecond = -1;
+k = 0;
 </script>
 
 <script id="cskeydown" type="text/x-cindyscript">
@@ -84,8 +86,15 @@ newstate(x, y) := (
     )
 );
 
-colorplot(
-  newstate(round(#.x*n), round(#.y*n));
+if(lastsecond < floor(seconds()),
+  colorplot(
+    newstate(round(#.x*n), round(#.y*n));
+  );
+  lastsecond = floor(seconds());
+  ,
+  colorplot(
+    get(round(#.x*n), round(#.y*n));
+  )
 );
 </script>
 
