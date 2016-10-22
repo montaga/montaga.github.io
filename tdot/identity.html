@@ -35,7 +35,7 @@
 
 <script id="csinit" type="text/x-cindyscript">
 camera = camera video();
-calibrate = true;
+calibrate = false;
 M = [[1,0,0],[0,1,0],[0,0,1]];
 plotcmd() := ();
 hidden = false;
@@ -54,9 +54,11 @@ hidden = false;
 <script id="csdraw" type="text/x-cindyscript">
 forall([M11, M21, M31, M41, M12, M22, M32, M42], #.visible = calibrate);
 if(calibrate,
-    
     colorplot(imagergb(camera,#));
     drawtext((0,0), "Press M to finish calibration.", color->red(1));
+    M = map(M11, M21, M31, M41,
+            M12, M22, M32, M42);
+    javascript("document.cookie = 'M = " + M + ";';");
   ,
   if (image ready(camera),
     plotcmd();
@@ -64,9 +66,7 @@ if(calibrate,
 );
 </script>
 
-<script id="plotcmd" type="text/x-cindyscript">
-M = map(M11, M21, M31, M41, M12, M22, M32, M42);
-colorplot(
+<script id="plotcmd" type="text/x-cindyscript">colorplot(
   z = [#.x, #.y, 1];
   imagergb(camera, M*z)
 );
@@ -138,8 +138,10 @@ window.setTimeout(function () {
   cdy.evokeCS(`
     plotcmd() := (
       ${document.getElementById('plotcmd').text}
-    )
+    );
   `);
+  cdy.evokeCS(document.cookie);
+  btn.click();
 }, 1000);
 
 
