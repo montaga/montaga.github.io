@@ -1953,7 +1953,7 @@ function cs_onDrop(lst, pos) {
 function cindy_cancelmove() {
     move = undefined;
 }
-var version = [0,8,1,11,"g10438aa!"];
+var version = [0,8,1,11,"gde6e4e9"];
 //==========================================
 //      Complex Numbers
 //==========================================
