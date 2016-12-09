@@ -78,7 +78,11 @@
         fun(p.x / 2.2, p.y / 2.2, p.z / 2.2);
     );
     
-    guessdeg() := max(apply(1..10,
+    guessdeg() := max(apply(1..10, //run randomized algorithm 10 times
+        //Algorithm: to find out degree of F (deg n), chose random x, r,
+        //compute F(x) (deg n), G(x)=F(x+r)-F(x) (deg n-1), H(x)=G(x+r)-G(x) (deg n-2),
+        //                 ... until it becomes zero.
+        
         x = [random(),random(),random()];
         r = [random(),random(),random()];
         v = [F(x)];
