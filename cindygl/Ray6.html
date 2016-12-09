@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+    <title>Cindy JS</title>
+        <script type="text/javascript" src="http://cindyjs.org/dist/v0.7/Cindy.js"></script>
+        <script type="text/javascript" src="http://cindyjs.org/dist/v0.7/CindyGL.js"></script>
+  </head>
+    
+	<body style="font-family:Arial;margin:0px">
+    
+<script id="csmousedrag" type="text/x-cindyscript">
+
+</script>
+<script id="csmousedown" type="text/x-cindyscript">
+sx=mouse().x;
+sy=mouse().y;
+dragging=sx<.5;
+
+</script>
+<script id="csmouseup" type="text/x-cindyscript">
+dragging=false;
+
+</script>
+    
+    <script id="csdraw" type="text/x-cindyscript">
+    zoom=1.3;
+  time = seconds()-t0;
+
+if(dragging &mover()!=PB,
+dx=3*(sx-mouse().x);
+dy=3*(sy-mouse().y);
+,
+dx=.005*sin(time*.1)*2;
+dy=.003*cos(time*.1)*2;
+dx=0;dy=0;
+);
+
+mat=mat*(
+(1,0,0),
+(0,cos(dy),-sin(dy)),
+(0,sin(dy),cos(dy))
+)
+*
+(
+(cos(dx),0,-sin(dx)),
+(0,1,0),
+(sin(dx),0,cos(dx))
+)
+;
+imat=(inverse(mat));
+sx=mouse().x;
+sy=mouse().y;
+
+    Z.x=0.65;
+    if(Z.y>.4,Z.y=.4);
+    if(Z.y<-.4,Z.y=-.4);
+     
+    zoom=(Z.y+.4)*4+.1; 
+    
+    PA.x=0.55;
+    if(PA.y>.4,PA.y=.4);
+    if(PA.y<-.4,PA.y=-.4);
+    a=offset+PA.y*4;
+  
+      //mouselightpos = (ray(mouse(), min(getDistanceToObj(mouse())-1, 10)));
+      colorplot(computeColor(#));
+          draw((.55,.4),(.55,-.4),color->(0,0,0));
+          draw((.65,.4),(.65,-.4),color->(0,0,0));
+
+    </script>
+               
+    <script id="csinit" type="text/x-cindyscript">
+offset=1;
+barth():=(
+        F(p) := (
+        regional(x, y, z);
+        x = p.x*zoom;
+        y = p.y*zoom;
+        z = p.z*zoom;  
+
+ 
+-(
+4*((a*(1+sqrt(5))/2)^2*x^2-y^2)
+*((a*(1+sqrt(5))/2)^2*y^2-z^2)
+*((a*(1+sqrt(5))/2)^2*z^2-x^2)
+-1*(1+2*(a*(1+sqrt(5))/2))
+*(x^2+y^2+z^2-1)^2)
+);
+
+colin=(.6,.7,1);
+colout=(1,.5,.1); 
+
+offset=1;
+PA.y=0;
+Z.y=-.4+.15;
+forcerecompile();
+
+);
+
+kummer():=(
+        F(p) := (
+        regional(x, y, z);
+        x = p.x*zoom;
+        y = p.y*zoom;
+        z = p.z*zoom;   
+ 
+(x^2+y^2+z^2-(0.5+2*a)^2)^2-(3.0*((0.5+2*a)^2)-1.0)/(3.0-((0.5+2*a)^2))
+*(1-z-sqrt(2)*x)*(1-z+sqrt(2)*x)*(1+z+sqrt(2)*y)*(1+z-sqrt(2)*y);
+);
+
+
+
+offset=.4;
+PA.y=0;
+Z.y=-.4+.1;
+
+ colin=(0,1,1);
+colout=(1,.4,0); 
+forcerecompile();
+);
+
+
+citrus():=(
+        F(p) := (
+        regional(x, y, z);
+        x = p.x*zoom/3;
+        y = p.y*zoom/3;
+        z = p.z*zoom/3;  
+   
+(1.2*x*x+1.2*z*z-5*(y+0.5)*(y+0.5)*(y+0.5)*(0.5-y)*(0.5-y)*(0.5-y))*.1;
+);
+
+
+
+offset=.4;
+PA.y=0;
+Z.y=-.4+.07;
+colin=(.9,1,.5);
+colout=(0,0,1); 
+forcerecompile();
+);
+
+
+
+dingdong():=(
+        F(p) := (
+        regional(x, y, z);
+        x = p.x*zoom/3;
+        y = p.y*zoom/3;
+        z = p.z*zoom/3;    
+x*x+y*y+z*z*z-z*z+a;
+);
+   
+offset=0;
+PA.y=0;
+Z.y=-.4+.37;
+colin=(.2,0.2,1);
+colout=(.8,0.7,.3);
+forcerecompile();
+);
+
+heart():=(
+        F(p) := (
+        regional(x, y, z);
+        x = p.x*zoom/3;
+        y = p.y*zoom/3;
+        z = p.z*zoom/3;    
+
+        var1=(x*x+9/4*y*y+z*z-1);
+var1*var1*var1-x*x*z*z*z-9/80*y*y*z*z*z
+);
+colin=(1,0.3,0.3);
+colout=(1.,.5,0);
+offset=0;
+PA.y=0;
+Z.y=-.4+.27;
+forcerecompile();
+ 
+);
+
+
+
+visavis():=(
+        F(p) := (
+        regional(x, y, z);
+        x = p.x*zoom/3;
+        y = p.y*zoom/3;
+        z = p.z*zoom/3;    
+ x*x-x*x*x+y*y+y*y*y*y+z*z*z-z*z*z*z
+);
+
+colin=(0,.7,1);
+colout=(.8,0,1)*.4; 
+offset=0;
+PA.y=0;
+Z.y=-.4+.47;
+forcerecompile();
+ 
+);
+
+helix():=(
+        F(p) := (
+        regional(x, y, z);
+        x = p.x*zoom/1;
+        y = p.y*zoom/1;
+        z = p.z*zoom/1;    
+ -6*x*x+2*x*x*x*x+y*y*z*z
+);
+colin=(1,1,1);
+colout=(0,0,.6); 
+offset=0;
+PA.y=0;
+Z.y=-.4+.47;
+forcerecompile();
+ 
+);
+
+
+quintic():=(
+        F(p) := (
+        regional(x, y, z);
+        x = p.x*zoom/3;
+        y = p.y*zoom/3;
+        z = p.z*zoom/3;    
+x*x*x*x*x-10*x*x*x*y*y
++5*x*y*y*y*y-3*z*z*z*z*z-5*x*x*x*x-10*x*x*y*y-5*y*y*y*y+10*z*z*z+20*x*x+20*y*y-15*z-24
+);
+
+offset=0;
+PA.y=0;
+Z.y=-.4+.47;
+colin=(.5,0,0);
+colout=(0,0.5,0); 
+forcerecompile();
+ 
+);
+
+
+togliatti():=(
+        F(p) := (
+        regional(x, y, z);
+        x = p.x*zoom/1;
+        y = p.y*zoom/1;
+        z = p.z*zoom/1;    
+(1-sqrt(5-sqrt(5))/2*z)*(x*x+y*y-1+(1+3*sqrt(5))/4*z*z)*(x*x+y*y-1+(1+3*sqrt(5))/4*z*z)-
+a*3.8496061120482*(x-z)
+*(cos(2*3.1415926535/5)*x-sin(2*3.1415926535/5)*y-z)*(cos(4*3.1415926535/5)*x-sin(4*3.1415926535/5)*y-z)*(cos(6*3.1415926535/5)*x-sin(6*3.1415926535/5)*y-z)*(cos(8*3.1415926535/5)*x-sin(8*3.1415926535/5)*y-z) 
+);
+
+offset=1;
+PA.y=0;
+Z.y=-.4+.47;
+colin=(.6,.7,1);
+colout=(1,.5,.1); 
+
+forcerecompile();
+ 
+);
+
+
+
+handle():=(
+        F(p) := (
+        regional(x, y, z);
+        x = p.x*zoom/3;
+        y = p.y*zoom/3;
+        z = p.z*zoom/3;    
+(x*x+y*y-1)*(x*x+y*y-1)+(y*y+z*z-1)*(y*y+z*z-1)-a;
+);
+offset=1;
+PA.y=-0.4+.2;
+Z.y=-.4+.47;
+colin=(1,1,0);
+colout=(1,1,1)*.4; 
+
+forcerecompile();
+ 
+);
+
+
+
+
+
+
+    mat=((1,0,0),(0,1,0),(0,0,1));
+    mat=[[0.3513, -0.4908, -0.7973], [-0.8171, -0.5765, -0.0051], [-0.4571, 0.6533, -0.6036]];
+imat=(inverse(mat));
+
+    sx=mouse().x;
+sy=mouse().y;
+dragging=false;
+      use("CindyGL");
+      oo = 1000; //"infinity"
+      t0 = seconds();
+
+
+      
+dingdong();
+
+      S(r) := (r*r-4*4); //sphere with radius 4
+      
+      ray(pos, t) := (
+        mat*
+       //   (t*(pos.x*4, pos.y*4, 1)+(0, 0, -5))
+          ((pos.x*10, pos.y*10, t)+(0, 0, 0))
+      );
+
+  
+      
+      eval1(polya,polyb, t,pos) := (polya*(1,t,t*t,t*t*t)+polyb*(t*t*t*t,t*t*t*t*t,t*t*t*t*t*t,0));  
+      eval(polya,polyb, t,pos) := F(ray(pos,t));
+
+      ;  
+
+      da(polya,polyb) := (polya_2, 2*polya_3, 3*polya_4, 4*polyb_1); //computes derivative of polynomial
+      db(polya,polyb) := (5*polyb_2, 6*polyb_3, 7*polyb_4, 0); //computes derivative of polynomial
+      
+      //finds root of poly in [x0, x1] using bisection. returns def if intermediate value theorem cannot be applied
+      bisect(pos,polya,polyb, x0, x1, def) := ( 
+      pos=pos;
+        regional(v0, v1, m, vm);
+        v0 = eval(polya,polyb, x0,pos);
+        v1 = eval(polya,polyb, x1,pos);
+        if(v0*v1<=0,
+          repeat(20,
+            m = (x0+x1)/2;
+            vm = eval(polya,polyb, m,pos);
+            if(v0*vm<=0,
+              (x1 = m; v1 = vm;),
+              (x0 = m; v0 = vm;)
+            );
+          );
+          m,
+          def
+        )
+      );
+
+            bisect1(pos,polya,polyb, x0, x1, def) := ( 
+      pos=pos;
+        regional(v0, v1, m, vm);
+        v0 = eval1(polya,polyb, x0,pos);
+        v1 = eval1(polya,polyb, x1,pos);
+        if(v0*v1<=0,
+          repeat(13,//Da scheint etwas weniger schon ok zu sein
+            m = (x0+x1)/2;
+            vm = eval1(polya,polyb, m,pos);
+            if(v0*vm<=0,
+              (x1 = m; v1 = vm;),
+              (x0 = m; v0 = vm;)
+            );
+          );
+          m,
+          def
+        )
+      );
+      
+      
+      //finds first root of poly in interval (l, u). returns oo if there is none
+      firstroot(posx,polya,polyb, l, u) := ( 
+        regional(p1a,p1b, p2a, p2b, p3a, p3b,p4a,p4b, 
+        a0, 
+        b0, b1, 
+        c0, c1, c2, 
+        d0, d1, d2, d3,
+        e0, e1, e2, e3, e4,
+        f0, f1, f2, f3, f4, f5
+
+        );
+          p6a = polya;        
+          p6b = polyb;        
+          p5a = da(p6a,p6b);  
+          p5b = db(p6a,p6b);  
+          p4a = da(p5a,p5b);  
+          p4b = db(p5a,p5b);  
+          p3a = da(p4a,p4b);  
+          p3b = db(p4a,p4b);  
+          p2a = da(p3a,p3b);  
+          p2b = db(p3a,p3b);  
+          p1a = da(p2a,p2b);  
+          p1b = db(p2a,p2b);  
+
+
+// Utilize Rolle's theorem: There is always a stationary point between two roots
+//           l   u
+//            \ /        <-bisection on p1
+//         l   a0  u     <-roots of p1
+//          \ / \ /      <-bisection on p2
+//       l   b0  b1  u   <-roots of p2
+//        \ / \ / \ /    <-bisection on p3
+//     l   c0  c1  c2  u <-roots of p3
+//      \ / \ / \ / \ /               <-bisection on p4
+//   l  d0  d1  d2  d3   u                <-roots of p4
+//    \ / \ / \ / \ / \ /  
+// l   e0  e1  e2  e3  e4   u  
+//  \ / \ / \ / \ / \ / \  /   
+//   f0  f1  f2  f3  f4  f5    
+
+          a0 = bisect1(posx,p1a,p1b, l, u, u);
+          b0 = bisect1(posx,p2a,p2b, l, a0, l);
+          c0 = bisect1(posx,p3a,p3b, l, b0, l);
+          d0 = bisect1(posx,p4a,p4b, l, c0, l);
+          e0 = bisect1(posx,p5a,p5b, l, d0, l);
+          f0 = bisect(posx,p6a,p6b, l, e0, l);
+          
+          if(l < f0 & f0 < u, f0,
+          b1 = bisect1(posx,p2a,p2b, a0, u, u);
+          c1 = bisect1(posx,p3a,p3b, b0, b1, c0);
+          d1 = bisect1(posx,p4a,p4b, c0, c1, d0);
+          e1 = bisect1(posx,p5a,p5b, d0, d1, e0);
+          f1 =  bisect(posx,p6a,p6b, e0, e1, f0);
+          if(l < f1 & f1 < u, f1,
+          c2 = bisect1(posx,p3a,p3b, b1, u, u);
+          d2 = bisect1(posx,p4a,p4b, c1, c2, d1);
+          e2 = bisect1(posx,p5a,p5b, d1, d2, e1);
+          f2 =  bisect(posx,p6a,p6b, e1, e2, f1);
+
+          if(l < f2 & f2 < u, f2,
+          d3 = bisect1(posx,p4a,p4b, c2, u, u);
+          e3 = bisect1(posx,p5a,p5b, d2, d3, e2);
+          f3 =  bisect(posx,p6a,p6b, e2, e3, f2);
+          if(l < f3 & f3 < u, f3,
+          e4 = bisect1(posx,p5a,p5b, d3, u, u);
+          f4 =  bisect(posx,p6a,p6b, e3, e4, f3);
+          if(l < f4 & f4 < u, f4,
+          f5 =  bisect(posx,p6a,p6b, e4, u, f4);
+          if(l < f5 & f5 < u, f5,
+            oo
+          ))))));
+
+      );
+      
+      A = apply(0..3,c,apply(0..3,i,(5*c)^i));
+      B = inverse(A); 
+
+      li=[-3,-2,-1,0,1,2,3];
+
+      AX = apply(li,c,apply(0..6,i,(c^i)));
+      BX = transpose(inverse(AX)); 
+
+  
+      b11=BX_1_1;b12=BX_1_2;b13=BX_1_3;b14=BX_1_4;b15=BX_1_5;b16=BX_1_6;b17=BX_1_7;
+      b21=BX_2_1;b22=BX_2_2;b23=BX_2_3;b24=BX_2_4;b25=BX_2_5;b26=BX_2_6;b27=BX_2_7;
+      b31=BX_3_1;b32=BX_3_2;b33=BX_3_3;b34=BX_3_4;b35=BX_3_5;b36=BX_3_6;b37=BX_3_7;
+      b41=BX_4_1;b42=BX_4_2;b43=BX_4_3;b44=BX_4_4;b45=BX_4_5;b46=BX_4_6;b47=BX_4_7;
+      b51=BX_5_1;b52=BX_5_2;b53=BX_5_3;b54=BX_5_4;b55=BX_5_5;b56=BX_5_6;b57=BX_5_7;
+      b61=BX_6_1;b62=BX_6_2;b63=BX_6_3;b64=BX_6_4;b65=BX_6_5;b66=BX_6_6;b67=BX_6_7;
+      b71=BX_7_1;b72=BX_7_2;b73=BX_7_3;b74=BX_7_4;b75=BX_7_5;b76=BX_7_6;b77=BX_7_7;
+
+
+     
+      
+      addlight(oldcolor, lightcolor, lightdir, normal, gamma) := (
+        illumination = max(0,(lightdir/abs(lightdir))*normal)^10*1.2+max(0,(lightdir/abs(lightdir))*normal)*.9;
+             illumination = max(0,(lightdir/abs(lightdir))*normal);
+        oldcolor + (illumination^gamma)*lightcolor
+      );
+      
+      //traces the ray for the pixel at pos and returns the distance to the first intersection point of ray with (F^{-1}\{0\} intersected with ball with radius 4)
+
+      getDistanceToObj(pos) := (
+        spolyvalues = [S(ray(pos, 0)), S(ray(pos, 5)), S(ray(pos, 10)), S(ray(pos, 15))];
+        spoly = B*spolyvalues; // interpolate
+        
+        D = (spoly_2*spoly_2)-4.*spoly_3*spoly_1; //discriminant of spoly
+        if(D>=0, //ray intersects ball
+          pv1 = F(ray(pos, li_1));
+          pv2 = F(ray(pos, li_2));
+          pv3 = F(ray(pos, li_3));
+          pv4 = F(ray(pos, li_4));
+          pv5 = F(ray(pos, li_5));
+          pv6 = F(ray(pos, li_6));
+          pv7 = F(ray(pos, li_7));
+    
+
+          polya = [ 
+            b11*pv1+b21*pv2+b31*pv3+b41*pv4+b51*pv5+b61*pv6+b71*pv7,
+            b12*pv1+b22*pv2+b32*pv3+b42*pv4+b52*pv5+b62*pv6+b72*pv7,
+            b13*pv1+b23*pv2+b33*pv3+b43*pv4+b53*pv5+b63*pv6+b73*pv7,
+            b14*pv1+b24*pv2+b34*pv3+b44*pv4+b54*pv5+b64*pv6+b74*pv7
+            ];
+
+          polyb = [ 
+            b15*pv1+b25*pv2+b35*pv3+b45*pv4+b55*pv5+b65*pv6+b75*pv7,
+            b16*pv1+b26*pv2+b36*pv3+b46*pv4+b56*pv5+b66*pv6+b76*pv7,
+            b17*pv1+b27*pv2+b37*pv3+b47*pv4+b57*pv5+b67*pv6+b77*pv7,
+            0
+            ];
+
+          firstroot(pos,polya,polyb,
+            (-spoly_2-re(sqrt(D)))/(2.*spoly_3), //intersection entering the ball
+            (-spoly_2+re(sqrt(D)))/(2.*spoly_3)  //intersection leaving the ball
+          )
+          ,
+          oo
+        )
+      );
+    
+      computeColor(pos) := (
+        dst = getDistanceToObj(pos);
+        if(dst == oo,
+          gray(0.7),
+        dstx = getDistanceToObj(pos+(0.003,0));
+        dsty = getDistanceToObj(pos+(0,0.003));
+dr1=(0.003,0,dstx-dst);
+dr2=(0,0.003,dsty-dst);
+n=(dr1_2*dr2_3-dr1_3*dr2_2,dr1_3*dr2_1-dr1_1*dr2_3,dr1_1*dr2_2-dr1_2*dr2_1);
+side=F(ray(pos,dst+.0001));
+
+color=if(side>0,colout,colin);
+
+       
+          n = n/abs(n);
+
+          dir1=(0,0,1);
+          dir2=(-.5,-.5,1);
+          dir3=(.5,-.5,1);
+          dir1=dir1/|dir1|;
+          dir2=dir2/|dir2|;
+          dir3=dir3/|dir3|;
+          ((n*dir1)*color*1.2+
+          (n*dir2)*color*1)+
+          color*.2;
+          //*( 1-(dst+3)/2)
+                  //  ( 1-(dst+3)/6)
+
+        );
+        
+      
+      );
+      
+      
+    </script>
+    
+
+    <div  id="CSCanvas" style="border:0px"></div>
+    
+    <script type="text/javascript">
+         var gslp=[
+                  {name:"PA", kind:"P", type:"Free", pos:[.5,0,1],narrow:true,color:[1,1,1]},
+                  {name:"PB", kind:"P", type:"Free", pos:[0,0,1],narrow:true,color:[1,1,1],alpha:0},
+
+                  {name:"Z", kind:"P", type:"Free", pos:[0,0,1],narrow:true,color:[1,1,1],alpha:1}
+                  ];
+        cdy = createCindy({canvasname:"CSCanvas",
+                    scripts: "cs*",
+                    animation: {autoplay: false},
+                    geometry:gslp,
+                    ports: [{
+                      id: "CSCanvas",
+                      width: 900,
+                      height: 700,
+                      transform: [ { visibleRect: [ -0.5, -0.5, 0.7, 0.5 ] } ]
+                    }]
+        });
+    </script>
+  
+ <button onclick="cdy.evokeCS('kummer()')" type="button" style="width=20" >1</button>
+ <button onclick="cdy.evokeCS('barth()')" type="button" style="width=20" >2</button>
+ <button onclick="cdy.evokeCS('citrus()')" type="button" style="width=20" >3</button>
+ <button onclick="cdy.evokeCS('dingdong()')" type="button" style="width=20" >4</button>
+ <button onclick="cdy.evokeCS('heart()')" type="button" style="width=20" >5</button>
+ <button onclick="cdy.evokeCS('visavis()')" type="button" style="width=20" >6</button>
+ <button onclick="cdy.evokeCS('helix()')" type="button" style="width=20" >7</button>
+ <button onclick="cdy.evokeCS('quintic()')" type="button" style="width=20" >8</button>
+ <button onclick="cdy.evokeCS('togliatti()')" type="button" style="width=20" >9</button>
+ <button onclick="cdy.evokeCS('handle()')" type="button" style="width=20" >10</button>
+  </body>
+</html>

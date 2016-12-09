@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+    <title>Cindy JS</title>
+    <script type="text/javascript" src="Cindy.js"></script>
+    <script type="text/javascript" src="CindyGL.js"></script>
+    <link rel="stylesheet" href="cindy.css">
+  </head>
+    
+	<body style="font-family:Arial;">
+    
+    <h1>CindyJS: Julia Feedbackloop</h1>
+    
+               
+    <script id="csinit" type="text/x-cindyscript">
+      use("CindyGL");
+      
+      f(z, c) := z*z+c;
+      createimage("julia", 1000, 1000);
+			oc = 0;
+			
+			n = 5;
+    </script>
+		<script id="csmove">
+		if(oc != complex(C),
+		
+			colorplot( "julia",
+				r = f(complex(#), complex(C));
+				[re(r), im(r), 1];
+			);
+			oc = complex(C);
+			
+			repeat(n,
+				colorplot( "julia", 
+					col = imagergb( "julia", #);
+					r = (col.r, col.g);
+					if(|r|<2,
+						imagergb( "julia", r) + [0,0,col.b],
+						col
+					);
+				);
+			);
+		);
+		</script>
+    
+    <script id="csdraw" type="text/x-cindyscript">
+		colorplot(
+			imagergb( "julia", #).b/(2^n);
+		);
+    </script>
+
+    <div  id="CSCanvas"></div>
+    <script type="text/javascript">
+  
+        cdy = CindyJS({canvasname:"CSCanvas",
+                    scripts: "cs*",
+                    geometry:[
+                      {name:"C", type:"Free", pos:[-0.79, -0.184], color:[1,0,0], pinned:false, size:6}
+                    ],
+                    animation: {autoplay: true},
+                    ports: [{
+                      id: "CSCanvas",
+                      width: 500,
+                      height: 500,
+                      transform: [ { visibleRect: [-2, -2, 2, 2] } ]
+                    }]
+                  });
+    </script>              
+	</body>
+</html>

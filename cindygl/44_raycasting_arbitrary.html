@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Cindy JS</title>
+    <script type="text/javascript" src="Cindy.js"></script>
+    <script type="text/javascript" src="CindyGL.js"></script>
+    <link rel="stylesheet" href="cindy.css">
+  </head>
+    
+  <body style="font-family:Arial;">
+    
+    <h1>CindyJS: Raycasting arbitrary algebraic surfaces</h1>
+    
+    <script id="csmousedown" type="text/x-cindyscript">
+      sx=mouse().x;
+      sy=mouse().y;
+      dragging=sx<.5;
+    </script>
+    <script id="csmouseup" type="text/x-cindyscript">
+      dragging=false;
+    </script>
+    <script id="csdraw" type="text/x-cindyscript">
+      time = seconds()-t0;
+
+      if(dragging,
+        dx=3*(sx-mouse().x);
+        dy=3*(sy-mouse().y);
+        ,
+        dx=.005*sin(time*.1);
+        dy=.003*cos(time*.1);
+      );
+
+      mat=mat*(
+        (1,0,0),
+        (0,cos(dy),-sin(dy)),
+        (0,sin(dy),cos(dy))
+      )*(
+        (cos(dx),0,-sin(dx)),
+        (0,1,0),
+        (sin(dx),0,cos(dx))
+      );
+      
+
+      sx=mouse().x;
+      sy=mouse().y;
+
+
+      PA.x=0.55;
+      if(PA.y>.4,PA.y=.4);
+      if(PA.y<-.4,PA.y=-.4);
+      a=0.4+PA.y*.7;
+
+      colorplot(computeColor(#));
+      drawtext((-.45,-.45),"degree: " + (N-1));
+      draw((.55,.4),(.55,-.4),color->(0,0,0));
+    </script>
+               
+    <script id="csinit" type="text/x-cindyscript">
+    mat = [
+        [0.3513, -0.4908, -0.7973],
+        [-0.8171, -0.5765, -0.0051],
+        [-0.4571, 0.6533, -0.6036]
+    ];
+    sx = mouse().x;
+    sy = mouse().y;
+    dragging = false;
+
+    use("CindyGL");
+    oo = 1000; //"infinity"
+    t0 = seconds();
+
+    a = 0.3;
+
+    fun(x, y, z) := (x ^ 2 + y ^ 2 + z ^ 2 - (0.5 + 2 * a) ^ 2) ^ 2 - (3.0 * ((0.5 + 2 * a) ^ 2) - 1.0) / (3.0 - ((0.5 + 2 * a) ^ 2)) * (1 - z - sqrt(2) * x) * (1 - z + sqrt(2) * x) * (1 + z + sqrt(2) * y) * (1 + z - sqrt(2) * y);
+    
+    F(p) := (
+        fun(p.x / 2.2, p.y / 2.2, p.z / 2.2);
+    );
+    
+    guessdeg() := max(apply(1..10,
+        x = [random(),random(),random()];
+        r = [random(),random(),random()];
+        v = [F(x)];
+        while(|v_(-1)|>.01 & length(v)<100,
+          x = x + r;
+          nv = [F(x)] ++ v;
+          forall(2..length(nv),
+            nv_# = nv_(#-1)-v_(#-1);
+          );
+          v = nv;
+        );
+        length(v)-2
+      ));
+      
+      
+      init() := (
+        N = guessdeg() + 1;
+        errc(N);
+        li = apply(1 .. N, k, cos((2 * k - 1) / (2 * N) * pi) * 4 + 9); //Chebyshev nodes for interval (5, 13)
+        //li = apply(1..N, #/N*8+5);
+        A = apply(li, c, apply(0..N - 1, i, c ^ i));
+        // A sends polynomials [p0, p1, p2, p3, p4] = p0+p1*X+p2*X*X+p3*X*X*X+p4*X*X*X*X to [p(-2), p(-1), p(0), p(1), p(2)]
+        B = (inverse(A)); //B interpolates polynomials, given the values [p(-2), p(-1), p(0), p(1), p(2)]
+        B3 = inverse(apply([-1, 0, 1], c, apply(0 .. 2, i, c ^ i))); //B3 interpolates quadratic polynomials, given the values [p(-1), p(0), p(1)]
+      );
+      
+      
+
+
+    init();
+    
+    errc(N);
+
+    eps = .1;
+    dF(p) := (
+      (F(p+[eps,0,0])-F(p-[eps,0,0])),
+      (F(p+[0,eps,0])-F(p-[0,eps,0])),
+      (F(p+[0,0,eps])-F(p-[0,0,eps]))
+    )/(2*eps);
+
+
+    S(r) := (r * r - 4 * 4); //sphere with radius 4
+
+    ray(pos, t) := mat * (t * (pos.x, pos.y, 1) + (0, 0, -9));
+
+    eval(poly, t) := ( //evals poly at time t by evaluating horner scheme         
+        ans = 0; forall(reverse(1 .. N), ans = ans * t + poly_#); ans
+    );
+
+    //computes derivative of polynomial
+    d(poly) := (forall(1 .. N-1, poly_# = # * poly_(# + 1)); poly_N = 0; poly);
+
+    //finds root of poly in [x0, x1] using bisection.
+    //returns def if intermediate value theorem cannot be applied
+    bisect(poly, x0, x1, def) := (
+        regional(v0, v1, m, vm); v0 = eval(poly, x0); v1 = eval(poly, x1);
+        if (v0 * v1 <= 0,
+            repeat(10,
+                m = (x0 + x1) / 2; vm = eval(poly, m);
+                if (v0 * vm <= 0,
+                    (x1 = m; v1 = vm;),
+                    (x0 = m; v0 = vm;)
+                );
+            ); m,
+            def
+        )
+    );
+    
+    bisectf(pos, x0, x1, def) := (
+        regional(v0, v1, m, vm); v0 = F(ray(pos, x0)); v1 = F(ray(pos, x1));
+        if (v0 * v1 <= 0,
+            repeat(10,
+                m = (x0 + x1) / 2; vm = F(ray(pos, m));
+                if (v0 * vm <= 0,
+                    (x1 = m; v1 = vm;),
+                    (x0 = m; v0 = vm;)
+                );
+            ); m,
+            def
+        )
+    );
+
+
+    //finds first root of poly in interval (l, u). returns oo if there is none
+    firstroot(poly, pos, l, u) := (
+        regional(sol);
+
+        p = apply(1 .. N, poly); forall(reverse(1 .. N - 1), p_# = d(p_(# + 1))); //p_k has degree k
+
+        roots = apply(1 .. N, u);
+        oroots = roots;
+        forall(1 .. N-1, i,
+            roots_1 = bisect(p_i, l, oroots_1, l);
+            forall(2..N-1, j,
+                roots_j = bisect(p_i, oroots_j, oroots_(j + 1), roots_(j - 1));
+            );
+            roots_N = bisect(p_i, oroots_N, u, roots_(N - 1));
+            oroots = roots;
+        ); 
+        
+        
+        roots_1 = bisectf(pos, l, oroots_1, l);
+        forall(2..N-1, j,
+            roots_j = bisectf(pos, oroots_j, oroots_(j + 1), roots_(j - 1));
+        );
+        roots_N = bisectf(pos, oroots_N, u, roots_(N - 1));
+        
+        sol = oo;
+        forall(1 .. N, i,
+            if (roots_i != l & roots_i != u, sol = min(sol, roots_i))); sol
+    );
+
+
+  
+
+    addlight(oldcolor, lightcolor, lightdir, normal, gamma) := (
+        illumination = max(0, (lightdir / abs(lightdir)) * normal); oldcolor + (illumination ^ gamma) * lightcolor
+    );
+
+    //traces the ray for the pixel at pos and returns the distance to the first intersection point of ray with (F^{-1}\{0\} intersected with ball with radius 4)
+    getDistanceToObj(pos) := (
+        spolyvalues = apply([-1, 0, 1], S(ray(pos, #))); spoly = B3 * spolyvalues; // interpolate
+
+        D = (spoly_2 * spoly_2) - 4. * spoly_3 * spoly_1; //discriminant of spoly
+        if (D >= 0, //ray intersects ball
+            polyvalues = apply(li, F(ray(pos, #))); poly = B * polyvalues; //interpolate
+            firstroot(poly, pos,
+                (-spoly_2 - re(sqrt(D))) / (2. * spoly_3), //intersection entering the ball
+                (-spoly_2 + re(sqrt(D))) / (2. * spoly_3) //intersection leaving the ball
+            ),
+            oo
+        )
+    );
+
+    computeColor(pos) := (
+        dst = getDistanceToObj(pos);
+        if (dst == oo,
+            gray(.7),
+            x = ray(pos, dst); n = dF(x); n = n / abs(n);
+
+            lightdir0 = .6 * (-10, 10, 0.) - x; lightdir3 = ray((.0, .0), -100.); lightdir4 = ray((.0, .0), 100.);
+
+            mouselightpos = ray(mouse(), 7); lightdir2 = mouselightpos - x;
+
+            color0 = .6 * (1., .6, .3); color2 = min(2., 1 / (lightdir2 * lightdir2)) * (.6, .4, 2.); //glowing mouse
+            color3 = (.1, .3, .8); color4 = (.9, .3, .0);
+
+            addlight(addlight(addlight(addlight(addlight(addlight(addlight(addlight(
+                                            (0, 0, 0),
+                                            color0, lightdir0, n, 2),
+                                        color0, lightdir0, n, 20),
+                                    color2, lightdir2, n, 2),
+                                color2, lightdir2, n, 20),
+                            color3, lightdir3, n, 2),
+                        color3, lightdir3, n, 20),
+                    color4, lightdir4, n, 2),
+                color4, lightdir4, n, 20)
+        )
+    );
+    </script>
+    
+
+    <div  id="CSCanvas" style="border:0px"></div>
+    
+    <script type="text/javascript">
+        var cdy = CindyJS({canvasname:"CSCanvas",
+                    scripts: "cs*",
+                    animation: {autoplay: true},
+                    geometry: [ { name:"PA", kind:"P", type:"Free", pos: [.5,0,1], narrow: true, color: [1,1,1], size:8 } ],
+                    ports: [{
+                      id: "CSCanvas",
+                      width: 600,
+                      height: 500,
+                      transform: [ { visibleRect: [ -0.55, -0.5, 0.65, 0.5 ] } ]
+                    }]
+        });
+    </script>
+    
+    <div>
+<input type="text" id="inp" value="(x^2+y^2+z^2-(0.5+2*a)^2)^2-(3*((0.5+2*a)^2)-1)/(3-((0.5+2*a)^2))*(1-z-sqrt(2)*x)*(1-z+sqrt(2)*x)*(1+z+sqrt(2)*y)*(1+z-sqrt(2)*y)"  onkeypress="if((event.which ? event.which : event.keyCode)==13) { cdy.evokeCS('fun(x,y,z) := (' + this.value + '); init();'); }" size="80" style="font-size:18px">
+<select id="sel" onchange="document.getElementById('inp').value = this.value; cdy.evokeCS('fun(x,y,z) := (' + this.value + '); init();');" style="width:20em;">  
+  <option value="(x^2+y^2+z^2-(0.5+2*a)^2)^2-(3*((0.5+2*a)^2)-1)/(3-((0.5+2*a)^2))*(1-z-sqrt(2)*x)*(1-z+sqrt(2)*x)*(1+z+sqrt(2)*y)*(1+z-sqrt(2)*y)">Kummer Quartic</option>
+  <option value="x^2+z^2-y^3*(1-y)^3">Citric</option>
+  <option value="x^2-x^3+y^2+y^4+z^3-z^4">Vis a Vis</option>
+  <option value="-(4*((a*(1+sqrt(5))/2)^2*x^2-y^2)*((a*(1+sqrt(5))/2)^2*y^2-z^2)*((a*(1+sqrt(5))/2)^2*z^2-x^2)-1*(1+2*(a*(1+sqrt(5))/2))*(x^2+y^2+z^2-1)^2)">Barth Sextic</option>
+</select>
+</div>
+
+    
+    Internally, Rolle's theorem and bisection method is used for finding roots.
+  </body>
+</html>
