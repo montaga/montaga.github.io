@@ -626,6 +626,19 @@ function canvasWithContainingDiv(elt) {
     return canvas;
 }
 
+function isCinderellaBeforeVersion() {
+    var c = instanceInvocationArguments.cinderella;
+    if (!c || !c.version)
+        return false;
+    for (var i = 0; i < arguments.length; ++i) {
+        var x = c.version[i];
+        var y = arguments[i];
+        if (x !== y)
+            return (typeof x === typeof y) && (x < y);
+    }
+    return false;
+}
+
 function createCindyNow() {
     startupCalled = true;
     if (waitForPlugins !== 0) return;
@@ -693,11 +706,7 @@ function createCindyNow() {
             setupAnimControls(data);
         if (data.animation && isFiniteNumber(data.animation.speed)) {
             if (data.animation.accuracy === undefined &&
-                data.cinderella &&
-                data.cinderella.version &&
-                data.cinderella.version[0] === 2 &&
-                data.cinderella.version[1] === 9 &&
-                data.cinderella.version[2] < 1875)
+                isCinderellaBeforeVersion(2, 9, 1875))
                 setSpeed(data.animation.speed * 0.5);
             else
                 setSpeed(data.animation.speed);
@@ -714,13 +723,14 @@ function createCindyNow() {
     }
 
     //Setup the scripts
-    var scripts = ["move", "keydown",
+    var scripts = ["move",
+        "keydown", "keyup", "keytyped", "keytype",
         "mousedown", "mouseup", "mousedrag", "mousemove", "mouseclick",
         "init", "tick", "draw",
         "simulationstep", "simulationstart", "simulationstop", "ondrop"
     ];
-    var scriptconf = data.scripts,
-        scriptpat = null;
+    var scriptconf = data.scripts;
+    var scriptpat = null;
     if (typeof scriptconf === "string" && scriptconf.search(/\*/))
         scriptpat = scriptconf;
     if (typeof scriptconf !== "object")
@@ -753,6 +763,12 @@ function createCindyNow() {
             cscompiled[s] = cscode;
         }
     });
+    if (isCinderellaBeforeVersion(2, 9, 1888) && !cscompiled.keydown) {
+        // Cinderella backwards-compatible naming of key events
+        cscompiled.keydown = cscompiled.keytyped;
+        cscompiled.keytyped = cscompiled.keytype;
+        cscompiled.keytype = undefined;
+    }
 
     if (isFiniteNumber(data.grid) && data.grid > 0) {
         csgridsize = data.grid;
@@ -1451,7 +1467,7 @@ function getmover(mouse) {
             }
             dist = dist + 25 / sc;
         } else if (el.kind === "Text") {
-            if (!el._bbox) continue;
+            if (!el.homog || el.dock || !el._bbox) continue;
             p = csport.from(mouse.x, mouse.y, 1);
             dx = Math.max(0, p[0] - el._bbox.right, el._bbox.left - p[0]);
             dy = Math.max(0, p[1] - el._bbox.bottom, el._bbox.top - p[1]);
@@ -1540,20 +1556,38 @@ function setuplisteners(canvas, data) {
 
     if (data.keylistener === true) {
         addAutoCleaningEventListener(document, "keydown", function(e) {
-            cs_keypressed(e);
+            cs_keydown(e);
             return false;
         });
-    } else if (cscompiled.keydown) {
+        addAutoCleaningEventListener(document, "keyup", function(e) {
+            cs_keyup(e);
+            return false;
+        });
+        addAutoCleaningEventListener(document, "keypress", function(e) {
+            cs_keytyped(e);
+            return false;
+        });
+    } else if (cscompiled.keydown || cscompiled.keyup || cscompiled.keytyped) {
         canvas.setAttribute("tabindex", "0");
         addAutoCleaningEventListener(canvas, "mousedown", function() {
             canvas.focus();
         });
         addAutoCleaningEventListener(canvas, "keydown", function(e) {
-            // console.log("Got key " + e.charCode + " / " + e.keyCode);
-            if (e.keyCode !== 9 /* tab */ ) {
-                cs_keypressed(e);
+            if (e.keyCode === 9 /* tab */ ) return;
+            cs_keydown(e);
+            if (!cscompiled.keytyped) {
+                // this must bubble in order to trigger a keypress event
                 e.preventDefault();
             }
+        });
+        addAutoCleaningEventListener(canvas, "keyup", function(e) {
+            cs_keyup(e);
+            e.preventDefault();
+        });
+        addAutoCleaningEventListener(canvas, "keypress", function(e) {
+            if (e.keyCode === 9 /* tab */ ) return;
+            cs_keytyped(e);
+            e.preventDefault();
         });
     }
 
@@ -1569,7 +1603,6 @@ function setuplisteners(canvas, data) {
     addAutoCleaningEventListener(canvas, "mouseup", function(e) {
         mouse.down = false;
         cindy_cancelmove();
-        stateContinueFromHere();
         cs_mouseup();
         manage("mouseup");
         scheduleUpdate();
@@ -1615,27 +1648,131 @@ function setuplisteners(canvas, data) {
         var y = e.clientY - rect.top - canvas.clientTop + 0.5;
         var pos = List.realVector(csport.to(x, y));
 
-        Array.prototype.forEach.call(files, function(file, i) {
-            var reader = new FileReader();
-            if ((/^text\//).test(file.type)) {
-                reader.onload = function() {
-                    var value = General.string(reader.result);
-                    oneDone(i, value);
-                };
-                reader.readAsText(file);
-            } else if ((/^image\//).test(file.type)) {
-                reader.onload = function() {
-                    var img = new Image();
-                    img.onload = function() {
-                        oneDone(i, loadImage(img));
+        if (files.length > 0) {
+            Array.prototype.forEach.call(files, function(file, i) {
+                var reader = new FileReader();
+                if (textType(file.type)) {
+                    reader.onload = function() {
+                        textDone(i, reader.result);
                     };
-                    img.src = reader.result;
-                };
-                reader.readAsDataURL(file);
-            } else {
-                oneDone(i, nada);
+                    reader.readAsText(file);
+                } else if ((/^image\//).test(file.type)) {
+                    reader.onload = function() {
+                        imgDone(reader.result);
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    console.log("Unknown MIME type: " + file.type);
+                    oneDone(i, nada);
+                }
+            });
+        } else {
+            var data = dt.getData("text/uri-list");
+            if (data) {
+                data = data.split("\n").filter(function(line) {
+                    return !/^\s*(#|$)/.test(line);
+                });
+                countDown = data.length;
+                dropped = Array(countDown);
+                files = Array(countDown);
+                data.forEach(dropUri);
             }
-        });
+        }
+
+        function dropUri(uri, i) {
+            var name = uri.replace(/[?#][^]*/, "");
+            name = name.replace(/[^]*\/([^\/])/, "$1");
+            files[i] = {
+                type: "",
+                name: name
+            };
+            var req = new XMLHttpRequest();
+            req.onreadystatechange = haveHead;
+            req.open("HEAD", uri);
+            req.send();
+
+            function haveHead() {
+                if (req.readyState !== XMLHttpRequest.DONE)
+                    return;
+                if (req.status !== 200) {
+                    console.error("HEAD request for " + uri + " failed: " +
+                        (req.responseText || "(no error message)"));
+                    oneDone(i, nada);
+                    return;
+                }
+                var type = req.getResponseHeader("Content-Type");
+                files[i].type = type;
+                if ((/^image\//).test(type)) {
+                    imgDone(i, uri);
+                } else if (textType(type)) {
+                    req = new XMLHttpRequest();
+                    req.onreadystatechange = haveText;
+                    req.open("GET", uri);
+                    req.send();
+                } else {
+                    oneDone(i, nada);
+                }
+            }
+
+            function haveText() {
+                if (req.readyState !== XMLHttpRequest.DONE)
+                    return;
+                if (req.status !== 200) {
+                    console.error("GET request for " + uri + " failed: " +
+                        (req.responseText || "(no error message)"));
+                    oneDone(i, nada);
+                    return;
+                }
+                textDone(i, req.responseText);
+            }
+
+        }
+
+        function textType(type) {
+            type = type.replace(/;[^]*/, "");
+            if ((/^text\//).test(type)) return 1;
+            if (type === "application/json") return 2;
+            return 0;
+        }
+
+        function textDone(i, text) {
+            switch (textType(files[i].type)) {
+                case 1:
+                    oneDone(i, General.string(text));
+                    break;
+                case 2:
+                    var data, value;
+                    try {
+                        data = JSON.parse(text);
+                        value = General.wrapJSON(data);
+                    } catch (err) {
+                        console.error(err);
+                        value = nada;
+                    }
+                    oneDone(i, value);
+                    break;
+                default:
+                    oneDone(i, nada);
+                    break;
+            }
+        }
+
+        function imgDone(i, src) {
+            var img = new Image();
+            var reported = false;
+            img.onload = function() {
+                if (reported) return;
+                reported = true;
+                oneDone(i, loadImage(img));
+            };
+            img.onerror = function(err) {
+                if (reported) return;
+                reported = true;
+                console.error(err);
+                oneDone(i, nada);
+            };
+            img.src = src;
+        }
 
         function oneDone(i, value, type) {
             dropped[i] = List.turnIntoCSList([
@@ -1652,6 +1789,18 @@ function setuplisteners(canvas, data) {
 
 
     function touchMove(e) {
+
+        var activeTouchIDList = e.changedTouches;
+        var gotit = false;
+        for (var i = 0; i < activeTouchIDList.length; i++) {
+            if (activeTouchIDList[i].identifier === activeTouchID) {
+                gotit = true;
+            }
+        }
+        if (!gotit) {
+            return;
+        }
+
         updatePostition(e.targetTouches[0]);
         if (mouse.down) {
             cs_mousedrag();
@@ -1663,8 +1812,19 @@ function setuplisteners(canvas, data) {
 
         e.preventDefault();
     }
+    var activeTouchID = -1;
 
     function touchDown(e) {
+        if (activeTouchID !== -1) {
+            return;
+        }
+
+        var activeTouchIDList = e.changedTouches;
+        if (activeTouchIDList.length === 0) {
+            return;
+        }
+        activeTouchID = activeTouchIDList[0].identifier;
+
         updatePostition(e.targetTouches[0]);
         cs_mousedown();
         mouse.down = true;
@@ -1674,9 +1834,20 @@ function setuplisteners(canvas, data) {
     }
 
     function touchUp(e) {
+        var activeTouchIDList = e.changedTouches;
+        var gotit = false;
+        for (var i = 0; i < activeTouchIDList.length; i++) {
+            if (activeTouchIDList[i].identifier === activeTouchID) {
+                gotit = true;
+            }
+        }
+
+        if (!gotit) {
+            return;
+        }
+        activeTouchID = -1;
         mouse.down = false;
         cindy_cancelmove();
-        stateContinueFromHere();
         cs_mouseup();
         manage("mouseup");
         scheduleUpdate();
@@ -1885,14 +2056,26 @@ function updateCindy() {
     csctx.restore();
 }
 
-function cs_keypressed(e) {
+function keyEvent(e, script) {
     var evtobj = window.event ? event : e;
     var unicode = evtobj.charCode ? evtobj.charCode : evtobj.keyCode;
     var actualkey = String.fromCharCode(unicode);
     cskey = actualkey;
     cskeycode = unicode;
-    evaluate(cscompiled.keydown);
+    evaluate(script);
     scheduleUpdate();
+}
+
+function cs_keydown(e) {
+    keyEvent(e, cscompiled.keydown);
+}
+
+function cs_keyup(e) {
+    keyEvent(e, cscompiled.keyup);
+}
+
+function cs_keytyped(e) {
+    keyEvent(e, cscompiled.keytyped);
 }
 
 function cs_mousedown(e) {
@@ -1953,7 +2136,7 @@ function cs_onDrop(lst, pos) {
 function cindy_cancelmove() {
     move = undefined;
 }
-var version = [0,8,1,11,"gde6e4e9"];
+var version = [0,8,2,90,"gf44d810"];
 //==========================================
 //      Complex Numbers
 //==========================================
@@ -3120,9 +3303,9 @@ List.consecutive = function(a) {
 };
 
 List.reverse = function(a) {
-    var erg = [];
-    for (var i = a.value.length - 1; i >= 0; i--) {
-        erg.push(a.value[i]);
+    var erg = new Array(a.value.length);
+    for (var i = a.value.length - 1, j = 0; i >= 0; i--, j++) {
+        erg[j] = a.value[i];
     }
 
     return {
@@ -3940,7 +4123,7 @@ List.mult = function(a, b) {
         return List.productVM(a, b);
     }
 
-    if (List.isNumberMatrix(a).value && List.isNumberMatrix(b) && b.value.length === a.value[0].value.length) {
+    if (List.isNumberMatrix(a).value && List.isNumberMatrix(b).value && b.value.length === a.value[0].value.length) {
         return List.productMM(a, b);
     }
 
@@ -5754,6 +5937,34 @@ General.withUsage = function(v, usage) {
         "usage": usage
     };
 };
+
+General.wrapJSON = function(data) {
+    switch (typeof data) {
+        case "number":
+            return CSNumber.real(data);
+        case "string":
+            return General.string(data);
+        case "boolean":
+            return General.bool(data);
+        case "object":
+            if (data === null)
+                return nada;
+            if (Array.isArray(data))
+                return List.turnIntoCSList(data.map(General.wrapJSON));
+            var d = Dict.create();
+            for (var k in data)
+                Dict.put(d, General.string(k), General.wrapJSON(data[k]));
+            return d;
+        default:
+            console.log(
+                "Failed to convert " + (typeof data) + " to CindyJS data type");
+            return nada;
+    }
+};
+
+General.identity = function(x) {
+    return x;
+};
 /*jshint -W069 */
 
 var myfunctions = {};
@@ -6222,11 +6433,6 @@ Accessor.getField = function(geo, field) {
                 return General.bool(false);
             }
         }
-        if (field === "text" || field === "currenttext") {
-            if (geo.type === "EditableText") {
-                return General.string(String(geo.html.value));
-            }
-        }
         if (field === "xy") {
             erg = List.dehom(geo.homog);
             return General.withUsage(erg, "Point");
@@ -6289,6 +6495,10 @@ Accessor.getField = function(geo, field) {
         }
 
     }
+    var getter = geoOps[geo.type]["get_" + field];
+    if (typeof getter === "function") {
+        return getter(geo);
+    }
     return nada;
 
 
@@ -6307,15 +6517,7 @@ Accessor.setField = function(geo, field, value) {
         geo.alpha = value;
     }
     if (field === "fillcolor" && List._helper.isNumberVecN(value, 3)) {
-        if (geo.type === "EditableText") {
-            geo.fillcolor = value.value.map(function(i) {
-                return i.value.real;
-            });
-            geo.html.style.backgroundColor =
-                Render2D.makeColor(geo.fillcolor, geo.fillalpha);
-        } else {
-            geo.fillcolor = value;
-        }
+        geo.fillcolor = value;
     }
     if (field === "fillalpha" && value.ctype === "number") {
         geo.fillalpha = value;
@@ -6370,29 +6572,9 @@ Accessor.setField = function(geo, field, value) {
         movepointscr(geo, value, "homog");
     }
 
-    if (field === "angle" && geo.type === "Through" && value.ctype === "number") {
-        var cc = CSNumber.cos(value);
-        var ss = CSNumber.sin(value);
-        dir = List.turnIntoCSList([cc, ss, CSNumber.real(0)]);
-        movepointscr(geo, dir, "dir");
-    }
-    if (field === "slope" && geo.type === "Through" && value.ctype === "number") {
-        dir = List.turnIntoCSList([CSNumber.real(1), value, CSNumber.real(0)]);
-        movepointscr(geo, dir, "dir");
-    }
-    if (geo.kind === "C") {
-        if (field === "radius" && geo.type === "CircleMr" && value.ctype === "number") {
-            movepointscr(geo, value, "radius");
-        }
-    }
     if (geo.kind === "Text") {
         if (field === "pressed" && value.ctype === "boolean" && geo.checkbox) {
             geo.checkbox.checked = value.value;
-        }
-        if (field === "text" || field === "currenttext") {
-            if (geo.type === "EditableText") {
-                geo.html.value = niceprint(value);
-            }
         }
         if (geo.movable) { // Texts may move without tracing
             if (field === "xy") {
@@ -6436,6 +6618,10 @@ Accessor.setField = function(geo, field, value) {
             geo.behavior.vx = value.value[0].value.real;
             geo.behavior.vy = value.value[1].value.real;
         }
+    }
+    var setter = geoOps[geo.type]["set_" + field];
+    if (typeof setter === "function") {
+        return setter(geo, value);
     }
 
 
@@ -6491,6 +6677,17 @@ evaluator.print$1 = function(args, modifs) {
 
 evaluator.println$1 = function(args, modifs) {
     csconsole.out(niceprint(evaluate(args[0])));
+    return nada;
+};
+
+evaluator.assert$2 = function(args, modifs) {
+    var v0 = evaluate(args[0]);
+    if (v0.ctype === 'boolean') {
+        if (v0.value === false)
+            return evaluator.println$1([args[1]], modifs);
+    } else {
+        csconsole.err("Condition for assert is not boolean");
+    }
     return nada;
 };
 
@@ -8001,30 +8198,12 @@ evaluator.isgeometric$1 = function(args, modifs) {
 
 evaluator.isnumbermatrix$1 = function(args, modifs) {
     var v0 = evaluate(args[0]);
-    if ((List.isNumberMatrix(v0)).value) {
-        return {
-            'ctype': 'boolean',
-            'value': true
-        };
-    }
-    return {
-        'ctype': 'boolean',
-        'value': false
-    };
+    return List.isNumberMatrix(v0);
 };
 
 evaluator.isnumbervector$1 = function(args, modifs) {
     var v0 = evaluate(args[0]);
-    if ((List.isNumberVector(v0)).value) {
-        return {
-            'ctype': 'boolean',
-            'value': true
-        };
-    }
-    return {
-        'ctype': 'boolean',
-        'value': false
-    };
+    return List.isNumberVector(v0);
 };
 
 
@@ -8209,6 +8388,11 @@ evaluator.moveto$2 = function(args, modifs) {
             Accessor.setField(el, "homog", v1);
         }
     }
+    return nada;
+};
+
+evaluator.continuefromhere$0 = function(args, modifs) {
+    stateContinueFromHere();
     return nada;
 };
 
@@ -8845,7 +9029,7 @@ function hungarianMethod(w) {
 
 evaluator.mincostmatching$1 = function(args, modifs) {
     var costMatrix = evaluate(args[0]);
-    if (List.isNumberMatrix(costMatrix)) {
+    if (List.isNumberMatrix(costMatrix).value) {
         var nr = costMatrix.value.length;
         var nc = List._helper.colNumb(costMatrix);
         var size = (nr < nc ? nc : nr);
@@ -10390,6 +10574,7 @@ evaluator.create$3 = function(args, modifs) {
     }
 
     if (!geoOps.hasOwnProperty(type.value) &&
+        !geoAliases.hasOwnProperty(type.value) &&
         !geoMacros.hasOwnProperty(type.value)) {
         console.log("Invalid geometric operation: '" + type.value + "'");
         return nada;
@@ -13329,38 +13514,36 @@ evaluator.cameravideo$0 = function(args, modifs) {
     var maximal = true; //use maximal as default (if no other modifier is given)
     var constraints = {};
 
+    function makeconstraints(width) {
+        return {
+            video: {
+                width: width,
+                advanced: [{
+                    width: {
+                        max: width, //see below for details
+                        min: width
+                    }
+                }, {
+                    width: {
+                        ideal: width
+                    }
+                }]
+            },
+            audio: false
+        };
+    }
+
     if (modifs.resolution !== undefined) {
-        maximal = false;
         var val = evaluate(modifs.resolution);
         if (val.ctype === 'string' && val.value === 'maximal') maximal = true;
         else {
-            var width = null;
-            var heightorratio = null;
-
             if (val.ctype === 'number') {
-                width = val.value.real;
-            } else if (List.isNumberVector(val).value && (val.value.length === 2)) {
-                width = val.value[0].value.real;
-                heightorratio = val.value[1].value.real;
-            } else return nada;
-
-            constraints = {
-                video: {
-                    width: width,
-                    advanced: [{
-                        width: {
-                            max: width, //ideal or exact seem not be supported by Chrome yet
-                            min: width
-                        }
-                    }, {
-                        width: {
-                            ideal: width
-                        }
-                    }]
-                },
-                audio: false
-            };
-            if (heightorratio) {
+                maximal = false;
+                constraints = makeconstraints(val.value.real);
+            } else if (List._helper.isNumberVecN(val, 2)) {
+                maximal = false;
+                constraints = makeconstraints(val.value[0].value.real);
+                var heightorratio = val.value[1].value.real;
                 if (heightorratio < 10 || !Number.isInteger(heightorratio)) {
                     constraints.video.aspectRatio = heightorratio;
                     constraints.video.advanced[0].aspectRatio = {
@@ -13417,8 +13600,6 @@ evaluator.cameravideo$0 = function(args, modifs) {
         };
     }
 
-    console.log(constraints);
-
     var openVideoStream = null;
 
     var gum = navigator.mediaDevices && navigator.mediaDevices.getUserMedia;
@@ -13455,6 +13636,176 @@ evaluator.cameravideo$0 = function(args, modifs) {
         console.error("Could not get user video:", String(err), err);
     });
     return img;
+};
+
+var helpercanvas; //invisible helper canvas.
+function getHelperCanvas(width, height) {
+    if (!helpercanvas) {
+        //creating helpercanvas only once increases the running time
+        helpercanvas = /** @type {HTMLCanvasElement} */ (document.createElement("canvas"));
+    }
+    helpercanvas.width = width;
+    helpercanvas.height = height;
+    return helpercanvas;
+}
+
+/**
+ * reads a rectangular block of pixels from the upper left corner.
+ * The colors are representent as a 4 component RGBA vector with entries in [0,1]
+ */
+function readPixelsIndirection(img, x, y, width, height) {
+    var res = [];
+    if (img.readPixels) {
+        res = img.readPixels(x, y, width, height);
+    } else { //use canvas-approach
+        var data, ctx;
+        if (img.img.getContext) { //img is a canvas
+            ctx = img.img.getContext('2d');
+            data = ctx.getImageData(x, y, width, height).data;
+        } else { //copy corresponding subimage of img.img to temporary canvas
+            try {
+                var helpercanvas = getHelperCanvas(width, height);
+                ctx = helpercanvas.getContext('2d');
+                ctx.drawImage(img.img, x, y, width, height, 0, 0, width, height);
+                data = ctx.getImageData(0, 0, width, height).data;
+            } catch (exception) {
+                console.log(exception);
+            }
+
+        }
+        for (var i in data) res.push(data[i] / 255);
+    }
+    return res;
+}
+
+/**
+ * imagergba(‹image›,x,y) implements imagergb(‹imagename›,x,y) from Cinderella, i.e.
+ * returns a 4 component vector ranging from (0-255, 0-255, 0-255, 0-1)
+ */
+evaluator.imagergba$3 = function(args, modifs) {
+    var img = imageFromValue(evaluateAndVal(args[0]));
+    var x = evaluateAndVal(args[1]);
+    var y = evaluateAndVal(args[2]);
+
+    if (!img || x.ctype !== 'number' || y.ctype !== 'number' || !img.ready) return nada;
+
+    x = Math.round(x.value.real);
+    y = Math.round(y.value.real);
+    if (!isFiniteNumber(x) || !isFiniteNumber(y)) return nada;
+
+    var rgba = readPixelsIndirection(img, x, y, 1, 1);
+    return List.realVector([rgba[0] * 255, rgba[1] * 255, rgba[2] * 255, rgba[3]]);
+};
+
+evaluator.imagergb$3 = evaluator.imagergba$3; //According to reference
+
+function readimgatcoord(img, coord, modifs) {
+    if (!coord.ok) return nada;
+
+    var w = img.width;
+    var h = img.height;
+
+    var interpolate = true; //default values
+    var repeat = false;
+
+    function handleModifs() {
+        var erg;
+        if (modifs.interpolate !== undefined) {
+            erg = evaluate(modifs.interpolate);
+            if (erg.ctype === 'boolean') {
+                interpolate = (erg.value);
+            }
+        }
+
+        if (modifs.repeat !== undefined) {
+            erg = evaluate(modifs.repeat);
+            if (erg.ctype === 'boolean') {
+                repeat = (erg.value);
+            }
+        }
+    }
+    handleModifs();
+    if (interpolate) {
+        coord.x -= 0.5; //center of pixels are in the middle of them.
+        coord.y -= 0.5; //Now pixel-centers have wlog integral coordinates
+    }
+
+    if (repeat) {
+        coord.x = (coord.x % w + w) % w;
+        coord.y = (coord.y % h + h) % h;
+    }
+
+    var xi = Math.floor(coord.x); //integral part
+    var yi = Math.floor(coord.y);
+
+    if (!isFiniteNumber(xi) || !isFiniteNumber(yi)) return nada;
+
+    var rgba = [0, 0, 0, 0];
+    if (interpolate) {
+        var i, j;
+
+        var xf = coord.x - xi; //fractional part
+        var yf = coord.y - yi;
+
+        var pixels = readPixelsIndirection(img, xi, yi, 2, 2);
+
+        //modify pixels for boundary cases:
+        if (repeat) { //read pixels at boundary seperately
+            if (xi === w - 1 || yi === h - 1) {
+                var p10 = readPixelsIndirection(img, (xi + 1) % w, yi, 1, 1);
+                var p01 = readPixelsIndirection(img, xi, (yi + 1) % h, 1, 1);
+                var p11 = readPixelsIndirection(img, (xi + 1) % w, (yi + 1) % h, 1, 1);
+                pixels = pixels.slice(0, 4).concat(p10, p01, p11);
+            }
+        } else { //clamp to boundary
+            if (xi === -1 || xi === w - 1) xf = Math.round(xf);
+            if (yi === -1 || yi === h - 1) yf = Math.round(yf);
+        }
+
+        //bilinear interpolation for each component i
+        for (i = 0; i < 4; i++)
+            rgba[i] = (1 - yf) * ((1 - xf) * pixels[i] + xf * pixels[i + 4]) +
+            yf * ((1 - xf) * pixels[i + 8] + xf * pixels[i + 12]);
+    } else {
+        rgba = readPixelsIndirection(img, xi, yi, 1, 1);
+    }
+    return List.realVector(rgba);
+}
+
+/**
+ * imagergba(<point1>, <point2>, ‹image›, <point3>) returns the color at the coordinate
+ * <point3> assuming that the left/right lower corner is <point1>/<point2> resp.
+ */
+evaluator.imagergba$4 = function(args, modifs) {
+    var img = imageFromValue(evaluateAndVal(args[2]));
+    if (!img || !img.ready) return nada;
+
+    var w = img.width;
+    var h = img.height;
+
+    var w0 = evaluateAndHomog(args[0]);
+    var w1 = evaluateAndHomog(args[1]);
+    var v0 = evaluateAndHomog(List.realVector([0, h, 1]));
+    var v1 = evaluateAndHomog(List.realVector([w, h, 1]));
+
+    if (w0 === nada || w1 === nada || p === nada) return nada;
+
+    //create an orientation-reversing similarity transformation that maps w0->v0, w1->v1
+    var ii = List.ii;
+    var jj = List.jj;
+
+    var m1 = eval_helper.basismap(v0, v1, ii, jj); //interchange I and J,
+    var m2 = eval_helper.basismap(w0, w1, jj, ii); //see Thm. 18.4 of Perspectives on Projective Geometry
+    var p = evaluateAndHomog(args[3]);
+    var coord = eval_helper.extractPoint(General.mult(m1, General.mult(List.adjoint3(m2), p)));
+    return readimgatcoord(img, coord, modifs);
+};
+
+
+evaluator.imagergb$4 = function(args, modifs) {
+    var rgba = evaluator.imagergba$4(args, modifs);
+    if (rgba === nada) return nada;
+    return List.turnIntoCSList(rgba.value.slice(0, 3));
 };
 /*jshint -W030 */
 'use strict'; // So this file can be used as a stand-alone node module
@@ -16317,7 +16668,7 @@ shutdownHooks.push(releaseExportedObject);
 // result in a new tab.  Note that Firefox fails to show images embedded
 // into an SVG.  So in the long run, saving is probably better than opening.
 // Note: See https://github.com/eligrey/FileSaver.js/ for saving Blobs
-function exportWith(Context, wnd) {
+function exportWith(Context) {
     cacheImages(function() {
         var origctx = csctx;
         try {
@@ -16326,9 +16677,9 @@ function exportWith(Context, wnd) {
             csctx.height = csh;
             updateCindy();
             var blob = csctx.toBlob();
-            releaseExportedObject();
             exportedCanvasURL = window.URL.createObjectURL(blob);
-            wnd.location.href = exportedCanvasURL;
+
+            downloadHelper(exportedCanvasURL);
         } finally {
             csctx = origctx;
         }
@@ -16336,14 +16687,31 @@ function exportWith(Context, wnd) {
 }
 
 globalInstance.exportSVG = function() {
-    exportWith(SvgWriterContext, window.open('about:blank', '_blank'));
+    exportWith(SvgWriterContext);
 };
 
 globalInstance.exportPDF = function() {
-    var wnd = window.open('about:blank', '_blank');
     CindyJS.loadScript('pako', 'pako.min.js', function() {
-        exportWith(PdfWriterContext, wnd);
+        exportWith(PdfWriterContext);
     });
+};
+
+globalInstance.exportPNG = function() {
+    downloadHelper(csctx.canvas.toDataURL());
+};
+
+
+var downloadHelper = function(data) {
+    var a = document.createElement("a");
+    document.body.appendChild(a);
+    a.style = "display: none";
+    a.href = data;
+    a.download = "CindyJSExport";
+    a.click();
+    setTimeout(function() {
+        document.body.removeChild(a);
+        releaseExportedObject();
+    }, 100);
 };
 var activeTool = "Move"; // Current selected tool
 var element; // The constructed element
@@ -17457,13 +17825,19 @@ function addElementNoProof(el) {
         console.log("Element name '" + el.name + "' already exists");
 
         var existingEl = csgeo.csnames[el.name];
-        if (geoOps[existingEl.type].isMovable)
+        if (geoOps[existingEl.type].isMovable &&
+            geoOps[existingEl.type].kind === "P")
             movepointscr(existingEl, el.pos, "homog");
 
         return {
             'ctype': 'geo',
             'value': existingEl
         };
+    }
+
+    // Recursively apply aliases
+    while (geoAliases.hasOwnProperty(el.type)) {
+        el.type = geoAliases[el.type];
     }
 
     // Expand macros
@@ -18166,6 +18540,7 @@ function stateAlloc(newSize) {
  */
 function stateContinueFromHere() {
     stateLastGood.set(stateIn);
+    tracingFailed = false;
     tracingStateReport(false);
 
     // Make numbers which are almost real totally real. This avoids
@@ -18211,8 +18586,6 @@ function traceMouseAndScripts() {
         traceLog.currentMouseAndScripts = [];
     }
     inMouseMove = true;
-    tracingFailed = false;
-    stateIn.set(stateLastGood); // copy stateLastGood and use it as input
     if (move) {
         var mover = move.mover;
         var sx = mouse.x + move.offset.x;
@@ -18242,15 +18615,14 @@ function traceMouseAndScripts() {
 }
 
 function movepointscr(mover, pos, type) {
-    if (inMouseMove) {
-        traceMover(mover, pos, type);
-        return;
-    }
-    stateContinueFromHere();
-    tracingFailed = false;
     traceMover(mover, pos, type);
-    stateContinueFromHere();
+    if (!inMouseMove && !tracingFailed)
+        stateContinueFromHere();
 }
+
+// Remember the last point which got moved.
+// @todo: be careful with this variable when doing automatic proving.
+var previousMover = null;
 
 /*
  * traceMover moves mover from current param to param for pos along a complex detour.
@@ -18258,6 +18630,13 @@ function movepointscr(mover, pos, type) {
 function traceMover(mover, pos, type) {
     if (traceLog && traceLog.currentMouseAndScripts) {
         traceLog.currentMover = [];
+    }
+    if (mover === previousMover) {
+        stateIn.set(stateLastGood); // copy stateLastGood and use it as input
+        tracingFailed = false;
+    } else {
+        previousMover = mover;
+        stateContinueFromHere(); // make changes up to now permanent
     }
     stateOut.set(stateIn); // copy in to out, for elements we don't recalc
     var traceLimit = 10000; // keep UI responsive in evil situations
@@ -18985,8 +19364,7 @@ geoOps._helper = {};
  * C  - Conic (including circle)
  * *s - Set of *
  * Tr - Projective transformation
- * Mt - Moebius transformation
- * Rc - Reflection in a circle
+ * Mt - Moebius transformation (or anti-Moebius)
  * V  - (numeric) value
  * Text - Text
  * "**" - arbitrary number of arguments with arbitrary types
@@ -19325,6 +19703,21 @@ geoOps.Through.updatePosition = function(el) {
     el.homog = General.withUsage(homog, "Line");
 };
 geoOps.Through.stateSize = 6;
+geoOps.Through.set_angle = function(el, value) {
+    if (value.ctype === "number") {
+        var cc = CSNumber.cos(value);
+        var ss = CSNumber.sin(value);
+        var dir = List.turnIntoCSList([cc, ss, CSNumber.real(0)]);
+        movepointscr(el, dir, "dir");
+    }
+};
+geoOps.Through.set_slope = function(el, value) {
+    if (value.ctype === "number") {
+        var dir = List.turnIntoCSList(
+            [CSNumber.real(1), value, CSNumber.real(0)]);
+        movepointscr(el, dir, "dir");
+    }
+};
 
 
 geoOps.Free = {};
@@ -19445,7 +19838,7 @@ geoOps.PointOnCircle.isMovable = true;
 geoOps.PointOnCircle.initialize = function(el) {
     var circle = csgeo.csnames[el.args[0]];
     var pos = List.normalizeZ(geoOps._helper.initializePoint(el));
-    var mid = List.normalizeZ(geoOps._helper.CenterOfConic(circle.matrix));
+    var mid = List.normalizeZ(geoOps._helper.CenterOfCircle(circle.matrix));
     var dir = List.sub(pos, mid);
     var param = List.turnIntoCSList([
         dir.value[1],
@@ -19478,7 +19871,7 @@ geoOps.PointOnCircle.getParamFromState = function(el) {
 };
 geoOps.PointOnCircle.getParamForInput = function(el, pos, type) {
     var circle = csgeo.csnames[el.args[0]];
-    var mid = List.normalizeZ(geoOps._helper.CenterOfConic(circle.matrix));
+    var mid = List.normalizeZ(geoOps._helper.CenterOfCircle(circle.matrix));
     var dir = List.sub(pos, mid);
     stateInIdx = el.stateIdx;
     var oldparam = getStateComplexVector(3);
@@ -19602,6 +19995,93 @@ geoOps.PointOnSegment.updatePosition = function(el) {
 };
 geoOps.PointOnSegment.stateSize = 2;
 
+geoOps._helper.projectPointToCircle = function(cir, P) {
+    var cen = geoOps._helper.CenterOfCircle(cir.matrix);
+    cen = List.normalizeMax(cen);
+    var l = List.normalizeMax(List.cross(P, cen));
+    var isec = geoOps._helper.IntersectLC(l, cir.matrix);
+    var d1 = List.projectiveDistMinScal(P, isec[0]);
+    var d2 = List.projectiveDistMinScal(P, isec[1]);
+    var erg = d1 < d2 ? isec[0] : isec[1];
+    return erg;
+};
+
+geoOps.PointOnArc = {};
+geoOps.PointOnArc.kind = "P";
+geoOps.PointOnArc.signature = ["C"];
+geoOps.PointOnArc.signatureConstraints = function(el) {
+    return csgeo.csnames[el.args[0]].isArc;
+};
+geoOps.PointOnArc.isMovable = true;
+geoOps.PointOnArc.initialize = function(el) {
+    var pos = geoOps._helper.initializePoint(el);
+    var cr = geoOps.PointOnArc.getParamForInput(el, pos);
+    putStateComplexVector(cr);
+};
+geoOps.PointOnArc.getParamForInput = function(el, pos) {
+    var arc = csgeo.csnames[el.args[0]];
+    var P = geoOps._helper.projectPointToCircle(arc, pos);
+    var A = arc.startPoint;
+    var B = arc.viaPoint;
+    var C = arc.endPoint;
+    var crh = List.normalizeMax(List.crossratio3harm(A, C, B, P, List.ii));
+    // Now restrict cross ratio to the range [0,∞]
+    var cr = CSNumber.div(crh.value[0], crh.value[1]);
+    if (cr.value.real < 0) {
+        if (cr.value.real < -1) {
+            crh = List.realVector([1, 0]); // ∞, use end point
+        } else {
+            crh = List.realVector([0, 1]); // 0, use start point
+        }
+    }
+    return crh;
+};
+geoOps.PointOnArc.getParamFromState = function(el) {
+    return getStateComplexVector(2);
+};
+geoOps.PointOnArc.putParamToState = function(el, param) {
+    putStateComplexVector(param);
+};
+geoOps.PointOnArc.updatePosition = function(el) {
+    var arc = csgeo.csnames[el.args[0]];
+    var A = arc.startPoint;
+    var B = arc.viaPoint;
+    var C = arc.endPoint;
+    var I = List.ii;
+    var AI = List.cross(A, I);
+    var BI = List.cross(B, I);
+    var CI = List.cross(C, I);
+    // Now we want to scale AI and CI such that λ⋅BI = AI + CI.
+    // a*AI + c*CI = BI => [AI, CI]*(a,c) = BI but [AI, CI] is not square so
+    // we solve this least-squares-style (see Moore-Penrose pseudoinverse),
+    // multiplying both sides by M2x3c and then using the adjoint to solve.
+    var M2x3 = List.turnIntoCSList([AI, CI]);
+    var M3x2 = List.transpose(M2x3);
+    var M2x3c = List.conjugate(M2x3);
+    var M2x2 = List.productMM(M2x3c, M3x2);
+    var v2x1 = List.productMV(M2x3c, BI);
+    var ab = List.productMV(List.adjoint2(M2x2), v2x1);
+    var a = ab.value[0];
+    var c = ab.value[1];
+    var crh = getStateComplexVector(2);
+    putStateComplexVector(crh);
+    var Q = List.normalizeMax(List.add(
+        List.scalmult(CSNumber.mult(a, crh.value[0]), A),
+        List.scalmult(CSNumber.mult(c, crh.value[1]), C)));
+    var P = geoOps._helper.conicOtherIntersection(arc.matrix, I, Q);
+    el.homog = General.withUsage(P, "Point");
+};
+geoOps.PointOnArc.stateSize = 4;
+
+geoOps._helper.CenterOfCircle = function(c) {
+    // Treating this special case of CenterOfConic avoids some computation
+    // and also allows dealing with the degenerate case of center at infinity
+    return List.turnIntoCSList([
+        c.value[2].value[0],
+        c.value[2].value[1],
+        CSNumber.neg(c.value[0].value[0])
+    ]);
+};
 
 geoOps._helper.CenterOfConic = function(c) {
     // The center is the pole of the dual conic of the line at infinity
@@ -19700,6 +20180,11 @@ geoOps.CircleMr.updatePosition = function(el) {
     el.radius = r;
 };
 geoOps.CircleMr.stateSize = 2;
+geoOps.CircleMr.set_radius = function(el, value) {
+    if (value.ctype === "number") {
+        movepointscr(el, value, "radius");
+    }
+};
 
 
 geoOps._helper.ScaledCircleMrr = function(M, rr) {
@@ -20931,18 +21416,24 @@ geoOps.TrMoebius.updatePosition = function(el) {
         [neg(A[2]), A[0]],
         [neg(A[3]), A[1]]
     ]));
-    var C = List.productMM(mB, mAa);
+    var C = List.normalizeMax(List.productMM(mB, mAa));
 
     // Read from that the (doubly) complex matrix [[a, b], [c, d]]
-    var ar = C.value[0].value[0];
-    var ai = C.value[1].value[0];
-    var br = C.value[0].value[1];
-    var bi = C.value[1].value[1];
-    var cr = C.value[2].value[0];
-    var ci = C.value[3].value[0];
-    var dr = C.value[2].value[1];
-    var di = C.value[3].value[1];
+    el.moebius = {
+        anti: false,
+        ar: C.value[0].value[0],
+        ai: C.value[1].value[0],
+        br: C.value[0].value[1],
+        bi: C.value[1].value[1],
+        cr: C.value[2].value[0],
+        ci: C.value[3].value[0],
+        dr: C.value[2].value[1],
+        di: C.value[3].value[1]
+    };
+    geoOps._helper.moebiusPair(el);
+};
 
+geoOps._helper.moebiusPair = function(el) {
     /*
     Build two matrices with the interesting property that for pxy = px + i*py
     this essentially encodes a Möbius transformation including division:
@@ -20951,16 +21442,40 @@ geoOps.TrMoebius.updatePosition = function(el) {
     cross(mat1 * p, mat2 * p) = ⎜Im((a*pxy + b*pz)*conj(c*pxy + d*pz))⎟
                                 ⎝   (c*pxy + d*pz)*conj(c*pxy + d*pz) ⎠
     */
+    var m = el.moebius;
+    var neg = CSNumber.neg;
+    var flip = m.anti ? neg : General.identity;
     el.mat1 = List.normalizeMax(List.matrix([
-        [neg(cr), ci, neg(dr)],
-        [ci, cr, di],
-        [ar, neg(ai), br]
+        [neg(m.cr), flip(m.ci), neg(m.dr)],
+        [m.ci, flip(m.cr), m.di],
+        [m.ar, neg(flip(m.ai)), m.br]
     ]));
     el.mat2 = List.normalizeMax(List.matrix([
-        [neg(ci), neg(cr), neg(di)],
-        [neg(cr), ci, neg(dr)],
-        [ai, ar, bi]
+        [neg(m.ci), neg(flip(m.cr)), neg(m.di)],
+        [neg(m.cr), flip(m.ci), neg(m.dr)],
+        [m.ai, flip(m.ar), m.bi]
     ]));
+};
+
+geoOps.TrInverseMoebius = {};
+geoOps.TrInverseMoebius.kind = "Mt";
+geoOps.TrInverseMoebius.signature = ["Mt"];
+geoOps.TrInverseMoebius.updatePosition = function(el) {
+    var m = csgeo.csnames[el.args[0]].moebius;
+    var neg = CSNumber.neg;
+    var flip = m.anti ? neg : General.identity;
+    el.moebius = {
+        anti: m.anti,
+        ar: m.dr,
+        ai: flip(m.di),
+        br: neg(m.br),
+        bi: neg(flip(m.bi)),
+        cr: neg(m.cr),
+        ci: neg(flip(m.ci)),
+        dr: m.ar,
+        di: flip(m.ai)
+    };
+    geoOps._helper.moebiusPair(el);
 };
 
 geoOps.TrMoebiusP = {};
@@ -21032,39 +21547,39 @@ geoOps.TrMoebiusS.updatePosition = function(el) {
 geoOps.TrMoebiusC = {};
 geoOps.TrMoebiusC.kind = "C";
 geoOps.TrMoebiusC.signature = ["Mt", "C"];
+geoOps.TrMoebiusC.signatureConstraints = function(el) {
+    return csgeo.csnames[el.args[1]].matrix.usage === "Circle";
+};
 geoOps.TrMoebiusC.updatePosition = function(el) {
     var t = csgeo.csnames[(el.args[0])];
     var cir = csgeo.csnames[(el.args[1])].matrix;
 
-    if (cir.usage !== "Circle") {
-        console.log("applying Moebius transform to conics is not implemented yet");
-        var th = CSNumber.real(3);
-        el.matrix = List.zeromatrix(th, th);
-    } else {
-        var getRandLine = function() {
-            var rline = List.realVector([Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5]);
-            return List.normalizeMax(rline);
-        };
+    var getRandLine = function() {
+        var rline = List.realVector([Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5]);
+        return List.normalizeMax(rline);
+    };
 
-        var pts1 = geoOps._helper.IntersectLC(getRandLine(), cir);
-        var pts2 = geoOps._helper.IntersectLC(getRandLine(), cir);
+    var pts1 = geoOps._helper.IntersectLC(getRandLine(), cir);
+    var pts2 = geoOps._helper.IntersectLC(getRandLine(), cir);
 
-        var a1 = pts1[0],
-            a2 = pts1[1],
-            a3 = pts2[1];
+    var a1 = pts1[0];
+    var a2 = pts1[1];
+    var a3 = pts2[1];
 
-        var b1 = geoOps._helper.TrMoebiusP(a1, t);
-        var b2 = geoOps._helper.TrMoebiusP(a2, t);
-        var b3 = geoOps._helper.TrMoebiusP(a3, t);
+    var b1 = geoOps._helper.TrMoebiusP(a1, t);
+    var b2 = geoOps._helper.TrMoebiusP(a2, t);
+    var b3 = geoOps._helper.TrMoebiusP(a3, t);
 
-        el.matrix = List.normalizeMax(geoOps._helper.ConicBy5(null, b1, b2, b3, List.ii, List.jj));
-    }
+    el.matrix = List.normalizeMax(geoOps._helper.ConicBy5(null, b1, b2, b3, List.ii, List.jj));
     el.matrix = General.withUsage(el.matrix, "Circle");
 };
 
 geoOps.TrMoebiusArc = {};
 geoOps.TrMoebiusArc.kind = "C";
 geoOps.TrMoebiusArc.signature = ["Mt", "C"];
+geoOps.TrMoebiusArc.signatureConstraints = function(el) {
+    return csgeo.csnames[el.args[1]].isArc;
+};
 geoOps.TrMoebiusArc.updatePosition = function(el) {
     var t = csgeo.csnames[(el.args[0])];
     var Arc = csgeo.csnames[(el.args[1])];
@@ -21270,151 +21785,31 @@ geoOps.TrReflectionS.updatePosition = geoOps.TrReflectionL.updatePosition;
 
 // Define a reflective transformation given a circle (not a general conic)
 geoOps.TrReflectionC = {};
-geoOps.TrReflectionC.kind = "Rc";
+geoOps.TrReflectionC.kind = "Mt";
 geoOps.TrReflectionC.signature = ["C"];
+geoOps.TrReflectionC.signatureConstraints = function(el) {
+    return csgeo.csnames[el.args[0]].matrix.usage === "Circle";
+};
 geoOps.TrReflectionC.updatePosition = function(el) {
-    var m1 = csgeo.csnames[(el.args[0])].matrix;
-    if (m1.usage !== "Circle") {
-        console.log("reflection in general conics is not defined");
-        el.sclRsq = CSNumber.zero;
-        el.matrix = List.fund;
-    } else {
-        var add = CSNumber.add;
-        var sub = CSNumber.sub;
-        var mult = CSNumber.mult;
-        var m1r3 = m1.value[2].value;
-        var nx1 = m1r3[0];
-        var ny1 = m1r3[1];
-        var zz1 = m1r3[2];
-        var z1 = m1.value[0].value[0];
-        el.sclRsq = CSNumber.sub(add(mult(nx1, nx1), mult(ny1, ny1)), mult(z1, zz1));
-    }
-    el.dualMatrix = el.matrix = m1;
-};
-
-geoOps._helper.ReflectC = function(Tr, m2) {
-    var add = CSNumber.add;
-    var sub = CSNumber.sub;
-    var mult = CSNumber.mult;
-    var scalmult = List.scalmult;
-    var m1 = Tr.matrix;
-    var z1 = m1.value[0].value[0];
-    var m1r3 = m1.value[2].value;
-    var nx1 = m1r3[0];
-    var ny1 = m1r3[1];
-    var zz1 = m1r3[2];
-    var z2 = m2.value[0].value[0];
-    var m2r3 = m2.value[2].value;
-    var nx2 = m2r3[0];
-    var ny2 = m2r3[1];
-    var zz2 = m2r3[2];
-    var u = sub(CSNumber.realmult(2, add(mult(nx1, nx2), mult(ny1, ny2))), add(mult(z1, zz2), mult(z2, zz1)));
-    return General.withUsage(List.normalizeMax(List.sub(scalmult(u, m1), scalmult(Tr.sclRsq, m2))), "Circle");
-};
-
-// Reflect a circle (not a general conic) in a circle
-geoOps.ReflectCC = {};
-geoOps.ReflectCC.kind = "C";
-geoOps.ReflectCC.signature = ["Rc", "C"];
-geoOps.ReflectCC.updatePosition = function(el) {
-    var cir = csgeo.csnames[(el.args[1])];
-    if (cir.matrix.usage !== "Circle") {
-        console.log("reflecting general conics in circles is not defined");
-        el.matrix = General.withUsage(List.fund, "Circle");
-    } else {
-        el.matrix = geoOps._helper.ReflectC(csgeo.csnames[(el.args[0])], cir.matrix);
-    }
-};
-
-// Reflect a line in a circle
-geoOps.ReflectCL = {};
-geoOps.ReflectCL.kind = "C";
-geoOps.ReflectCL.signature = ["Rc", "L"];
-geoOps.ReflectCL.updatePosition = function(el) {
-    /*
-        Define the line as this circle matrix when l is [x, y, z]:
-        ⎛  0   0   x ⎞
-        ⎜  0   0   y ⎟
-        ⎝  x   y  2*z⎠
-    */
-    var z = CSNumber.zero;
-    var l = csgeo.csnames[(el.args[1])].homog.value;
-    var c = geoOps._helper.buildConicMatrix([z, z, z, l[0], l[1], CSNumber.realmult(2, l[2])]);
-    el.matrix = geoOps._helper.ReflectC(csgeo.csnames[(el.args[0])], c);
-};
-
-geoOps._helper.ReflectCP = function(p, Tr) {
-    var m1 = Tr.matrix;
-    var m1r3 = m1.value[2].value;
-    var center = List.turnIntoCSList([m1r3[0], m1r3[1], CSNumber.neg(m1.value[0].value[0])]);
-    var cc = List.cross;
-    // Returns intersection of polar of p and line thru center and p
-    return List.normalizeMax(cc(List.productMV(m1, p), cc(center, p)));
-};
-
-// Reflect a point in a circle
-geoOps.ReflectCP = {};
-geoOps.ReflectCP.kind = "P";
-geoOps.ReflectCP.signature = ["Rc", "P"];
-geoOps.ReflectCP.updatePosition = function(el) {
-    el.homog = General.withUsage(
-        geoOps._helper.ReflectCP(csgeo.csnames[(el.args[1])].homog,
-            csgeo.csnames[(el.args[0])]), "Point");
-};
-
-// Reflect an arc in a circle
-geoOps.ReflectCArc = {};
-geoOps.ReflectCArc.kind = "C";
-geoOps.ReflectCArc.signature = ["Rc", "C"];
-geoOps.ReflectCArc.updatePosition = function(el) {
-    var t = csgeo.csnames[(el.args[0])];
-    var Arc = csgeo.csnames[(el.args[1])];
-
-    var a1 = Arc.startPoint;
-    var a2 = Arc.viaPoint;
-    var a3 = Arc.endPoint;
-
-    var b1 = geoOps._helper.ReflectCP(a1, t);
-    var b2 = geoOps._helper.ReflectCP(a2, t);
-    var b3 = geoOps._helper.ReflectCP(a3, t);
-    el.startPoint = b1;
-    el.viaPoint = b2;
-    el.endPoint = b3;
-
-    el.isArc = true;
-    el.matrix = geoOps._helper.ReflectC(t, Arc.matrix);
-};
-
-// Reflect a segment in a circle
-geoOps.ReflectCS = {};
-geoOps.ReflectCS.kind = "C";
-geoOps.ReflectCS.signature = ["Rc", "S"];
-geoOps.ReflectCS.updatePosition = function(el) {
-    var t = csgeo.csnames[(el.args[0])];
-    var Segment = csgeo.csnames[(el.args[1])];
-
-    var a1 = Segment.startpos;
-    var a3 = Segment.endpos;
-    var a2 = geoOps._helper.midpoint(a1, a3);
-
-    var b1 = geoOps._helper.ReflectCP(a1, t);
-    var b2 = geoOps._helper.ReflectCP(a2, t);
-    var b3 = geoOps._helper.ReflectCP(a3, t);
-    el.startPoint = b1;
-    el.viaPoint = b2;
-    el.endPoint = b3;
-
-    el.isArc = true;
-    /*
-        Define the line as this circle matrix when l is [x, y, z]:
-        ⎛  0   0   x ⎞
-        ⎜  0   0   y ⎟
-        ⎝  x   y  2*z⎠
-    */
-    var z = CSNumber.zero;
-    var l = Segment.homog.value;
-    var c = geoOps._helper.buildConicMatrix([z, z, z, l[0], l[1], CSNumber.realmult(2, l[2])]);
-    el.matrix = geoOps._helper.ReflectC(t, c);
+    var m = csgeo.csnames[(el.args[0])].matrix;
+    // m = [[a, 0, b], [0, a, c], [b, c, d]]
+    var a = m.value[0].value[0];
+    var b = m.value[0].value[2];
+    var c = m.value[1].value[2];
+    var d = m.value[2].value[2];
+    var neg = CSNumber.neg;
+    el.moebius = {
+        anti: true,
+        ar: b,
+        ai: c,
+        br: d,
+        bi: CSNumber.zero,
+        cr: neg(a),
+        ci: CSNumber.zero,
+        dr: neg(b),
+        di: c
+    };
+    geoOps._helper.moebiusPair(el);
 };
 
 geoOps.TrInverse = {};
@@ -21443,6 +21838,9 @@ geoOps.TransformC.updatePosition = function(el) {
 geoOps.TransformArc = {};
 geoOps.TransformArc.kind = "C";
 geoOps.TransformArc.signature = ["Tr", "C"];
+geoOps.TransformArc.signatureConstraints = function(el) {
+    return csgeo.csnames[el.args[0]].isArc;
+};
 geoOps.TransformArc.updatePosition = function(el) {
     var t = csgeo.csnames[(el.args[0])].matrix;
     var Arc = csgeo.csnames[(el.args[1])];
@@ -21679,6 +22077,12 @@ function commonButton(el, event, button) {
         inlinebox.appendChild(arguments[i]);
     canvas.parentNode.appendChild(outer);
     el.html = arguments[arguments.length - 1];
+    if (!isFiniteNumber(el.fillalpha))
+        el.fillalpha = 1.0;
+    if (el.fillcolor) {
+        el.html.style.backgroundColor =
+            Render2D.makeColor(el.fillcolor, el.fillalpha);
+    }
     var onEvent = scheduleUpdate;
     if (el.script) {
         var code = analyse(el.script);
@@ -21688,6 +22092,20 @@ function commonButton(el, event, button) {
         };
     }
     button.addEventListener(event, onEvent);
+    if (!instanceInvocationArguments.keylistener &&
+        (cscompiled.keydown || cscompiled.keyup || cscompiled.keytyped)) {
+        button.addEventListener("keydown", function(e) {
+            if (e.keyCode === 9 /* tab */ ) return;
+            cs_keydown(e);
+        });
+        button.addEventListener("keyup", function(e) {
+            cs_keyup(e);
+        });
+        button.addEventListener("keypress", function(e) {
+            if (e.keyCode === 9 /* tab */ ) return;
+            cs_keytyped(e);
+        });
+    }
     geoOps.Text.initialize(el);
 }
 
@@ -21703,6 +22121,15 @@ geoOps.Button.initialize = function(el) {
 geoOps.Button.getParamForInput = geoOps.Text.getParamForInput;
 geoOps.Button.getParamFromState = geoOps.Text.getParamFromState;
 geoOps.Button.putParamToState = geoOps.Text.putParamToState;
+geoOps.Button.set_fillcolor = function(el, value) {
+    if (List._helper.isNumberVecN(value, 3)) {
+        el.fillcolor = value.value.map(function(i) {
+            return i.value.real;
+        });
+        el.html.style.backgroundColor =
+            Render2D.makeColor(el.fillcolor, el.fillalpha);
+    }
+};
 
 geoOps.ToggleButton = {};
 geoOps.ToggleButton.kind = "Text";
@@ -21724,6 +22151,7 @@ geoOps.ToggleButton.initialize = function(el) {
 geoOps.ToggleButton.getParamForInput = geoOps.Text.getParamForInput;
 geoOps.ToggleButton.getParamFromState = geoOps.Text.getParamFromState;
 geoOps.ToggleButton.putParamToState = geoOps.Text.putParamToState;
+geoOps.ToggleButton.set_fillcolor = geoOps.Button.set_fillcolor;
 
 geoOps.EditableText = {};
 geoOps.EditableText.kind = "Text";
@@ -21734,12 +22162,6 @@ geoOps.EditableText.initialize = function(el) {
     var textbox = document.createElement("input");
     textbox.setAttribute("type", "text");
     textbox.className = "CindyJS-editabletext";
-    if (!isFiniteNumber(el.fillalpha))
-        el.fillalpha = 1.0;
-    if (el.fillcolor) {
-        textbox.style.backgroundColor =
-            Render2D.makeColor(el.fillcolor, el.fillalpha);
-    }
     if (isFiniteNumber(el.minwidth))
         textbox.style.width = (el.minwidth - 3) + "px";
     if (typeof el.text === "string")
@@ -21756,6 +22178,15 @@ geoOps.EditableText.getText = function(el) {
 geoOps.EditableText.getParamForInput = geoOps.Text.getParamForInput;
 geoOps.EditableText.getParamFromState = geoOps.Text.getParamFromState;
 geoOps.EditableText.putParamToState = geoOps.Text.putParamToState;
+geoOps.EditableText.set_fillcolor = geoOps.Button.set_fillcolor;
+geoOps.EditableText.get_currenttext = function(el) {
+    return General.string(String(el.html.value));
+};
+geoOps.EditableText.set_currenttext = function(el, value) {
+    el.html.value = niceprint(value);
+};
+geoOps.EditableText.get_text = geoOps.EditableText.get_currenttext;
+geoOps.EditableText.set_text = geoOps.EditableText.set_currenttext;
 
 function noop() {}
 
@@ -21821,6 +22252,29 @@ geoOps.Poly.updatePosition = function(el) {
 };
 
 
+var geoAliases = {
+    "CircleByRadius": "CircleMr",
+    "IntersectionCircleCircle": "IntersectCirCir",
+    "IntersectionConicConic": "IntersectConicConic",
+    "FreePoint": "Free",
+    "Orthogonal": "Perp",
+    "Parallel": "Para",
+    "Pole": "PolarOfLine",
+    "Polar": "PolarOfPoint",
+    "Arc": "ArcBy3",
+    "EuclideanMid": "Mid",
+    "AngularBisector": "AngleBisector",
+    "TransformConic": "TransformC",
+    "TransformSegment": "TransformS",
+    "TrMoebiusSegment": "TrMoebiusS",
+    "ReflectCC": "TrMoebiusC",
+    "ReflectCL": "TrMoebiusL",
+    "ReflectCP": "TrMoebiusP",
+    "ReflectCArc": "TrMoebiusArc",
+    "ReflectCS": "TrMoebiusS",
+    "TrMoebiusCircle": "TrMoebiusC"
+};
+
 var geoMacros = {};
 
 /* Note: currently the expansion of a macro is simply included in the
@@ -21842,79 +22296,9 @@ geoMacros.CircleByFixedRadius = function(el) {
     return [el];
 };
 
-geoMacros.CircleByRadius = function(el) {
-    el.type = "CircleMr";
-    return [el];
-};
-
 geoMacros.IntersectionConicLine = function(el) {
     el.args = [el.args[1], el.args[0]];
     el.type = "IntersectLC";
-    return [el];
-};
-
-geoMacros.IntersectionCircleCircle = function(el) {
-    el.type = "IntersectCirCir";
-    return [el];
-};
-
-geoMacros.IntersectionConicConic = function(el) {
-    el.type = "IntersectConicConic";
-    return [el];
-};
-
-geoMacros.FreePoint = function(el) {
-    el.type = "Free";
-    return [el];
-};
-
-geoMacros.Orthogonal = function(el) {
-    el.type = "Perp";
-    return [el];
-};
-
-geoMacros.Parallel = function(el) {
-    el.type = "Para";
-    return [el];
-};
-
-geoMacros.Pole = function(el) {
-    el.type = "PolarOfLine";
-    return [el];
-};
-
-geoMacros.Polar = function(el) {
-    el.type = "PolarOfPoint";
-    return [el];
-};
-
-geoMacros.Arc = function(el) {
-    el.type = "ArcBy3";
-    return [el];
-};
-
-geoMacros.EuclideanMid = function(el) {
-    el.type = "Mid";
-    return [el];
-};
-
-geoMacros.AngularBisector = function(el) {
-    el.type = "AngleBisector";
-    return [el];
-};
-
-geoMacros.TransformConic = function(el) {
-    el.type = "TransformC";
-    return [el];
-};
-
-geoMacros.TransformSegment = function(el) {
-    el.type = "TransformS";
-    return [el];
-};
-
-geoMacros.TrMoebiusSegment = function(el) {
-    el.type = "TrMoebiusS";
     return [el];
 };
 
@@ -21938,8 +22322,7 @@ geoMacros.Transform = function(el) {
 
     var map = {
         Tr: "Transform",
-        Mt: "TrMoebius",
-        Rc: "ReflectC"
+        Mt: "TrMoebius"
     };
     var op = map[tr.kind] + akind;
     if (geoOps.hasOwnProperty(op)) {

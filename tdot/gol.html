@@ -41,6 +41,8 @@ plotcmd() := ();
 hidden = false;
 lastsecond = -1;
 k = 0;
+createimage("img", 1680, 1080);
+
 </script>
 
 <script id="cskeydown" type="text/x-cindyscript">
@@ -86,9 +88,16 @@ newstate(x, y) := (
     )
 );
 
-colorplot(
+if(floor(seconds()*2)>lastsecond,
+
+colorplot("img",
   newstate(round(#.x*n), round(#.y*n));
-);</script>
+);
+lastsecond = floor(seconds()*2);
+);
+colorplot(imagergb("img",#));
+
+</script>
 
 <body>
   <div id="outer">
