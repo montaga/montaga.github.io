@@ -79,7 +79,7 @@ col(c) := (c_1, c_2, c_3-d*c_2);
 colorplot(
   z = complex(#);
   res = z - f(z)/df(z);
-  col(imagergb(camera, M*[res.x, res.y, 1]));
+  col(imagergb(camera, M*[re(res), im(res), 1]));
 );
 
 </script>
