@@ -71,8 +71,9 @@ if(calibrate,
 </script>
 
 <script id="plotcmd" type="text/x-cindyscript">n = 25;
+n = 25;
 
-get(x, y) :=  if(imagergb(camera, M*[x, y, n])*[1,1,1]/3<.5, 0, 1);
+get(x, y) :=  if(imagergb(camera, M*[x+0.1, y, n])*([1,1,1]/3)<.5, 0, 1);
       
 newstate(x, y) := (
   number =
@@ -96,7 +97,6 @@ colorplot("img",
 lastsecond = floor(seconds()*2);
 );
 colorplot(imagergb("img",#));
-
 </script>
 
 <body>
