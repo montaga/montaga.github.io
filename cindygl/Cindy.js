@@ -1603,7 +1603,6 @@ function setuplisteners(canvas, data) {
     addAutoCleaningEventListener(canvas, "mouseup", function(e) {
         mouse.down = false;
         cindy_cancelmove();
-        stateContinueFromHere();
         cs_mouseup();
         manage("mouseup");
         scheduleUpdate();
@@ -1849,7 +1848,6 @@ function setuplisteners(canvas, data) {
         activeTouchID = -1;
         mouse.down = false;
         cindy_cancelmove();
-        stateContinueFromHere();
         cs_mouseup();
         manage("mouseup");
         scheduleUpdate();
@@ -2138,7 +2136,7 @@ function cs_onDrop(lst, pos) {
 function cindy_cancelmove() {
     move = undefined;
 }
-var version = [0,8,2,87,"ga7782d1"];
+var version = [0,8,3,18,"g4989821!"];
 //==========================================
 //      Complex Numbers
 //==========================================
@@ -3305,9 +3303,9 @@ List.consecutive = function(a) {
 };
 
 List.reverse = function(a) {
-    var erg = [];
-    for (var i = a.value.length - 1; i >= 0; i--) {
-        erg.push(a.value[i]);
+    var erg = new Array(a.value.length);
+    for (var i = a.value.length - 1, j = 0; i >= 0; i--, j++) {
+        erg[j] = a.value[i];
     }
 
     return {
@@ -3986,6 +3984,13 @@ List.isNumberMatrix = function(a) {
         'value': true
     };
 
+};
+
+
+List._helper.isNumberMatrixMN = function(a, m, n) {
+    return List.isNumberMatrix(a).value &&
+        a.value.length === m &&
+        a.value[0].value.length === n;
 };
 
 
@@ -8393,6 +8398,11 @@ evaluator.moveto$2 = function(args, modifs) {
     return nada;
 };
 
+evaluator.continuefromhere$0 = function(args, modifs) {
+    stateContinueFromHere();
+    return nada;
+};
+
 evaluator.matrixrowcolumn$1 = function(args, modifs) {
     var v0 = evaluate(args[0]);
     var n = List._helper.colNumb(v0);
@@ -11786,10 +11796,10 @@ evaluator.drawconic$1 = function(args, modifs) {
 
         for (var ii = 0; ii < 3; ii++) // check for faulty arrays
             for (var jj = 0; jj < 3; jj++)
-            if (arr.value[ii].value[jj].ctype !== "number") {
-                console.error("could not parse conic");
-                return nada;
-            }
+                if (arr.value[ii].value[jj].ctype !== "number") {
+                    console.error("could not parse conic");
+                    return nada;
+                }
 
         if (!List.equals(arr, List.transpose(arr)).value) { // not symm case
             var aa = General.mult(arr, CSNumber.real(0.5));
@@ -17822,7 +17832,8 @@ function addElementNoProof(el) {
         console.log("Element name '" + el.name + "' already exists");
 
         var existingEl = csgeo.csnames[el.name];
-        if (geoOps[existingEl.type].isMovable)
+        if (geoOps[existingEl.type].isMovable &&
+            geoOps[existingEl.type].kind === "P")
             movepointscr(existingEl, el.pos, "homog");
 
         return {
@@ -18536,6 +18547,7 @@ function stateAlloc(newSize) {
  */
 function stateContinueFromHere() {
     stateLastGood.set(stateIn);
+    tracingFailed = false;
     tracingStateReport(false);
 
     // Make numbers which are almost real totally real. This avoids
@@ -18581,8 +18593,6 @@ function traceMouseAndScripts() {
         traceLog.currentMouseAndScripts = [];
     }
     inMouseMove = true;
-    tracingFailed = false;
-    stateIn.set(stateLastGood); // copy stateLastGood and use it as input
     if (move) {
         var mover = move.mover;
         var sx = mouse.x + move.offset.x;
@@ -18612,15 +18622,14 @@ function traceMouseAndScripts() {
 }
 
 function movepointscr(mover, pos, type) {
-    if (inMouseMove) {
-        traceMover(mover, pos, type);
-        return;
-    }
-    stateContinueFromHere();
-    tracingFailed = false;
     traceMover(mover, pos, type);
-    stateContinueFromHere();
+    if (!inMouseMove && !tracingFailed)
+        stateContinueFromHere();
 }
+
+// Remember the last point which got moved.
+// @todo: be careful with this variable when doing automatic proving.
+var previousMover = null;
 
 /*
  * traceMover moves mover from current param to param for pos along a complex detour.
@@ -18628,6 +18637,13 @@ function movepointscr(mover, pos, type) {
 function traceMover(mover, pos, type) {
     if (traceLog && traceLog.currentMouseAndScripts) {
         traceLog.currentMover = [];
+    }
+    if (mover === previousMover) {
+        stateIn.set(stateLastGood); // copy stateLastGood and use it as input
+        tracingFailed = false;
+    } else {
+        previousMover = mover;
+        stateContinueFromHere(); // make changes up to now permanent
     }
     stateOut.set(stateIn); // copy in to out, for elements we don't recalc
     var traceLimit = 10000; // keep UI responsive in evil situations
@@ -20286,6 +20302,41 @@ geoOps.ConicBy5.updatePosition = function(el) {
     el.matrix = General.withUsage(el.matrix, "Conic");
 };
 
+geoOps.FreeConic = {};
+geoOps.FreeConic.kind = "C";
+geoOps.FreeConic.signature = [];
+geoOps.FreeConic.initialize = function(el) {
+    var pos;
+    if (el.pos)
+        pos = geoOps._helper.inputConic(el.pos);
+    else
+        pos = List.zeromatrix(CSNumber.real(3), CSNumber.real(3));
+    geoOps.FreeConic.putParamToState(el, pos);
+};
+geoOps.FreeConic.getParamForInput = function(el, pos, type) {
+    return List.normalizeMax(pos);
+};
+geoOps.FreeConic.getParamFromState = function(el) {
+    return geoOps._helper.buildConicMatrix(getStateComplexVector(6).value);
+};
+geoOps.FreeConic.putParamToState = function(el, param) {
+    for (var i = 0; i < 3; ++i)
+        for (var j = 0; j <= i; ++j)
+            putStateComplexNumber(param.value[i].value[j]);
+};
+geoOps.FreeConic.updatePosition = function(el) {
+    var pos = getStateComplexVector(6);
+    putStateComplexVector(pos);
+    el.matrix = geoOps._helper.buildConicMatrix(pos.value);
+    el.matrix = List.normalizeMax(el.matrix);
+    el.matrix = General.withUsage(el.matrix, "Conic");
+};
+geoOps.FreeConic.set_matrix = function(el, value) {
+    if (List._helper.isNumberMatrixMN(value, 3, 3))
+        movepointscr(el, List.add(value, List.transpose(value)), "matrix");
+};
+geoOps.FreeConic.stateSize = 6 * 2;
+
 geoOps._helper.buildConicMatrix = function(arr) {
     var a = arr[0];
     var b = arr[1];
@@ -20369,23 +20420,22 @@ geoOps._helper.splitDegenConic = function(mat) {
     return [lg, lh];
 };
 
+geoOps._helper.inputConic = function(pos) {
+    var v = "xx xy yy xz yz zz".split(" ").map(function(name) {
+        var num = CSNumber._helper.input(pos[name]);
+        if (name[0] !== name[1]) num = CSNumber.realmult(0.5, num);
+        return num;
+    });
+    return geoOps._helper.buildConicMatrix(v);
+};
+
 geoOps.SelectConic = {};
 geoOps.SelectConic.kind = "C";
 geoOps.SelectConic.signature = ["Cs"];
 geoOps.SelectConic.initialize = function(el) {
     if (el.index !== undefined)
         return el.index - 1;
-    var xx = CSNumber._helper.input(el.pos.xx);
-    var yy = CSNumber._helper.input(el.pos.yy);
-    var zz = CSNumber._helper.input(el.pos.zz);
-    var xy = CSNumber.realmult(0.5, CSNumber._helper.input(el.pos.xy));
-    var xz = CSNumber.realmult(0.5, CSNumber._helper.input(el.pos.xz));
-    var yz = CSNumber.realmult(0.5, CSNumber._helper.input(el.pos.yz));
-    var pos = List.turnIntoCSList([
-        List.turnIntoCSList([xx, xy, xz]),
-        List.turnIntoCSList([xy, yy, yz]),
-        List.turnIntoCSList([xz, yz, zz])
-    ]);
+    var pos = geoOps._helper.inputConic(el.pos);
     var set = csgeo.csnames[(el.args[0])].results;
     var d1 = List.conicDist(pos, set[0]);
     var best = 0;

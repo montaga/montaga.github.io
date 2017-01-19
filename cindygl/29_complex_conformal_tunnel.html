@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>Cindy JS Example</title>
+<meta charset="UTF-8">
+<script type="text/javascript" src="Cindy.js"></script>
+<script type="text/javascript" src="CindyGL.js"></script>
+<script id="csinit" type="text/x-cindyscript">
+  dropped = (;); // undefined
+  image = "image";
+  t0 = seconds();
+  mipmap = true;
+  interpolate = true;
+</script>
+<script id="csdraw" type="text/x-cindyscript">
+  t = seconds()-t0+.001;
+  colorplot(imagergb([0,0], [0,2*pi], image,
+    e = round(A.x)+i*round(A.y);
+    -t
+    
+    +complex(round(A))*log((complex(#)-18-10*i)) //=log(complex(#^e)) (mod 2 pi i)
+    +complex(round(B))*log((complex(#)-18+10*i))
+    +complex(round(C))*log((complex(#)+11+2*i))
+  , repeat->true, mipmap->mipmap, interpolate->interpolate));
+  if (isundefined(dropped), drawtext((-18, 0), "Drag and drop an image into this area"));
+</script>
+
+<script id="csondrop" type="text/x-cindyscript">
+  dropped = dropped();
+  dump(dropped);
+  if (!isundefined(dropped_1_1),
+    image = dropped_1_1;
+    maxpixel = 2048*2048;
+    curpixel = imagesize(image).x*imagesize(image).y;
+    if(curpixel>maxpixel,
+      s = 0;
+      while(curpixel>maxpixel*(2^s), s=s+1);
+      createimage("smallimage", imagesize(image).x/(2^s), imagesize(image).y/(2^s));
+      canvas((0,0),(1,0), "smallimage", drawimage((0,0),(1,0), image));
+      image = "smallimage";
+    );
+  );
+</script>
+<script type="text/javascript">
+
+var cdy = CindyJS({
+  ports: [{id: "CSCanvas", transform: [{visibleRect: [-30, -30, 30, 30]}]}],
+  scripts: "cs*",
+  language: "en",
+  animation: {autoplay: true},
+  images: {image:"tile.jpg"},
+  defaultAppearance: {
+  },
+  geometry: [
+    {name:"A", type:"Free", pos:[-6,-6]},
+    {name:"B", type:"Free", pos:[0,3]},
+    {name:"C", type:"Free", pos:[0,3]}
+  ],
+  use: ["CindyGL"]
+});
+
+
+var check1=function(){
+  if(document.getElementById("ch1").checked){
+    cdy.evokeCS('interpolate=true;');
+  } else {
+    cdy.evokeCS('interpolate=false;');
+  }
+}
+
+var check2=function(){
+  if(document.getElementById("ch2").checked){
+    cdy.evokeCS('mipmap=true;');
+  } else {
+    cdy.evokeCS('mipmap=false;');
+  }
+}
+
+</script>
+</head>
+
+<body style="font-family:Arial;">
+  <div id="CSCanvas" style="width:800px; height:800px; border:2px solid black"></div>
+  <p>
+    <input id="ch1" onclick="check1()" checked type="checkbox" >interpolate linear&nbsp;&nbsp;&nbsp;
+    <input id="ch2" onclick="check2()" checked type="checkbox" >mipmap 
+  </p>
+  
+  <img src="1.jpg"></img>
+  <img src="16.jpg"></img>
+  <img src="28.jpg"></img>
+</body>
+
+
+</html>
