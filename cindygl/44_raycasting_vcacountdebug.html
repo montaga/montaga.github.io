@@ -188,7 +188,7 @@ color = gray(.7);
 
 
     init() := (
-        N = guessdeg() + 1; errc(N); li = apply(1..N, k, cos((2 * k - 1) / (2 * N) * pi)); //Chebyshev nodes for interval (0, oo)
+        N = guessdeg() + 1; errc(N); li = apply(1..N, k, cos((2 * k - 1) / (2 * N) * pi)); //Chebyshev nodes for interval (-1, 1)
         //li = apply(1..N, (#-1)/(N-1)*2-1);
         A = apply(li, c, apply(0.. N-1, i, c ^ i));
         // A sends polynomials [a0, a1, a2...] = a0+a1*X+a2*X*X+... to [p(li_1), p(li_2), ...]

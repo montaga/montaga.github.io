@@ -89,52 +89,6 @@
     draw((.55, .4), (.55, -.4), color -> (0, 0, 0));
     draw((.6, .4), (.6, -.4), color -> (0, 0, 0));
     draw((.65, .4), (.65, -.4), color -> (0, 0, 0));
-    
-    
-    
-    pos = mouse();
-        spolyvalues = apply([-2, 0, 2], S(ray(pos, #))); spoly = B3 * spolyvalues; // interpolate
-
-        D = (spoly_2 * spoly_2) - 4. * spoly_3 * spoly_1; //discriminant of spoly
-      
-color = gray(.7);
-
-        if (D >= 0, //ray intersects ball
-            
-            l = (-spoly_2 - re(sqrt(D))) / (2 * spoly_3); //intersection entering the ball
-            u = (-spoly_2 + re(sqrt(D))) / (2 * spoly_3); //intersection leaving the ball
-          
-            
-            a = l;
-            b = u;
-            
-            id = 1;
-            nit = 1;
-            repeat(30, if(id>0,
-              nit = nit +1;
-              errc(id);
-              s = gets(id);
-              
-              b = u - (u-l)*((id-s+0)/s);
-              a = u - (u-l)*((id-s+1)/s);
-              
-              cnt = nsign(pos, a, b);
-              draw((a/2,nit/100),(b/2,nit/100), color->if(cnt==0, red(1), if(cnt==1, green(1),red(.3))));
-              if(cnt == 1,
-                color = updatecolor(pos, bisectf(pos, a, b, oo), color); //actually bisection
-                draw((a/2,nit/100), color->color);
-                id = next(id);
-              ,
-              if(cnt == 0,
-                id = next(id);
-                ,
-                id = 2*id;
-              )
-            );  
-          ));
-            draw(mouse(), color->color,size->10);
-        );
-        
     </script>
                
     <script id="csinit" type="text/x-cindyscript">
@@ -167,7 +121,7 @@ color = gray(.7);
 
 
     F(p) := (
-        fun(p.x / zoom, p.y / zoom, p.z / zoom);
+        zoom^(N-1)*fun(p.x / zoom, p.y / zoom, p.z / zoom);
     );
 
     helpfun(s, x) := log(|F(s*x)|)/log(s*|x|); //is approx. degree+log(leadingcoeff)/log(s*|x|) for large s
@@ -213,70 +167,13 @@ color = gray(.7);
     //computes derivative of polynomial
     d(poly) := (forall(1 .. N-1, poly_# = # * poly_(#+1)); poly_N = 0; poly);
 
-  
-    updatecolor(pos, dst, color) := (
-  
-            color = (1 - alpha) * color;
-
-            odst = dst;
-            x = ray(pos, dst);
-            normal = dF(x);
-            normal = normal / abs(normal);
-
-
-
-            forall(1..length(lightdirs),
-                illumination = max(0, (lightdirs_# / abs(lightdirs_#)) * normal);
-                color = color + alpha * (illumination ^ gamma_#) * colors_#;
-            );
-
-        color
-    );
-    
-    nsign(pos, a, b) := (
-      //compute poly (1+x)^deg*poly((a+bx/1+x))
-      polyvalues = apply(li, ((1+#))^(N-1)*F(ray(pos, (a+b*#)/(1+#))));
-      poly = B * polyvalues; //interpolate
-      //  (min(poly) < 0 & 0 < max(poly))
-      ans = 0;
-     last = poly_1;
-     forall(2..N, k,
-       if(last == 0, last = poly_k;);
-       if(min(last, poly_k) < 0 & 0 < max(last, poly_k),
-         last = poly_k;
-         ans = ans + 1;
-       );
-     );
-     ans
-     
-    
-    );
-    
-    gets(id) := (
-      s = 1;
-      repeat(15,
-        if(2*s<=id,
-          s = 2*s;
-        )
-      );
-      s
-    );
-    
-    next(id) := (
-      id = id+1;
-      repeat(15,
-        if(mod(id,2)==0,
-          id = floor(id/2);
-        )
-      );
-      if(id==1, 0, id)
-    );
-    
-    bisectf(pos, x0, x1, def) := (
-        regional(v0, v1, m, vm); v0 = F(ray(pos, x0)); v1 = F(ray(pos, x1));
+    //finds root of poly in [x0, x1] using bisection.
+    //returns def if intermediate value theorem cannot be applied
+    bisect(poly, x0, x1, def) := (
+        regional(v0, v1, m, vm); v0 = eval(poly, x0); v1 = eval(poly, x1);
         if (v0 * v1 <= 0,
-            repeat(12,
-                m = (x0 + x1) / 2; vm = F(ray(pos, m));
+            repeat(10,
+                m = (x0 + x1) / 2; vm = eval(poly, m);
                 if (v0 * vm <= 0,
                     (x1 = m; v1 = vm;),
                     (x0 = m; v0 = vm;)
@@ -286,8 +183,23 @@ color = gray(.7);
         )
     );
 
+    updatecolor(pos, dst, color) := (
+        if (dst > l & dst < u & dst < odst,
+            color = (1 - alpha) * color;
+
+            odst = dst; x = ray(pos, dst); normal = dF(x); normal = normal / abs(normal);
+
+
+
+            forall(1..length(lightdirs),
+                illumination = max(0, (lightdirs_# / abs(lightdirs_#)) * normal);
+                color = color + alpha * (illumination ^ gamma_#) * colors_#;
+            );
+        );
+        color
+    );
+
     computeColor(pos) := (
-      regional(D, a, b, l, u);
         spolyvalues = apply([-2, 0, 2], S(ray(pos, #))); spoly = B3 * spolyvalues; // interpolate
 
         D = (spoly_2 * spoly_2) - 4. * spoly_3 * spoly_1; //discriminant of spoly
@@ -295,35 +207,28 @@ color = gray(.7);
 
 
         if (D >= 0, //ray intersects ball
-            
-            l = (-spoly_2 - re(sqrt(D))) / (2 * spoly_3); //intersection entering the ball
-            u = (-spoly_2 + re(sqrt(D))) / (2 * spoly_3); //intersection leaving the ball
-            
-            //method B from "On the Various Bisection Methods Derived from Vincent’s Theorem"
-            a = l;
-            b = u;
-            
-            id = 1;
-            
-            repeat(30, if(id>0,
-              s = gets(id);
-              
-              b = u - (u-l)*((id-s+0)/s);
-              a = u - (u-l)*((id-s+1)/s);
-              
-              cnt = nsign(pos, a, b);
-              if(cnt == 1,
-                color = updatecolor(pos, bisectf(pos, a, b, oo), color); //actually bisection
-                id = next(id);
-              ,
-              if(cnt == 0,
-                id = next(id);
-                ,
-                id = 2*id;
-              )
-            );  
-          ));
-            
+            polyvalues = apply(li, F(ray(pos, #))); poly = B * polyvalues; //interpolate
+            l = (-spoly_2 - re(sqrt(D))) / (2. * spoly_3); //intersection entering the ballu
+            u = (-spoly_2 + re(sqrt(D))) / (2. * spoly_3); //intersection leaving the ball
+
+            p = apply(1..N, poly);
+            forall(reverse(1.. N-1), p_# = d(p_(#+1))); //p_k has degree k
+
+            roots = oroots = apply(1..N, u);
+            forall(1 .. N, i,
+                roots_1 = bisect(p_i, l, oroots_1, l);
+                repeat(i-1, j,
+                  roots_(j+1) = bisect(p_i, oroots_j, oroots_(j + 1), roots_j);
+                );
+                oroots = roots;
+            );
+
+            odst = u + 1;
+
+            forall(reverse(1..N),
+                dst = roots_#;
+                color = updatecolor(pos, dst, color);
+            );
         ); color
     );
     </script>
@@ -365,6 +270,6 @@ color = gray(.7);
   <option value="(x^2+9/4*y^2+z^2-1)^3-x^2*z^3-9/80*y^2*z^3">Sweet</option>
 </select>
 </div>
-    Internally, a bisection methods derived from Vincent's Theorem is used for finding roots.
+    Internally, Rolle's theorem and bisection method is used for finding roots.
   </body>
 </html>

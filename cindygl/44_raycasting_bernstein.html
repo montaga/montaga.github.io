@@ -84,11 +84,11 @@
 
 
     colorplot(computeColor(#));
-    drawtext((-.65, -.45), "degree: " + ( N-1));
+    drawtext((-.65, -.45), "degree: " + N);
 
     draw((.55, .4), (.55, -.4), color -> (0, 0, 0));
     draw((.6, .4), (.6, -.4), color -> (0, 0, 0));
-    draw((.65, .4), (.65, -.4), color -> (0, 0, 0));
+    draw((.65, .4), (.65, -.4), color -> (0, 0, 0));    
     </script>
                
     <script id="csinit" type="text/x-cindyscript">
@@ -106,14 +106,13 @@
     t0 = seconds();
 
 
-    ray(pos, t) := mat * ((t + 2.2) * (pos.x, pos.y, 1) + (0, 0, -2.2));
+    ray(pos, t) := mat * ((2*t + 1) * (pos.x, pos.y, 1) + (0, 0, -2)); //the sphere is intersected for t in [0,1]
 
     fun(x, y, z) := (x ^ 2 + y ^ 2 + z ^ 2 - (0.5 + a) ^ 2) ^ 2 - (3.0 * ((0.5 + a) ^ 2) - 1.0) / (3.0 - ((0.5 + a) ^ 2)) * (1 - z - sqrt(2) * x) * (1 - z + sqrt(2) * x) * (1 + z + sqrt(2) * y) * (1 + z - sqrt(2) * y);
     N = 5;
     zoom = 2.2;
     a = 0.3;
 
-    errc(N);
 
     eps = .04;
 
@@ -121,7 +120,7 @@
 
 
     F(p) := (
-        zoom^(N-1)*fun(p.x / zoom, p.y / zoom, p.z / zoom);
+        (zoom^N)*fun(p.x / zoom, p.y / zoom, p.z / zoom);
     );
 
     helpfun(s, x) := log(|F(s*x)|)/log(s*|x|); //is approx. degree+log(leadingcoeff)/log(s*|x|) for large s
@@ -140,31 +139,34 @@
       best        
     ));
     
-
-    eval(poly, x) := ( //Casteljau
+    casteljau(poly, x) := (
+      regional(alpha, beta);
       alpha = 1-x;
       beta = x;
-      forall(reverse(0..N), k,
-        repeat(k,
-          poly_# = alpha*poly_# + beta*poly_(#+1)
+      forall(0..N, k,
+        repeat(N-k,
+          poly_# = alpha*poly_# + beta*poly_(#+1);
         );
       );
-
-      poly_1
+      poly
     );
 
+    eval(poly, x) := (
+      casteljau(poly, x)_1
+    );
+    
+
     init() := (
-        N = guessdeg();
-        errc(N);
-        li = apply(1..N+1, k, cos((2 * k - 1) / (2 * (N+1)) * pi)); //Chebyshev nodes for interval (-1, 1)
-        //li = apply(1..N, (#-1)/(N-1)*2-1);
-        //A = apply(li, c, apply(0.. N, i, c ^ i));
-        errc(li);
+        N = guessdeg(); errc(N);
+        //li = apply(1..(N+1), k, cos((2 * k - 1) / (2 * (N+1)) * pi)); //Chebyshev nodes for interval (-1, 1)
+        //li = apply(1..(N+1), k, (cos((2 * k - 1) / (2 * (N+1)) * pi)+1)/2); //Chebyshev nodes for interval (0, 1)
+        li = apply(0..N, (#+.5)/(N+1));
         A = apply(li, c, apply(0..N, i, eval(apply(0..N, if(#==i,1,0)), c)));
         errc(A);
-
+        
         // A sends polynomials [a0, a1, a2...] = a0+a1*X+a2*X*X+... to [p(li_1), p(li_2), ...]
         B = (inverse(A)); //B interpolates polynomials, given the values [p(li_1), p(li_2), ...]
+        errc(B);
         B3 = inverse(apply([-2, 0, 2], c, apply(0 .. 2, i, c ^ i))); //B3 interpolates quadratic polynomials, given the values [p(-1), p(0), p(1)]
     );
     init();
@@ -178,109 +180,114 @@
 
     S(r) := (r * r - 1); //sphere with radius 1
 
-    /*eval(poly, t) := ( //evals poly at time t by evaluating horner scheme         
-        ans = poly_N; forall(reverse(1 .. N-1), ans = ans * t + poly_#); ans
-    );*/
-    
   
-
-    //computes derivative of polynomial
-    //d(poly) := (forall(1 .. N-1, poly_# = # * poly_(#+1)); poly_N = 0; poly);
-    d(poly) := (
-      dpoly = apply(1..N, (poly_(#+1)-poly_#)); //in wrong basis N-1 //skiping faktor 1/N
-      forall(1..N+1, k, poly_k=0);
-      forall(0..N-1, k,
-        poly_(k+1) = poly_(k+1) + ((N-k)/N)*dpoly_(k+1);
-        poly_(k+2) = poly_(k+2) + ((k+1)/N)*dpoly_(k+1);
-      );
-
-    poly
-    );
-
-    //finds root of poly in [x0, x1] using bisection.
-    //returns def if intermediate value theorem cannot be applied
-    bisect(poly, x0, x1, def) := (
-        regional(v0, v1, m, vm); v0 = eval(poly, x0); v1 = eval(poly, x1);
-        if (v0 * v1 <= 0,
-            repeat(10,
-                m = (x0 + x1) / 2; vm = eval(poly, m);
-                if (v0 * vm <= 0,
-                    (x1 = m; v1 = vm;),
-                    (x0 = m; v0 = vm;)
-                );
-            ); m,
-            def
-        )
-    );
-
-    bisectf(pos, x0, x1, def) := (
-        regional(v0, v1, m, vm); v0 = F(ray(pos, x0)); v1 = F(ray(pos, x1));
-        if (v0 * v1 <= 0,
-            repeat(12,
-                m = (x0 + x1) / 2; vm = F(ray(pos, m));
-                if (v0 * vm <= 0,
-                    (x1 = m; v1 = vm;),
-                    (x0 = m; v0 = vm;)
-                );
-            ); m,
-            def
-        )
-    );
-
     updatecolor(pos, dst, color) := (
-        if (dst > l & dst < u & dst < odst,
             color = (1 - alpha) * color;
 
-            odst = dst; x = ray(pos, dst); normal = dF(x); normal = normal / abs(normal);
-
-
+            odst = dst;
+            x = ray(pos, dst);
+            normal = dF(x);
+            normal = normal / abs(normal);
 
             forall(1..length(lightdirs),
                 illumination = max(0, (lightdirs_# / abs(lightdirs_#)) * normal);
                 color = color + alpha * (illumination ^ gamma_#) * colors_#;
             );
-        );
         color
+    );
+    
+
+    
+    nsign(poly, x, y) := ( //descartes rule of sign for (x,y)
+      poly = casteljau(reverse(casteljau(poly, x)), (y-1)/(x-1));
+      //count number of sign changes
+      ans = 0;
+      last = poly_1;
+      forall(2..(N+1), k,
+        if(last == 0, last = poly_k;);
+        if(min(last, poly_k) <= 0 & 0 <= max(last, poly_k),
+          last = poly_k;
+          ans = ans + 1;
+        );
+      );
+      ans       
+    );
+    
+    bisectf(pos, x0, x1, def) := (
+        regional(v0, v1, m, vm);
+        v0 = F(ray(pos, x0));
+        v1 = F(ray(pos, x1));
+        if (min(v0, v1) <= 0 & 0 <= max(v0, v1),
+            repeat(12,
+                m = (x0 + x1) / 2; vm = F(ray(pos, m));
+                if (min(v0,vm) <= 0 & 0 <= max(v0, vm),
+                    (x1 = m; v1 = vm;),
+                    (x0 = m; v0 = vm;)
+                );
+            ); m,
+            def
+        )
+    );
+    
+    gets(id) := (
+      s = 1;
+      repeat(15,
+        if(2*s<=id,
+          s = 2*s;
+        )
+      );
+      s
+    );
+    
+    next(id) := (
+      id = id+1;
+      repeat(15,
+        if(mod(id,2)==0,
+          id = floor(id/2);
+        )
+      );
+      if(id==1, 0, id)
     );
 
     computeColor(pos) := (
+      regional(a,b,u,l);
         spolyvalues = apply([-2, 0, 2], S(ray(pos, #))); spoly = B3 * spolyvalues; // interpolate
 
         D = (spoly_2 * spoly_2) - 4. * spoly_3 * spoly_1; //discriminant of spoly
         color = gray(.7);
 
-
         if (D >= 0, //ray intersects ball
-            polyvalues = apply(li, F(ray(pos, #))); poly = B * polyvalues; //interpolate
-            l = (-spoly_2 - re(sqrt(D))) / (2. * spoly_3); //intersection entering the ballu
-            u = (-spoly_2 + re(sqrt(D))) / (2. * spoly_3); //intersection leaving the ball
-
-            p = apply(1..N+1, poly);
-            forall(reverse(1..N), p_# = d(p_(#+1))); //p_k has degree k
-
-            roots = oroots = apply(1..(N+1), u);
-            forall(1 .. N, i,
-                roots_1 = bisect(p_i, l, oroots_1, l);
-                repeat(i, j,
-                  roots_(j+1) = bisect(p_i, oroots_j, oroots_(j + 1), roots_j);
-                );
-                oroots = roots;
-            );
-
-
-            roots_1 = bisectf(pos, l, oroots_1, l);
-            forall(2.. N+1, j,
-                roots_j = bisectf(pos, oroots_(j-1), oroots_(j), roots_(j - 1));
-            );
-            //roots_(N+1) = bisectf(pos, oroots_(N+1), u, u);
             
-
-            odst = u + 1;
-
-            forall(reverse(1..(N+1)),
-                dst = roots_#;
-                color = updatecolor(pos, dst, color);
-            );
+            l = (-spoly_2 - re(sqrt(D))) / (2 * spoly_3); //intersection entering the ball
+            u = (-spoly_2 + re(sqrt(D))) / (2 * spoly_3); //intersection leaving the ball
+            
+            polyvalues = apply(li, F(ray(pos, #)));
+            poly = B * polyvalues; //interpolate
+            
+            a = l;
+            b = u;
+            
+            //traverse binary tree using heap-indices
+            //1 it root node and node v has children 2*v and 2*v+1
+            id = 1; 
+            repeat(30, if(id>0,
+              s = gets(id);
+              
+              b = u - (u-l)*((id-s+0)/s);
+              a = u - (u-l)*((id-s+1)/s);
+              
+              cnt = nsign(poly, a, b);
+              if(cnt == 1,
+                color = updatecolor(pos, bisectf(pos, a, b, (a+b)/2), color); //actually bisection
+                id = next(id);
+              ,
+              if(cnt == 0,
+                id = next(id),
+                id = 2*id;
+              )
+            );  
+          ));
+            
         ); color
     );
     </script>
@@ -322,6 +329,7 @@
   <option value="(x^2+9/4*y^2+z^2-1)^3-x^2*z^3-9/80*y^2*z^3">Sweet</option>
 </select>
 </div>
-    Internally, Rolle's theorem and bisection method is used for finding roots.
+    Polynomials are represented in the Bernstein form.
+    Use Descartes Method in Bernstein basis.
   </body>
 </html>
