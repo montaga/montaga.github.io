@@ -89,6 +89,52 @@
     draw((.55, .4), (.55, -.4), color -> (0, 0, 0));
     draw((.6, .4), (.6, -.4), color -> (0, 0, 0));
     draw((.65, .4), (.65, -.4), color -> (0, 0, 0));
+    
+    
+    
+    pos = mouse();
+        spolyvalues = apply([-2, 0, 2], S(ray(pos, #))); spoly = B3 * spolyvalues; // interpolate
+
+        D = (spoly_2 * spoly_2) - 4. * spoly_3 * spoly_1; //discriminant of spoly
+      
+color = gray(.7);
+
+        if (D >= 0, //ray intersects ball
+            
+            l = (-spoly_2 - re(sqrt(D))) / (2 * spoly_3); //intersection entering the ball
+            u = (-spoly_2 + re(sqrt(D))) / (2 * spoly_3); //intersection leaving the ball
+          
+            
+            a = l;
+            b = u;
+            
+            id = 1;
+            nit = 1;
+            repeat(30, if(id>0,
+              nit = nit +1;
+              errc(id);
+              s = gets(id);
+              
+              b = u - (u-l)*((id-s+0)/s);
+              a = u - (u-l)*((id-s+1)/s);
+              
+              cnt = nsign(pos, a, b);
+              draw((a/2,nit/100),(b/2,nit/100), color->if(cnt==0, red(1), if(cnt==1, green(1),red(.3))));
+              if(cnt == 1,
+                color = updatecolor(pos, bisectf(pos, a, b, oo), color); //actually bisection
+                draw((a/2,nit/100), color->color);
+                id = next(id);
+              ,
+              if(cnt == 0,
+                id = next(id);
+                ,
+                id = 2*id;
+              )
+            );  
+          ));
+            draw(mouse(), color->color,size->10);
+        );
+        
     </script>
                
     <script id="csinit" type="text/x-cindyscript">
@@ -142,7 +188,7 @@
 
 
     init() := (
-        N = guessdeg() + 1; errc(N); li = apply(1..N, k, cos((2 * k - 1) / (2 * N) * pi)); //Chebyshev nodes for interval (-1, 1)
+        N = guessdeg() + 1; errc(N); li = apply(1..N, k, cos((2 * k - 1) / (2 * N) * pi)); //Chebyshev nodes for interval (0, oo)
         //li = apply(1..N, (#-1)/(N-1)*2-1);
         A = apply(li, c, apply(0.. N-1, i, c ^ i));
         // A sends polynomials [a0, a1, a2...] = a0+a1*X+a2*X*X+... to [p(li_1), p(li_2), ...]
@@ -169,7 +215,7 @@
 
   
     updatecolor(pos, dst, color) := (
-        if (dst > l & dst < u & dst < odst,
+  
             color = (1 - alpha) * color;
 
             odst = dst;
@@ -183,16 +229,27 @@
                 illumination = max(0, (lightdirs_# / abs(lightdirs_#)) * normal);
                 color = color + alpha * (illumination ^ gamma_#) * colors_#;
             );
-        );
+
         color
     );
     
-    haspotentialroot(pos, a, b) := (
+    nsign(pos, a, b) := (
       //compute poly (1+x)^deg*poly((a+bx/1+x))
-      polyvalues = apply(li, (1+#)^(N-1)*F(ray(pos, (a+b*#)/(1+#))));
+      polyvalues = apply(li, ((1+#))^(N-1)*F(ray(pos, (a+b*#)/(1+#))));
       poly = B * polyvalues; //interpolate
-      
-      (min(poly) < 0 & 0 < max(poly))
+      //  (min(poly) < 0 & 0 < max(poly))
+      ans = 0;
+     last = poly_1;
+     forall(2..N, k,
+       if(last == 0, last = poly_k;);
+       if(min(last, poly_k) < 0 & 0 < max(last, poly_k),
+         last = poly_k;
+         ans = ans + 1;
+       );
+     );
+     ans
+     
+    
     );
     
     gets(id) := (
@@ -206,15 +263,31 @@
     );
     
     next(id) := (
+      id = id+1;
       repeat(15,
-        if(mod(id,2)==1,
+        if(mod(id,2)==0,
           id = floor(id/2);
         )
       );
-      id + 1
+      if(id==1, 0, id)
+    );
+    
+    bisectf(pos, x0, x1, def) := (
+        regional(v0, v1, m, vm); v0 = F(ray(pos, x0)); v1 = F(ray(pos, x1));
+        if (v0 * v1 <= 0,
+            repeat(12,
+                m = (x0 + x1) / 2; vm = F(ray(pos, m));
+                if (v0 * vm <= 0,
+                    (x1 = m; v1 = vm;),
+                    (x0 = m; v0 = vm;)
+                );
+            ); m,
+            def
+        )
     );
 
     computeColor(pos) := (
+      regional(D, a, b, l, u);
         spolyvalues = apply([-2, 0, 2], S(ray(pos, #))); spoly = B3 * spolyvalues; // interpolate
 
         D = (spoly_2 * spoly_2) - 4. * spoly_3 * spoly_1; //discriminant of spoly
@@ -232,24 +305,24 @@
             
             id = 1;
             
-            repeat(30, 
+            repeat(30, if(id>0,
               s = gets(id);
               
-              a = l + (u-l)*((id/s)-1);
-              b = l + (u-l)*((id+1)/s-1);
-              hasroot = haspotentialroot(pos, a, b);
-              if(hasroot,
-                if(id>2^10,
-                  color = updatecolor(pos, (a+b)/2, color);
-                  id = next(id);
+              b = u - (u-l)*((id-s+0)/s);
+              a = u - (u-l)*((id-s+1)/s);
+              
+              cnt = nsign(pos, a, b);
+              if(cnt == 1,
+                color = updatecolor(pos, bisectf(pos, a, b, oo), color); //actually bisection
+                id = next(id);
+              ,
+              if(cnt == 0,
+                id = next(id);
                 ,
-                  id = 2*id; //go to child
-                ),
-                id = next(id); //transverse tree to the left
-              );
-            );
-            //color = [mod(id,2)/2, id/8, id/64];
-            //if(hasroot, color = updatecolor(pos, (a+b)/2, color) );
+                id = 2*id;
+              )
+            );  
+          ));
             
         ); color
     );

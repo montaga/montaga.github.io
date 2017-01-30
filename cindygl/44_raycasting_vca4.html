@@ -232,6 +232,7 @@
             
             id = 1;
             
+            res = oo;
             repeat(30, 
               s = gets(id);
               
@@ -239,8 +240,9 @@
               b = l + (u-l)*((id+1)/s-1);
               hasroot = haspotentialroot(pos, a, b);
               if(hasroot,
-                if(id>2^10,
-                  color = updatecolor(pos, (a+b)/2, color);
+                if(id>2^12,
+                //  color = updatecolor(pos, (a+b)/2, color);
+                  res = (a+b)/2;
                   id = next(id);
                 ,
                   id = 2*id; //go to child
@@ -249,7 +251,7 @@
               );
             );
             //color = [mod(id,2)/2, id/8, id/64];
-            //if(hasroot, color = updatecolor(pos, (a+b)/2, color) );
+            if(hasroot, color = updatecolor(pos, res, color) );
             
         ); color
     );

@@ -2136,7 +2136,7 @@ function cs_onDrop(lst, pos) {
 function cindy_cancelmove() {
     move = undefined;
 }
-var version = [0,8,3,18,"g4989821!"];
+var version = [0,8,3,26,"gabe543b!"];
 //==========================================
 //      Complex Numbers
 //==========================================
@@ -12235,7 +12235,7 @@ evaluator.fillpolygon$1 = function(args, modifs) {
 eval_helper.drawpolygon = function(args, modifs, df, cycle) {
     Render2D.handleModifs(modifs, Render2D.conicModifs);
     Render2D.preDrawCurve();
-    csctx.mozFillRule = 'evenodd';
+
 
     var m = csport.drawingstate.matrix;
 
@@ -12288,13 +12288,13 @@ eval_helper.drawpolygon = function(args, modifs, df, cycle) {
     if (df === "D") {
         if (Render2D.fillColor) {
             csctx.fillStyle = Render2D.fillColor;
-            csctx.fill();
+            csctx.fill(Render2D.fillrule);
         }
         csctx.stroke();
     }
     if (df === "F") {
         csctx.fillStyle = Render2D.lineColor;
-        csctx.fill();
+        csctx.fill(Render2D.fillrule);
     }
     if (df === "C") {
         csctx.clip();
@@ -15157,6 +15157,7 @@ Render2D.handleModifs = function(modifs, handlers) {
         Render2D.unSetDash();
     Render2D.colorraw = null;
     Render2D.fillcolorraw = null;
+    Render2D.fillrule = "nonzero";
     Render2D.size = null;
     if (Render2D.psize <= 0) Render2D.psize = 0;
     if (Render2D.lsize <= 0) Render2D.lsize = 0;
@@ -15437,6 +15438,10 @@ Render2D.modifHandlers = {
         if (v.ctype === "string" && (v.value === "round" || v.value === "bevel" || v.value === "miter"))
             Render2D.lineJoin = v.value;
     },
+    "fillrule": function(v) {
+        if (v.ctype === "string" && (v.value === "nonzero" || v.value === "evenodd"))
+            Render2D.fillrule = v.value;
+    },
 
     "miterLimit": function(v) {
         if (v.ctype === "number" && v.value.real > 0) {
@@ -15476,6 +15481,7 @@ Render2D.conicModifs = {
     "color": true,
     "alpha": true,
     "fillcolor": true,
+    "fillrule": true,
     "fillalpha": true,
     "lineCap": true,
     "lineJoin": true,
@@ -15508,6 +15514,8 @@ Render2D.preDrawCurve = function() {
     csctx.lineWidth = Render2D.lsize;
     csctx.lineCap = Render2D.lineCap;
     csctx.lineJoin = Render2D.lineJoin;
+    csctx.mozFillRule = Render2D.fillrule;
+    csctx.fillrule = Render2D.fillrule;
     csctx.miterLimit = Render2D.miterLimit;
     csctx.strokeStyle = Render2D.lineColor;
 };
@@ -18418,6 +18426,7 @@ function drawgeopolygon(el) {
         fillalpha: el.fillalpha,
         size: el.size,
         lineJoin: General.string("miter"),
+        fillrule: General.string(el.fillrule),
     };
     eval_helper.drawpolygon([el.vertices], modifs, "D", true);
 }

@@ -121,7 +121,7 @@
 
 
     F(p) := (
-        fun(p.x / zoom, p.y / zoom, p.z / zoom);
+        zoom^(N-1)*fun(p.x / zoom, p.y / zoom, p.z / zoom);
     );
 
     helpfun(s, x) := log(|F(s*x)|)/log(s*|x|); //is approx. degree+log(leadingcoeff)/log(s*|x|) for large s
@@ -142,7 +142,7 @@
 
 
     init() := (
-        N = guessdeg() + 1; errc(N); li = apply(1..N, k, cos((2 * k - 1) / (2 * N) * pi)); //Chebyshev nodes for interval (-1, 1)
+        N = guessdeg() + 1; errc(N); li = .5*apply(1..N, k, cos((2 * k - 1) / (2 * N) * pi)); //Chebyshev nodes for interval (-1, 1)
         //li = apply(1..N, (#-1)/(N-1)*2-1);
         A = apply(li, c, apply(0.. N-1, i, c ^ i));
         // A sends polynomials [a0, a1, a2...] = a0+a1*X+a2*X*X+... to [p(li_1), p(li_2), ...]
@@ -167,15 +167,41 @@
     //computes derivative of polynomial
     d(poly) := (forall(1 .. N-1, poly_# = # * poly_(#+1)); poly_N = 0; poly);
 
-  
+    //finds root of poly in [x0, x1] using bisection.
+    //returns def if intermediate value theorem cannot be applied
+    bisect(poly, x0, x1, def) := (
+        regional(v0, v1, m, vm); v0 = eval(poly, x0); v1 = eval(poly, x1);
+        if (v0 * v1 <= 0,
+            repeat(15,
+                m = (x0 + x1) / 2; vm = eval(poly, m);
+                if (v0 * vm <= 0,
+                    (x1 = m; v1 = vm;),
+                    (x0 = m; v0 = vm;)
+                );
+            ); m,
+            def
+        )
+    );
+
+    bisectf(pos, x0, x1, def) := (
+        regional(v0, v1, m, vm); v0 = F(ray(pos, x0)); v1 = F(ray(pos, x1));
+        if (v0 * v1 <= 0,
+            repeat(15,
+                m = (x0 + x1) / 2; vm = F(ray(pos, m));
+                if (v0 * vm <= 0,
+                    (x1 = m; v1 = vm;),
+                    (x0 = m; v0 = vm;)
+                );
+            ); m,
+            def
+        )
+    );
+
     updatecolor(pos, dst, color) := (
         if (dst > l & dst < u & dst < odst,
             color = (1 - alpha) * color;
 
-            odst = dst;
-            x = ray(pos, dst);
-            normal = dF(x);
-            normal = normal / abs(normal);
+            odst = dst; x = ray(pos, dst); normal = dF(x); normal = normal / abs(normal);
 
 
 
@@ -186,33 +212,6 @@
         );
         color
     );
-    
-    haspotentialroot(pos, a, b) := (
-      //compute poly (1+x)^deg*poly((a+bx/1+x))
-      polyvalues = apply(li, (1+#)^(N-1)*F(ray(pos, (a+b*#)/(1+#))));
-      poly = B * polyvalues; //interpolate
-      
-      (min(poly) < 0 & 0 < max(poly))
-    );
-    
-    gets(id) := (
-      s = 1;
-      repeat(15,
-        if(2*s<=id,
-          s = 2*s;
-        )
-      );
-      s
-    );
-    
-    next(id) := (
-      repeat(15,
-        if(mod(id,2)==1,
-          id = floor(id/2);
-        )
-      );
-      id + 1
-    );
 
     computeColor(pos) := (
         spolyvalues = apply([-2, 0, 2], S(ray(pos, #))); spoly = B3 * spolyvalues; // interpolate
@@ -222,44 +221,37 @@
 
 
         if (D >= 0, //ray intersects ball
-            
-            l = (-spoly_2 - re(sqrt(D))) / (2 * spoly_3); //intersection entering the ball
-            u = (-spoly_2 + re(sqrt(D))) / (2 * spoly_3); //intersection leaving the ball
-            
-            //method B from "On the Various Bisection Methods Derived from Vincent’s Theorem"
-            a = l;
-            b = u;
-            
-            id = 1;
-            
-            repeat(30, 
-              s = gets(id);
-              
-              a = l + (u-l)*((id/s)-1);
-              b = l + (u-l)*((id+1)/s-1);
-              hasroot = haspotentialroot(pos, a, b);
-              if(hasroot,
-                if(id>2^10,
-                  color = updatecolor(pos, (a+b)/2, color);
-                  id = next(id);
-                ,
-                  id = 2*id; //go to child
-                ),
-                id = next(id); //transverse tree to the left
-              );
+            polyvalues = apply(li, F(ray(pos, #))); poly = B * polyvalues; //interpolate
+            l = (-spoly_2 - re(sqrt(D))) / (2. * spoly_3); //intersection entering the ballu
+            u = (-spoly_2 + re(sqrt(D))) / (2. * spoly_3); //intersection leaving the ball
+
+            p = apply(1..N, poly);
+            forall(reverse(1.. N-1), p_# = d(p_(#+1))); //p_k has degree k
+
+            roots = oroots = apply(1..N, u);
+            forall(1 .. N-1, i,
+                roots_1 = bisect(p_i, l, oroots_1, l);
+                repeat(i, j,
+                  roots_(j+1) = bisect(p_i, oroots_j, oroots_(j + 1), roots_j);
+                );
+                oroots = roots;
             );
-            //color = [mod(id,2)/2, id/8, id/64];
-            //if(hasroot, color = updatecolor(pos, (a+b)/2, color) );
-            
+
+
+            roots_1 = bisectf(pos, l, oroots_1, l);
+            forall(2.. N-1, j,
+                roots_j = bisectf(pos, oroots_j, oroots_(j + 1), roots_(j - 1));
+            );
+            roots_N = bisectf(pos, oroots_N, u, roots_(N-1));
+
+            odst = u + 1;
+
+            forall(reverse(1..N),
+                dst = roots_#;
+                color = updatecolor(pos, dst, color);
+            );
         ); color
     );
-    
-    dstbound(a) := ( //a lower bound for the abs. value of the smallest root of p(X)=a_1 + a_2*X + ... a_N*X^(X-1)
-      ma = 0;
-      forall(2..N , ma = max(ma, |a_#|));
-      |a_1|/(|a_1|+ma) //in CindyJS: last line is return statement
-    );
-    
     </script>
     
 

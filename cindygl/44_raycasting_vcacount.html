@@ -187,12 +187,23 @@
         color
     );
     
-    haspotentialroot(pos, a, b) := (
+    nsign(pos, a, b) := (
       //compute poly (1+x)^deg*poly((a+bx/1+x))
-      polyvalues = apply(li, (1+#)^(N-1)*F(ray(pos, (a+b*#)/(1+#))));
+      polyvalues = apply(li, ((1+#)/(b-a))^(N-1)*F(ray(pos, (a+b*#)/(1+#))));
       poly = B * polyvalues; //interpolate
-      
-      (min(poly) < 0 & 0 < max(poly))
+      //  (min(poly) < 0 & 0 < max(poly))
+      ans = 0;
+     last = poly_1;
+     forall(2..N, k,
+       if(last == 0, last = poly_k;);
+       if(last * poly_k < 0,
+         last = poly_k;
+         ans = ans + 1;
+       );
+     );
+     ans
+     
+    
     );
     
     gets(id) := (
@@ -213,6 +224,20 @@
       );
       id + 1
     );
+    
+    bisectf(pos, x0, x1, def) := (
+        regional(v0, v1, m, vm); v0 = F(ray(pos, x0)); v1 = F(ray(pos, x1));
+        if (v0 * v1 <= 0,
+            repeat(12,
+                m = (x0 + x1) / 2; vm = F(ray(pos, m));
+                if (v0 * vm <= 0,
+                    (x1 = m; v1 = vm;),
+                    (x0 = m; v0 = vm;)
+                );
+            ); m,
+            def
+        )
+    );
 
     computeColor(pos) := (
         spolyvalues = apply([-2, 0, 2], S(ray(pos, #))); spoly = B3 * spolyvalues; // interpolate
@@ -232,21 +257,23 @@
             
             id = 1;
             
-            repeat(30, 
+            repeat(10, 
               s = gets(id);
               
-              a = l + (u-l)*((id/s)-1);
-              b = l + (u-l)*((id+1)/s-1);
-              hasroot = haspotentialroot(pos, a, b);
-              if(hasroot,
-                if(id>2^10,
-                  color = updatecolor(pos, (a+b)/2, color);
-                  id = next(id);
+              a = l + (u-l)*((id-s+0)/s);
+              b = l + (u-l)*((id-s+1)/s);
+              cnt = nsign(pos, a, b);
+              if(cnt == 1,
+                color = updatecolor(pos, bisectf(pos, a, b, oo), color); //actually bisection
+                id = next(id);
+              ,
+              if(cnt == 0,
+                id = next(id);
                 ,
-                  id = 2*id; //go to child
-                ),
-                id = next(id); //transverse tree to the left
-              );
+                id = 2*id;
+              )
+            );
+              
             );
             //color = [mod(id,2)/2, id/8, id/64];
             //if(hasroot, color = updatecolor(pos, (a+b)/2, color) );

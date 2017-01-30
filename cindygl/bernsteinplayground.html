@@ -1,0 +1,148 @@
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+            <title>Cindy JS</title>
+            <script type="text/javascript" src="Cindy.js"></script>
+
+            
+
+
+            </head>
+
+	<body style="font-family:Arial;">
+
+        <h1>CindyJS: Function Plotting</h1>
+
+
+        <script id='csdraw' type='text/x-cindyscript'>
+        poly = [A.y, B.y, C.y, D.y];
+        A.x = 0;
+        B.x = 1/3;
+        C.x = 2/3;
+        D.x = 1;
+        N = length(poly)-1;
+        
+        eval(poly, x) := ( //Casteljau
+          alpha = 1-x;
+          beta = x;
+          N = length(poly)-1;
+          forall(0..N, k,
+            repeat(N-k,
+              poly_# = alpha*poly_# + beta*poly_(#+1);
+            );
+          );
+
+          poly_1
+        );
+        
+        
+        dclas(poly) := (
+          N = length(poly)-1;
+          dpoly = apply(1..N, 1/N*(poly_(#+1)-poly_#)); //in wrong basis N-1
+          dpoly
+        );
+        
+        d(poly) := (
+          N = length(poly)-1;
+          dpoly = apply(1..N, 1/N*(poly_(#+1)-poly_#)); //in wrong basis N-1
+          res = apply(0..N, 0);
+          forall(0..N-1, k,
+            res_(k+1) = res_(k+1) + (N-k)/N*dpoly_(k+1);
+            res_(k+2) = res_(k+2) + (k+1)/N*dpoly_(k+1);
+          );
+          res
+        );
+        
+        subdivide(poly, x, y) := ( //modified Casteljau
+          N = length(poly)-1;
+          
+          
+          alpha = 1-x;
+          beta = x;
+          
+          gamma = (y-x)/alpha;
+           delta = 1-gamma;
+          
+          
+          forall(0..N, k,
+            repeat(N-k,
+              poly_# = alpha*poly_# + beta*poly_(#+1);
+            );
+          );
+          poly = reverse(poly);
+          forall(0..N, k,
+            repeat(N-k,
+              poly_# = gamma*poly_# + delta*poly_(#+1);
+            );
+          );
+          reverse(poly)
+        );
+        
+        
+        forall(1..length(poly),
+          (
+            x = (#-1)/(length(poly)-1);
+            draw((x, poly_#));
+          )
+        );
+        
+        
+        
+        spoly = subdivide(poly, E.x, F.x);
+        forall(1..length(spoly),
+          (
+            x = E.x+(F.x-E.x)*(#-1)/(length(spoly)-1);
+            draw((x, spoly_#));
+          )
+        );
+
+
+            plot(eval(poly, x));
+            
+            plot(eval(dclas(poly), x), color->green(1), size->5);
+            plot(eval(d(poly), x), color->red(1));
+
+
+
+        </script>
+
+
+        <div  id="CSCanvas" style="border:2px solid #000000"></div>
+
+        <script type="text/javascript">
+
+            var gslp=[
+                      {name:"A", kind:"P", type:"Free", pos:[.2,.3,1]},
+                      {name:"B", kind:"P", type:"Free", pos:[.2,.6,1]},
+                      {name:"C", kind:"P", type:"Free", pos:[.2,.2,1]},
+                      {name:"D", kind:"P", type:"Free", pos:[.2,.4,1]},
+                      
+                      {name:"E", kind:"P", type:"Free", pos:[.2,.1,1]},
+                      {name:"F", kind:"P", type:"Free", pos:[.8,.1,1]}
+                      
+
+                      ];
+            CindyJS({canvasname:"CSCanvas",
+                        scripts: "cs*",
+                        geometry:gslp,
+                        ports: [{
+                          id: "CSCanvas",
+                          width: 500,
+                          height: 500,
+                          transform: [ { visibleRect: [ 0, 0, 1, 1] } ]
+                        }]
+                      });
+
+
+
+
+
+            </script>
+
+
+
+
+	</body>
+</html>
