@@ -106,7 +106,7 @@
     t0 = seconds();
 
 
-    ray(pos, t) := mat * ((t + 2.2) * (pos.x, pos.y, 1) + (0, 0, -2)); //the sphere is intersected for t in [0,1]
+    ray(pos, t) := mat * (t * (pos.x, pos.y, 1) + (0, 0, -2)); //the sphere is intersected for t in [0,1]
 
     fun(x, y, z) := (x ^ 2 + y ^ 2 + z ^ 2 - (0.5 + a) ^ 2) ^ 2 - (3.0 * ((0.5 + a) ^ 2) - 1.0) / (3.0 - ((0.5 + a) ^ 2)) * (1 - z - sqrt(2) * x) * (1 - z + sqrt(2) * x) * (1 + z + sqrt(2) * y) * (1 + z - sqrt(2) * y);
     N = 5;
@@ -197,13 +197,12 @@
     
     nsign(pos, a, b) := ( //descartes rule of sign for (x,y)
       //poly = casteljau(reverse(casteljau(poly, x)), (y-1)/(x-1));
-      polyvalues = apply(li, F(ray(pos, a+#*(b-a))));
-      poly = B * polyvalues; //interpolate
-      //count number of sign changes
+      poly = B * apply(li, F(ray(pos, a+#*(b-a)))); //interpolate
+      //count the number of sign changes
       ans = 0;
       last = poly_1;
       forall(2..(N+1), k,
-        if(last == 0, last = poly_k;);
+        //if(last == 0, last = poly_k;);
         if(min(last, poly_k) <= 0 & 0 <= max(last, poly_k),
           last = poly_k;
           ans = ans + 1;
@@ -254,18 +253,16 @@
         color = gray(.7);
 
         if (D >= 0, //ray intersects ball
-            
             l = (-spoly_2 - re(sqrt(D))) / (2 * spoly_3); //intersection entering the ball
             u = (-spoly_2 + re(sqrt(D))) / (2 * spoly_3); //intersection leaving the ball
-            
-            
+
             a = l;
             b = u;
             
             //traverse binary tree using heap-indices
-            //1 it root node and node v has children 2*v and 2*v+1
+            //1 is root node and node v has children 2*v and 2*v+1
             id = 1; 
-            repeat(30, if(id>0,
+            repeat(N*6, if(id>0,
               s = gets(id);
               
               a = u - (u-l)*((id+1)/s-1);
@@ -273,9 +270,8 @@
               
               cnt = nsign(pos, a, b);
               if(cnt == 1 % b-a<.001,
-                color = updatecolor(pos, bisectf(pos, a, b), color); //actually bisection
-                id = next(id);
-              ,
+                color = updatecolor(pos, bisectf(pos, a, b), color);
+                id = next(id),
               if(cnt == 0,
                 id = next(id),
                 id = 2*id;

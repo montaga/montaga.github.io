@@ -210,20 +210,18 @@
       ans       
     );
     
-    bisectf(pos, x0, x1, def) := (
+    bisectf(pos, x0, x1) := (
         regional(v0, v1, m, vm);
         v0 = F(ray(pos, x0));
         v1 = F(ray(pos, x1));
-        if (min(v0, v1) <= 0 & 0 <= max(v0, v1),
             repeat(12,
                 m = (x0 + x1) / 2; vm = F(ray(pos, m));
                 if (min(v0,vm) <= 0 & 0 <= max(v0, vm),
                     (x1 = m; v1 = vm;),
                     (x0 = m; v0 = vm;)
                 );
-            ); m,
-            def
-        )
+            );
+            m
     );
     
     gets(id) := (
@@ -267,15 +265,15 @@
             //traverse binary tree using heap-indices
             //1 it root node and node v has children 2*v and 2*v+1
             id = 1; 
-            repeat(30, if(id>0,
+            repeat(N*8, if(id>0,
               s = gets(id);
               
               a = u - (u-l)*((id+1)/s-1);
               b = u - (u-l)*((id+0)/s-1);
               
               cnt = nsign(poly, a, b);
-              if(cnt == 1 % id>=2^12,
-                color = updatecolor(pos, bisectf(pos, a, b, (a+b)/2), color); //actually bisection
+              if(cnt == 1 % b-a<.001,
+                color = updatecolor(pos, bisectf(pos, a, b), color); //actually bisection
                 id = next(id);
               ,
               if(cnt == 0,
