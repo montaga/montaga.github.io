@@ -308,11 +308,12 @@
             //traverse binary tree (DFS) using heap-indices
             //1 is root node and node v has children 2*v and 2*v+1
             id = 1; 
-            
-            //single step of DFS:
+            //maximum number of steps
             repeat(N*6,
+              //id=0 means we are done; do only a DFS-step if we are not finished yet
               if(id>0,
-                s = gets(id);
+                s = gets(id); //s = floor(log_2(id))
+                
                 //the intervals [a,b] are chossen such that (id in binary notation)
                 //id = 1   => [a,b]=[l,u]
                 //id = 10  => [a,b]=[l,(u+l)/2]
@@ -322,6 +323,7 @@
                 a = u - (u-l)*((id+1)/s-1);
                 b = u - (u-l)*((id+0)/s-1);
                 
+                //how many sign changes has F(ray(pixel, ·)) in (a,b)?
                 cnt = nsign(pixel, a, b);
                 if(cnt == 1 % (b-a)<.01*zoom, //in this case we found a root (or it is likely to have a multiple root)
                   //=>colorize and break DFS
@@ -329,7 +331,9 @@
                   id = next(id),
                 if(cnt == 0, //there is no root
                   id = next(id), //break DFS
-                  id = 2*id; //otherwise: there are cnt - 2*k roots. visit children in DFS
+                  
+                  //otherwise cnt>=2: there are cnt - 2*k roots.
+                  id = 2*id;  //visit first child within DFS
                 )
             );  
           ));
