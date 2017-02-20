@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>CindyScript command line</title>
+    <meta charset="utf-8"/>
+    <script src="Cindy.plain.js"></script>
+    <script src="monombasis.js"></script>
+    <script src="symdiff.js"></script>
+    <script id='csinit' type='text/x-cindyscript'>
+          f(x):=x*x;
+          
+          symdiff(f(x), x, df(x):=#);
+          
+          errc(f(5));
+          errc(df(5));
+    </script>
+    <script>
+      var cindy = CindyJS({
+        canvasname:"Cindy",
+        scripts: "cs*",
+        csconsole: true,
+        use: ["monombasis", "symdiff"]
+      });
+    </script>
+  </head>
+  <body>
+    <div id="Cindy" style="display:none; width:1px; height:1px;"></div>
+  </body>
+</html>
