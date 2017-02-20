@@ -25,9 +25,7 @@
     [coeff, exponent] = parse("monombasis(" + Fstr + ")");
     //Fvec = monombasis(x^2+y^2+z^2-1);
     while(length(coeff)<12, coeff = coeff ++ [0]; exponent = exponent ++ [[0,0,0]]);
-    errc(coeff);
-    errc(exponent);
-    errc(length(coeff));
+    init();
     
     time = seconds() - t0;
 
@@ -92,7 +90,7 @@
 
 
     colorplot(computeColor(#));
-    drawtext((-.65, -.45), "degree: " + ( deg));
+    drawtext((-.65, -.45), "degree: " + max(exponent, max(#)));
 
     draw((.55, .4), (.55, -.4), color -> (0, 0, 0));
     draw((.6, .4), (.6, -.4), color -> (0, 0, 0));
@@ -123,8 +121,7 @@
     //F takes vec3 instead of 3 variables
     F(p) := fun(p.x/zoom, p.y/zoom, p.z/zoom);
   
-    N = 5;
-    deg = 5;
+    N = 6;
     zoom = 2.2;
     a = 0.3;
 
@@ -135,14 +132,17 @@
     
 
     init() := (
-        //deg = 3;
         //N = max(3, deg+1);
-        errc(N); li = apply(1..N, k, cos((2 * k - 1) / (2 * N) * pi)); //Chebyshev nodes for interval (-1, 1)
-        //li = apply(1..N, (#-1)/(N-1)*2-1);
-        A = apply(li, c, apply(0.. N-1, i, c ^ i));
-        // A sends polynomials [a0, a1, a2...] = a0+a1*X+a2*X*X+... to [p(li_1), p(li_2), ...]
-        B = (inverse(A)); //B interpolates polynomials, given the values [p(li_1), p(li_2), ...]
-        B3 = inverse(apply([-2, 0, 2], c, apply(0 .. 2, i, c ^ i))); //B3 interpolates quadratic polynomials, given the values [p(-1), p(0), p(1)]
+        newN = max(6, 1+max(exponent, max(#)));
+        if(N != newN,
+          N = newN;
+          errc(N); li = apply(1..N, k, cos((2 * k - 1) / (2 * N) * pi)); //Chebyshev nodes for interval (-1, 1)
+          //li = apply(1..N, (#-1)/(N-1)*2-1);
+          A = apply(li, c, apply(0.. N-1, i, c ^ i));
+          // A sends polynomials [a0, a1, a2...] = a0+a1*X+a2*X*X+... to [p(li_1), p(li_2), ...]
+          B = (inverse(A)); //B interpolates polynomials, given the values [p(li_1), p(li_2), ...]
+          B3 = inverse(apply([-2, 0, 2], c, apply(0 .. 2, i, c ^ i))); //B3 interpolates quadratic polynomials, given the values [p(-1), p(0), p(1)]
+        );
     );
     init();
 

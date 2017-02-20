@@ -5,15 +5,15 @@
     <title>Cindy JS</title>
     <script type="text/javascript" src="Cindy.js"></script>
     <script type="text/javascript" src="CindyGL.js"></script>
-    <script type="text/javascript" src="symdiff.js"></script>
+    <script type="text/javascript" src="monombasis.js"></script>
     <link rel="stylesheet" href="cindy.css">
   </head>
     
   <body style="font-family:Arial;">
     
-    <h1>Raycasting Implicit Surfaces</h1>
+    <h1>CindyJS: Raycasting arbitrary algebraic surfaces</h1>
     <div style="float: left; padding:20px">
-    
+      
     <script id="csmousedown" type="text/x-cindyscript">
     sx = mouse().x;
     sy = mouse().y;
@@ -23,6 +23,10 @@
     dragging = false;
     </script>
     <script id="csdraw" type="text/x-cindyscript">
+    [coeff, exponent] = parse("monombasis(" + Fstr + ")");
+    //Fvec = monombasis(x^2+y^2+z^2-1);
+    while(length(coeff)<12, coeff = coeff ++ [0]; exponent = exponent ++ [[0,0,0]]);
+    init();
     //the following is executed for every rendered frame
     if (dragging,
         dx = 3 * (sx - mouse().x); dy = 3 * (sy - mouse().y);,
@@ -44,13 +48,11 @@
     );
 
 
-    
-        //the 3 sliders at the left.
-        PA.x = 0.55;
-        if (PA.y > .4, PA.y = .4);
-        if (PA.y < -.4, PA.y = -.4);
-        a = smootha((.5 + PA.y/.7));
-
+    //the 3 sliders at the left.
+    PA.x = 0.55;
+    if (PA.y > .4, PA.y = .4);
+    if (PA.y < -.4, PA.y = -.4);
+    a = smootha((.5 + PA.y/.7));
 
 
     PC.x = 0.65;
@@ -73,7 +75,7 @@
     colorplot(computeColor(#)); //render the scene. # is the pixel coordinate
     
     
-    drawtext((-.65, -.45), "degree: $" + if(newN<100,newN,"\infty") +"$");
+    drawtext((-.65, -.45), "degree: " + max(exponent, max(#)));
 
     //lines for the sliders
     draw((.55, .4), (.55, -.4), color -> (0, 0, 0));
@@ -82,18 +84,20 @@
     </script>
                
     <script id="csinit" type="text/x-cindyscript">
+    Fstr = "x^2+y^2+z^2-1.1";
+    
     speciala = .5;
     smootha(x) := if(x<speciala,
       (-1/(speciala+.01))*(x-speciala)^2+speciala,
       (1/(1.01-speciala))*(x-speciala)^2+speciala      
     );
-
+    
     seta(na) := (
       a = na;
       speciala = na;
       PA.y = (na-.5)*.7;
     );
-
+    
     setzoom(zoom) := (
       PC.y = (zoom);
     );
@@ -109,6 +113,7 @@
     N = 5;
     zoom = 2.2;
     a = 0.3;
+    eps = .04;
     
     //we stand at position mat*(0, 0, -2.2/zoom) and watch to (0,0,0).
     //ray(pixel, t) is the point in R^3 that lies at position t the ray behind the pixel at location pixel(vec2)
@@ -119,30 +124,11 @@
     S(r) := (r * r - 1/(zoom*zoom));
     
     //fun is the user defined trivariate polynomial
-    fun(x, y, z) := (x ^ 2 + y ^ 2 + z ^ 2 - (0.5 + a) ^ 2) ^ 2 - (3.0 * ((0.5 + a) ^ 2) - 1.0) / (3.0 - ((0.5 + a) ^ 2)) * (1 - z - sqrt(2) * x) * (1 - z + sqrt(2) * x) * (1 + z + sqrt(2) * y) * (1 + z - sqrt(2) * y);
+    fun(x, y, z) := sum(apply(1..length(coeff), coeff_#*x^(exponent_#_1)*y^(exponent_#_2)*z^(exponent_#_3) ));
     
     //F takes vec3 instead of 3 variables
     F(p) := fun(p.x, p.y, p.z);
-
-    //guess the degree of the trivariate polynomial F. This approximation is reliable up to degree ~20.
-    helpfun(s, x) := log(|F(s*x)|)/log(s*|x|); //is approx. degree+log(leadingcoeff)/log(s*|x|) for large s
-    guessdeg() := max(apply(1 .. 2, //take the best result of 2
-      x = [random(), random(), random()];
-      s = 1;
-      l = 1;
-      best = 1;
-      it = 0;
-      while(l<100 & s < 1e50 & it<100, //throw away Infinity
-        best = round(l);
-        it = it+1;
-        s = 2*s;
-        l = 2*helpfun(s*s, x)-helpfun(s,x); //remove error caused by log(leadingcoeff)
-      );
-      if(it==100, best = 1000000);
-      best        
-    ));
-    
-    
+      
     //casteljau algorithm to evaluate and subdivide polynomials in Bernstein form.
     //poly is a vector containing the coefficients, i.e. p(x) = sum(0..N, i, poly_(i+1) * b_(i,N)(x)) where b_(i,N)(x) = choose(N, i)*x^i*(1-x)^(N-1)
     casteljau(poly, x) := (
@@ -160,13 +146,9 @@
     //evaluates a polynomial, represented as vector of coefficients in bernstein-form
     eval(poly, x) := casteljau(poly, x)_1;
     
-    //this function has to be called whenever fun (or N) changes
+    //this function has to be called whenever N changes
     init() := (
-      symdiff(fun(x,y,z), x, dxF(x,y,z) := #);
-      symdiff(fun(x,y,z), y, dyF(x,y,z) := #);
-      symdiff(fun(x,y,z), z, dzF(x,y,z) := #);
-      
-        newN = guessdeg(); errc(newN);
+        newN = max(7, 1+max(exponent, max(#)));
         if(newN!=N,
           N = newN;
           //The following line is DIRTY, but it makes the application run smooth for high degrees. :-)
@@ -187,8 +169,8 @@
             )) 
           );
           
-          B = inverse(A); //B interpolates polynomials (in Bernstein basis), given the values [p(li_1), p(li_2), ...]
-        );
+          B = (inverse(A)); //B interpolates polynomials (in Bernstein basis), given the values [p(li_1), p(li_2), ...]
+        )
         
     );
     init();
@@ -196,12 +178,12 @@
     //B3 is a matrix that interpolates quadratic polynomials (in monomial basis), given the values [p(-2), p(0), p(2)]
     B3 = inverse(apply([-2, 0, 2], c, apply(0 .. 2, i, c ^ i))); 
 
-    //use symbolic differentation function
+    //use central difference to approximate dF
     dF(p) := (
-        dxF(p.x,p.y,p.z),
-        dyF(p.x,p.y,p.z),
-        dzF(p.x,p.y,p.z)
-    );
+        (F(p + [eps, 0, 0]) - F(p - [eps, 0, 0])),
+        (F(p + [0, eps, 0]) - F(p - [0, eps, 0])),
+        (F(p + [0, 0, eps]) - F(p - [0, 0, eps]))
+    ) / (2 * eps);
 
 
     
@@ -350,7 +332,7 @@
         var cdy = CindyJS({canvasname:"CSCanvas",
                     scripts: "cs*",
                     animation: {autoplay: true},
-                    use : ["CindyGL","katex","symdiff"],
+                    use : ["CindyGL","katex","monombasis"],
                     geometry: [ { name:"PA", kind:"P", type:"Free", pos: [.5,.3,1], narrow: true, color: [1,1,1], size:8 },
                                 //{ name:"PB", kind:"P", type:"Free", pos: [.5,.2,1], narrow: true, color: [1,1,1], size:8 },
                                 { name:"PC", kind:"P", type:"Free", pos: [.5,.1,1], narrow: true, color: [1,1,1], size:8 } ],
@@ -361,45 +343,32 @@
                       transform: [ { visibleRect: [ -0.7, -0.5, 0.7, 0.5 ] } ]
                     }]
         });
+        var update = function(f,overwrite) {
+          if(overwrite)
+            document.getElementById('inp').value = f;
+          cdy.evokeCS('Fstr = "' + f + '";');
+        };
     </script>
-    <input type="text" id="inp" value="(x^2+y^2+z^2-(0.5+a)^2)^2-(3*((0.5+a)^2)-1)/(3-((0.5+a)^2))*(1-z-sqrt(2)*x)*(1-z+sqrt(2)*x)*(1+z+sqrt(2)*y)*(1+z-sqrt(2)*y)"  onkeyup="cdy.evokeCS('fun(x,y,z) := (' + this.value + '); init();');" size="80" style="font-size:18px">
     </div>
 <p>Non-algebraic functions are approximated by polynomials.
 Roots are isolated by Descartes Method in Bernstein basis.</p>
 <p>You can enter your own implicit surfaces or select one of the following list:</p>
-<p><select id="sel" size="15" style="width:20em;"><option data-a="1" value="(x^2+y^2+z^2-(0.5+a)^2)^2-(3*((0.5+a)^2)-1)/(3-((0.5+a)^2))*(1-z-sqrt(2)*x)*(1-z+sqrt(2)*x)*(1+z+sqrt(2)*y)*(1+z-sqrt(2)*y)">Kummer Quartic</option>
-  <option data-a="1" value="4*((a*(1+sqrt(5))/2)^2*x^2-y^2)*((a*(1+sqrt(5))/2)^2*y^2-z^2)*((a*(1+sqrt(5))/2)^2*z^2-x^2)-1*(1+2*(a*(1+sqrt(5))/2))*(x^2+y^2+z^2-1)^2">Barth Sextic</option>
-  <option data-a="0" value="-2*a/125+x^8+y^8+z^8-2*x^6-2*y^6-2*z^6+1.25*x^4+1.25*y^4+1.25*z^4-0.25*x^2-0.25*y^2-0.25*z^2+0.03125">Chmutov Octic</option>
-  <option data-a="1" data-zoom="-.1" value="a*(-1/4*(1-sqrt(2))*(x^2+y^2)^2+(x^2+y^2)*((1-1/sqrt(2))*z^2+1/8*(2-7*sqrt(2)))-z^4+(0.5+sqrt(2))*z^2-1/16*(1-12*sqrt(2)))^2-(cos(0*pi/4)*x+sin(0*pi/4)*y-1)*(cos(pi/4)*x+sin(pi/4)*y-1)*(cos(2*pi/4)*x+sin(2*pi/4)*y-1)*(cos(3*pi/4)*x+sin(3*pi/4)*y-1)*(cos(4*pi/4)*x+sin(4*pi/4)*y-1)*(cos(5*pi/4)*x+sin(5*pi/4)*y-1)*(cos(6*pi/4)*x+sin(6*pi/4)*y-1)*(cos(7*pi/4)*x+sin(7*pi/4)*y-1)">
+<input type="text" id="inp" value="(x^2+y^2+z^2-1)"  onkeyup="update(this.value, false);" size="80" style="font-size:18px">
+<select id="sel" onchange="update(this.value, true);" style="width:20em;">  
+  <option value="x^2+y^2+z^2-1">Ball</option>
+  <option value="(x^2+y^2+z^2-(0.5+a)^2)^2-(3*((0.5+a)^2)-1)/(3-((0.5+a)^2))*(1-z-sqrt(2)*x)*(1-z+sqrt(2)*x)*(1+z+sqrt(2)*y)*(1+z-sqrt(2)*y)">Kummer Quartic</option>
+  <option value="4*((a*(1+sqrt(5))/2)^2*x^2-y^2)*((a*(1+sqrt(5))/2)^2*y^2-z^2)*((a*(1+sqrt(5))/2)^2*z^2-x^2)-1*(1+2*(a*(1+sqrt(5))/2))*(x^2+y^2+z^2-1)^2">Barth Sextic</option>
+  <option value="-2*a/125+x^8+y^8+z^8-2*x^6-2*y^6-2*z^6+1.25*x^4+1.25*y^4+1.25*z^4-0.25*x^2-0.25*y^2-0.25*z^2+0.03125">Chmutov Octic</option>
+  <option value="a*(-1/4*(1-sqrt(2))*(x^2+y^2)^2+(x^2+y^2)*((1-1/sqrt(2))*z^2+1/8*(2-7*sqrt(2)))-z^4+(0.5+sqrt(2))*z^2-1/16*(1-12*sqrt(2)))^2-(cos(0*pi/4)*x+sin(0*pi/4)*y-1)*(cos(pi/4)*x+sin(pi/4)*y-1)*(cos(2*pi/4)*x+sin(2*pi/4)*y-1)*(cos(3*pi/4)*x+sin(3*pi/4)*y-1)*(cos(4*pi/4)*x+sin(4*pi/4)*y-1)*(cos(5*pi/4)*x+sin(5*pi/4)*y-1)*(cos(6*pi/4)*x+sin(6*pi/4)*y-1)*(cos(7*pi/4)*x+sin(7*pi/4)*y-1)">
     Endraß Octic
   </option>
-  <option data-zoom=".2" value="x^2+y^2+z^2-1">Ball</option>
-  <option data-zoom=".2" value="k = 6; x^k+y^k+z^k-1">Cube</option>
-  <option data-zoom=".2" value="x^2+z^2-1/3*(1+y)^3*(1-y)^3">Citric</option>
-  <option data-zoom=".1" value="x^2+y^2+z^3-z^2">Ding Dong</option>
-  <option data-zoom="0" value="x^3+x^2*z^2-y^2">Hummingbird</option>
-  <option data-zoom=".2" value="x^2-x^3+y^2+y^4+z^3-z^4">Vis a Vis</option>
-  <option data-zoom=".1" value="(x^2+9/4*y^2+z^2-1)^3-x^2*z^3-9/80*y^2*z^3">Sweet</option>
-  <option data-zoom=".2" data-a="1/4" value="k=a*2;(x+(k/2-1))*(x^2+y^2+z^2-k^2/4)+z^2">Parabolic Ring Cyclide</option>
-  <option data-a="0" data-zoom="-.15" value="cos(x)*sin(y) + cos(y)*sin(z) + cos(z)*sin(x) + a">Gyroid</option>
-  <option data-a="0" data-zoom="-.15" value="cos(x)+cos(y)+cos(z)+a">Schwarz P</option>
-  <option data-a=".5" data-zoom=".1"  value="r=a; R=1; (x^2+y^2+z^2+R^2-r^2)^2-4*R^2*(x^2+y^2)">Torus</option>
-  <option data-a=".4" data-zoom="-.1" value = "r=a/2; R=.9; ((sin(x)^2+y^2+z^2+R^2-r^2)^2-4*R^2*(sin(x)^2+y^2))*((cos(x)^2+y^2+z^2+R^2-r^2)^2-4*R^2*(cos(x)^2+z^2))">Interleaved Tori</option>
-</select></p>
-<script type="text/javascript">
-var select = document.getElementById("sel");
-select.addEventListener('change', function(event) {
-  document.getElementById('inp').value = this.value;
-  cdy.evokeCS('fun(x,y,z) := (' + this.value + '); init();');
-
-  var a = this.options[this.selectedIndex].getAttribute("data-a") || .5;
-  cdy.evokeCS('seta(' + a + ')');
-
-  var zoom = this.options[this.selectedIndex].getAttribute("data-zoom");
-  if(zoom) cdy.evokeCS('setzoom(' + zoom + ')');
-
-}, false);
-</script>
+  <option value="k = 6; x^k+y^k+z^k-1">Cube</option>
+  <option value="x^2+z^2-1/3*(1+y)^3*(1-y)^3">Citric</option>
+  <option value="x^2+y^2+z^3-z^2">Ding Dong</option>
+  <option value="x^3+x^2*z^2-y^2">Hummingbird</option>
+  <option value="x^2-x^3+y^2+y^4+z^3-z^4">Vis a Vis</option>
+  <option value="(x^2+9/4*y^2+z^2-1)^3-x^2*z^3-9/80*y^2*z^3">Sweet</option>
+</select>
 
 </body>
 </html>
