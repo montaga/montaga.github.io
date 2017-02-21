@@ -133,16 +133,16 @@
       //we stand at position mat*(0, 0, -2.2/zoom) and watch to (0,0,0).
       //ray(pixel, t) is the point in R^3 that lies at position t the ray behind the pixel at location pixel(vec2)
       //t=0 is corresponds to points within the interesting area near (0,0,0)
-      ray(pixel, t) := mat * ((t+2.2/zoom) * (pixel.x, pixel.y, 1) + (0, 0, -2.2/zoom));
+      ray(pixel, t) := mat * ((t+2.2) * (pixel.x, pixel.y, 1) + (0, 0, -2.2));
       
-      //sphere with radius 1/zoom for clipping
-      S(r) := (r * r - 1/(zoom*zoom));
+      //sphere with radius 1 for clipping
+      S(r) := (r * r - 1);
       
       //fun is the user defined trivariate polynomial
       fun(x, y, z) := (x ^ 2 + y ^ 2 + z ^ 2 - (0.5 + a) ^ 2) ^ 2 - (3.0 * ((0.5 + a) ^ 2) - 1.0) / (3.0 - ((0.5 + a) ^ 2)) * (1 - z - sqrt(2) * x) * (1 - z + sqrt(2) * x) * (1 + z + sqrt(2) * y) * (1 + z - sqrt(2) * y);
       
       //F takes vec3 instead of 3 variables
-      F(p) := fun(p.x, p.y, p.z);
+      F(p) := (p=p/zoom;fun(p.x, p.y, p.z));
     
 
       //guess the degree of the trivariate polynomial F. This approximation is reliable up to degree ~20.
@@ -218,11 +218,11 @@
       B3 = inverse(apply([-2, 0, 2], c, apply(0 .. 2, i, c ^ i))); 
 
       //use symbolic differentation function
-      dF(p) := (
+      dF(p) := (p=p/zoom; (
           dxF(p.x,p.y,p.z),
           dyF(p.x,p.y,p.z),
           dzF(p.x,p.y,p.z)
-      );
+      ));
 
 
       
@@ -287,7 +287,7 @@
       //purpose: id corresponds interval [id-s,id+1-s]/s
       gets(id) := (
         s = 1;
-        repeat(10,
+        repeat(15,
           if(2*s<=id,
             s = 2*s;
           )
@@ -301,7 +301,7 @@
       next(id) := (
         id = id+1;
         //now: remove zeros from right (in binary representation) while(id&1) id=id>>1;
-        repeat(10,
+        repeat(15,
           if(mod(id,2)==0, 
             id = floor(id/2);
           )
@@ -331,7 +331,7 @@
               //1 is root node and node v has children 2*v and 2*v+1
               id = 1; 
               //maximum number of steps
-              repeat(N*6,
+              repeat(N*8,
                 //id=0 means we are done; do only a DFS-step if we are not finished yet
                 if(id>0,
                   s = gets(id); //s = floor(log_2(id))
@@ -347,7 +347,7 @@
                   
                   //how many sign changes has F(ray(pixel, ·)) in (a,b)?
                   cnt = nsign(pixel, a, b);
-                  if(cnt == 1 % (b-a)<.01*zoom, //in this case we found a root (or it is likely to have a multiple root)
+                  if(cnt == 1 % (b-a)<1e-5, //in this case we found a root (or it is likely to have a multiple root)
                     //=>colorize and break DFS
                     color = updatecolor(pixel, bisectf(pixel, a, b), color);
                     id = next(id),
