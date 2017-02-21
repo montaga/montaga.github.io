@@ -234,7 +234,7 @@
       //last = poly_1;
       forall(2..(N+1), k,
         //if(last == 0, last = poly_k;); this (almost) never happens
-        if(min(poly_(k-1), poly_k) <= 1e-7 & -1e-7 <= max(poly_(k-1), poly_k), //sign switch; avoid products due numerics
+        if(min(poly_(k-1), poly_k) <= 0 & 0 <= max(poly_(k-1), poly_k), //sign switch; avoid products due numerics
           ans = ans + 1;
         );
       );
@@ -265,7 +265,7 @@
     //purpose: id corresponds interval [id-s,id+1-s]/s
     gets(id) := (
       s = 1;
-      repeat(12,
+      repeat(14,
         if(2*s<=id,
           s = 2*s;
         )
@@ -279,7 +279,7 @@
     next(id) := (
       id = id+1;
       //now: remove zeros from right (in binary representation) while(id&1) id=id>>1;
-      repeat(12,
+      repeat(14,
         if(mod(id,2)==0, 
           id = floor(id/2);
         )
@@ -325,7 +325,7 @@
                 
                 //how many sign changes has F(ray(pixel, ·)) in (a,b)?
                 cnt = nsign(pixel, a, b);
-                if(cnt == 1 % (b-a)<.01*zoom, //in this case we found a root (or it is likely to have a multiple root)
+                if(cnt == 1 % (b-a)<1e-4, //in this case we found a root (or it is likely to have a multiple root)
                   //=>colorize and break DFS
                   intersect = true;
                   id = 0,
