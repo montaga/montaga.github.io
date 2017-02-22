@@ -6,11 +6,15 @@
     <script type="text/javascript" src="Cindy.js"></script>
     <script type="text/javascript" src="CindyGL.js"></script>
     <script type="text/javascript" src="symdiff.js"></script>
+    <script type="text/javascript" src="cpucolorplot.js"></script>
     <link rel="stylesheet" href="cindy.css">
   </head>
     
   <body style="font-family:Arial;">
-  <h1>Raycasting Implicit Surfaces</h1>
+  
+    
+          <h1>Raycasting Implicit Surfaces</h1>
+
   <div style="float: left; padding:20px">
       
       <script id="csmousedown" type="text/x-cindyscript">
@@ -24,8 +28,8 @@
       <script id="csdraw" type="text/x-cindyscript">
       //the following is executed for every rendered frame
       if (dragging,
-          dx = 3 * (sx - mouse().x); dy = 3 * (sy - mouse().y);,
-          dx = .9*dx; dy = .9*dy;
+          dx = 3 * (sx - mouse().x); dy = 3 * (sy - mouse().y); change=true,
+          dx = 0; dy = 0;
       );
       
       sx = mouse().x;
@@ -84,9 +88,12 @@
           .9 * (.6, .1, .6)
       ];
 
-
-      colorplot(computeColor(#)); //render the scene. # is the pixel coordinate
-      
+      if(change,
+        cpucolorplot(computeColor(#)),
+        refinecpucolorplot(computeColor(#))
+      );
+      change = false;
+      draw(mouse(), color->computeColor(mouse()));
       
       drawtext((-.65, -.45), "degree: $" + if(newN<100,newN,"\infty") +"$");
 
@@ -180,7 +187,7 @@
       
       //this function has to be called whenever fun changes
       init() := (
-        dx = .05; dy =.02;
+        change = true;
         symdiff(fun(x,y,z), x, dxF(x,y,z) := #);
         symdiff(fun(x,y,z), y, dyF(x,y,z) := #);
         symdiff(fun(x,y,z), z, dzF(x,y,z) := #);
@@ -229,9 +236,8 @@
       //because of the alpha-transparency updatecolor should be called for the intersections with large dst first
       updatecolor(pixel, dst, color) := (
         regional(x, normal);
-        x = ray(pixel, dst); //the intersection point in R^3
         color = (1 - alpha) * color;
-              
+        x = ray(pixel, dst); //the intersection point in R^3
         normal = dF(x);
         normal = normal / |normal|;
 
@@ -330,7 +336,7 @@
               //1 is root node and node v has children 2*v and 2*v+1
               id = 1; 
               //maximum number of steps
-              repeat(N*8,
+              repeat(N*6,
                 //id=0 means we are done; do only a DFS-step if we are not finished yet
                 if(id>0,
                   s = gets(id); //s = floor(log_2(id))
@@ -346,7 +352,7 @@
                   
                   //how many sign changes has F(ray(pixel, ·)) in (a,b)?
                   cnt = nsign(pixel, a, b);
-                  if(cnt == 1 % (b-a)<1e-4, //in this case we found a root (or it is likely to have a multiple root)
+                  if(cnt == 1 % (b-a)<1e-2, //in this case we found a root (or it is likely to have a multiple root)
                     //=>colorize and break DFS
                     color = updatecolor(pixel, bisectf(pixel, a, b), color);
                     id = next(id),
@@ -371,7 +377,8 @@
           var cdy = CindyJS({canvasname:"CSCanvas",
                       scripts: "cs*",
                       animation: {autoplay: true},
-                      use : ["CindyGL","katex", "symdiff"],
+                      use : ["CindyGL","katex", "symdiff", "cpucolorplot"],
+                      csconsole: true,
                       geometry: [ { name:"PA", kind:"P", type:"Free", pos: [.5,.37,1], narrow: true, color: [1,1,1], size:8 },
                                   { name:"PB", kind:"P", type:"Free", pos: [.5,.2,1], narrow: true, color: [1,1,1], size:8 },
                                   { name:"PC", kind:"P", type:"Free", pos: [.5,.1,1], narrow: true, color: [1,1,1], size:8 } ],

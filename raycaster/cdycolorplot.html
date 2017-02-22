@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>CindyScript command line</title>
+    <meta charset="utf-8"/>
+    <script src="Cindy.plain.js"></script>
+    <script src="cdycolorplot.js"></script>
+    <script src="symdiff.js"></script>
+    <script id='csinit' type='text/x-cindyscript'>
+    
+    </script>
+    <script id='csdraw' type='text/x-cindyscript'>
+          
+          cdycolorplot(hue(seconds()+#_1+#_2));
+          draw((0,0));
+          
+    </script>
+    <script>
+      var cindy = CindyJS({
+        canvasname:"Cindy",
+        scripts: "cs*",
+        csconsole: true,
+        use: ["cdycolorplot", "symdiff"],
+        transform: [ { visibleRect: [ -0.7, -0.5, 0.7, 0.5 ] } ]
+      });
+    </script>
+  </head>
+  <body>
+    <div id="Cindy" style="width:100px; height:100px;"></div>
+  </body>
+</html>
