@@ -5,7 +5,7 @@
     <title>Cindy JS</title>
     <script type="text/javascript" src="Cindy.js"></script>
     <script type="text/javascript" src="CindyGL.js"></script>
-    <script type="text/javascript" src="symdiff.js"></script>
+    <script type="text/javascript" src="symbolic.js"></script>
     <link rel="stylesheet" href="cindy.css">
   </head>
     
@@ -185,7 +185,8 @@
         symdiff(fun(x,y,z), y, dyF(x,y,z) := #);
         symdiff(fun(x,y,z), z, dzF(x,y,z) := #);
         
-          newN = guessdeg(); errc(newN);
+          newN = degree(fun(x,y,z), x, y, z);
+          if(newN==-1, newN=1000);
           if(newN!=N,
             N = newN;
             //The following line is DIRTY, but it makes the application run smooth for high degrees. :-)
@@ -330,7 +331,7 @@
               //1 is root node and node v has children 2*v and 2*v+1
               id = 1; 
               //maximum number of steps
-              repeat(N*8,
+              repeat(min(newN*8,80),
                 //id=0 means we are done; do only a DFS-step if we are not finished yet
                 if(id>0,
                   s = gets(id); //s = floor(log_2(id))
@@ -371,7 +372,7 @@
           var cdy = CindyJS({canvasname:"CSCanvas",
                       scripts: "cs*",
                       animation: {autoplay: true},
-                      use : ["CindyGL","katex", "symdiff"],
+                      use : ["CindyGL","katex", "symbolic"],
                       geometry: [ { name:"PA", kind:"P", type:"Free", pos: [.5,.37,1], narrow: true, color: [1,1,1], size:8 },
                                   { name:"PB", kind:"P", type:"Free", pos: [.5,.2,1], narrow: true, color: [1,1,1], size:8 },
                                   { name:"PC", kind:"P", type:"Free", pos: [.5,.1,1], narrow: true, color: [1,1,1], size:8 } ],

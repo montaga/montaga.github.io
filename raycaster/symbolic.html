@@ -13,6 +13,20 @@
           
           errc(f(5));
           errc(df(5));
+          a  = .2;
+          errc(degree(x^5*x,x));
+          
+          errc(degree(
+            a*(-1/4*(1-sqrt(2))*(x^2+y^2)^2+(x^2+y^2)*((1-1/sqrt(2))*z^2+1/8*(2-7*sqrt(2)))-z^4+(0.5+sqrt(2))*z^2-1/16*(1-12*sqrt(2)))^2-(cos(0*pi/4)*x+sin(0*pi/4)*y-1)*(cos(pi/4)*x+sin(pi/4)*y-1)*(cos(2*pi/4)*x+sin(2*pi/4)*y-1)*(cos(3*pi/4)*x+sin(3*pi/4)*y-1)*(cos(4*pi/4)*x+sin(4*pi/4)*y-1)*(cos(5*pi/4)*x+sin(5*pi/4)*y-1)*(cos(6*pi/4)*x+sin(6*pi/4)*y-1)*(cos(7*pi/4)*x+sin(7*pi/4)*y-1),
+            x,
+            y,
+            z
+          ));
+          
+          errc(degree(
+            k = 6; x^k+y^k+z^k-1,
+            x,y,z
+          ))
     </script>
     <script>
       var cindy = CindyJS({
