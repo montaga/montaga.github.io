@@ -1,0 +1,343 @@
+
+<!-- saved from url=(0029)https://folk.uio.no/martinre/ -->
+<html><script>(function main() {
+    // Create enabled event
+    function fireEnabledEvent() {
+        // If gli exists, then we are already present and shouldn't do anything
+        if (!window.gli) {
+            setTimeout(function () {
+                var enabledEvent = document.createEvent("Event");
+                enabledEvent.initEvent("WebGLEnabledEvent", true, true);
+                document.dispatchEvent(enabledEvent);
+            }, 0);
+        } else {
+            //console.log("WebGL Inspector already embedded on the page - disabling extension");
+        }
+    };
+
+    // Grab the path root from the extension
+    document.addEventListener("WebGLInspectorReadyEvent", function (e) {
+        var pathElement = document.getElementById("__webglpathroot");
+        if (window["gliloader"]) {
+            gliloader.pathRoot = pathElement.innerText;
+        } else {
+            // TODO: more?
+            window.gliCssUrl = pathElement.innerText + "gli.all.css";
+        }
+    }, false);
+
+    // Rewrite getContext to snoop for webgl
+    var originalGetContext = HTMLCanvasElement.prototype.getContext;
+    if (!HTMLCanvasElement.prototype.getContextRaw) {
+        HTMLCanvasElement.prototype.getContextRaw = originalGetContext;
+    }
+    HTMLCanvasElement.prototype.getContext = function () {
+        var ignoreCanvas = this.internalInspectorSurface;
+        if (ignoreCanvas) {
+            return originalGetContext.apply(this, arguments);
+        }
+
+        var result = originalGetContext.apply(this, arguments);
+        if (result == null) {
+            return null;
+        }
+
+        var contextNames = ["moz-webgl", "webkit-3d", "experimental-webgl", "webgl", "3d"];
+        var requestingWebGL = contextNames.indexOf(arguments[0]) != -1;
+        if (requestingWebGL) {
+            // Page is requesting a WebGL context!
+            fireEnabledEvent(this);
+
+            // If we are injected, inspect this context
+            if (window.gli) {
+                if (gli.host.inspectContext) {
+                    // TODO: pull options from extension
+                    result = gli.host.inspectContext(this, result);
+                    // NOTE: execute in a timeout so that if the dom is not yet
+                    // loaded this won't error out.
+                    window.setTimeout(function() {
+                        var hostUI = new gli.host.HostUI(result);
+                        result.hostUI = hostUI; // just so we can access it later for debugging
+                    }, 0);
+                }
+            }
+        }
+
+        return result;
+    };
+})();</script><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+
+<title>Martin Reimers homepage</title>
+<!-- Changed by: Martin Reimers, 05-Apr-2005 -->
+
+</head><body bgcolor="#ffffff" text="#000033" link="#000088" vlink="#000088">
+
+
+
+<h1><font color="#006771">Martin Reimers</font></h1><br>
+
+<!--Postdoc at the <A HREF="http://www.cma.uio.no">CMA</A>, <A HREF="http://www.uio.no">University of Oslo</A>-->
+
+  
+<table border="">
+
+<tbody><tr><td align="middle" valign="middle"><img src="./Martin Reimers homepage_files/martin.jpg"></td>
+
+<td>
+<table width="380">
+<tbody><tr><td valign="top">Position:</td><td>Professor at <a href="http://www.ifi.uio.no/">IfI</a> / <a href="http://www.cma.uio.no/">CMA</a><br> <a href="http://www.uio.no/">University of Oslo</a></td></tr>
+<tr><td>Office:</td><td>1028, Mathematics building</td></tr>
+<tr><td>Phone:</td><td>+47 22856032</td></tr>
+<!-- <TR><TD>Fax:</TD><TD>+47 22854349</TD></TR> -->
+<tr><td>E-mail:</td><td> martinre [snabel-a] ifi.uio.no</td></tr>
+<tr><td valign="top">Address:&nbsp; &nbsp;</td><td>    
+CMA, University of Oslo<br>
+P. O. Box 1053 Blindern<br>
+0316 Oslo<br>
+NORWAY<br>
+</td></tr>
+</tbody></table>
+</td>
+</tr></tbody></table>
+
+
+
+<!--
+
+<TD WIDTH=250>
+    Office: B527,  Math building<BR>
+    Tlf:   +47 22856032<BR>
+    Fax:   +47 22854349<BR>
+    Email: martinre [at] ifi.uio.no<BR>
+<BR>Mail:
+    CMA, University of Oslo<BR>
+    P. O. Box 1053 Blindern<BR>
+    0316 Oslo<BR>
+    NORWAY<BR>
+</TD>
+-->
+
+
+
+
+
+<p></p><p>
+</p><h2>Research interests</h2>
+
+<ul class="link">
+<li> Geometric modeling, splines
+</li><li> Approximation Theory
+</li><li> Mesh based modeling
+</li><li> Computer graphics
+</li><li> GPU programming
+</li><li> Multiresolution methods, Wavelets and Frames
+</li><li> Optimal path problems 
+</li></ul>
+
+
+
+<table cellpadding="0" cellspacing="0" noborder="">
+<tbody><tr>
+  <td colspan="3">
+    <h2>Recent Publications (<a href="https://folk.uio.no/martinre/Publications/index.html">full list</a>)</h2>
+  </td>
+</tr>
+
+
+<!--
+<TR>
+  <TD VALIGN=TOP>
+    <A HREF="Images/mozart_image_att.png"><IMG SRC="Images/mozart_image_att.png" BORDER=0></A>
+
+  </TD>
+  <TD>&nbsp;</TD>
+  <TD VALIGN=MIDDLE>
+S. Bruvoll and M. Reimers,<BR>
+<A HREF="Publications/sfs.pdf">"<B>Spherical Surface Parameterization for Perspective Shape From Shading</B>"</A>, <BR>
+To appear in Pattern Recognition Letters (September 2011)<BR>
+  </TD>
+</TR>
+-->
+
+
+<tr>
+  <td valign="TOP">
+    <a href="https://folk.uio.no/martinre/Images/fig_bunny_grad.png"><img src="./Martin Reimers homepage_files/topofix_teaser.png" border="0"></a>
+
+  </td>
+  <td>&nbsp;</td>
+  <td valign="MIDDLE">
+C. Dyken, M. Reimers and J. Seland,<br>
+<a href="https://folk.uio.no/martinre/Publications/topofix-draft.pdf">"<b>Semi-uniform Adaptive Patch Tessellation</b>"</a>, <br>
+To appear in Computer Graphics Forum (July 2008)<br>
+<a href="http://heim.ifi.uio.no/erikd/topofix.mpeg">[video]</a>&nbsp;<a href="http://developer.download.nvidia.com/SDK/10.5/direct3d/samples.html#InstancedTessellation">[Nvidia code sample]</a><br>
+
+  </td>
+</tr>
+
+
+<tr><td colspan="2">&nbsp;</td></tr>
+
+
+<tr>
+  <td valign="TOP">
+    <a href="https://folk.uio.no/martinre/Images/intersections.png"><img src="./Martin Reimers homepage_files/intersections_teaser.png" border="0"></a>
+
+  </td>
+  <td>&nbsp;</td>
+  <td valign="MIDDLE">
+K. Mørken, M. Reimers and C. Schultz<br>
+<a href="https://folk.uio.no/martinre/Publications/intersection-preprint.pdf">"<b>Computing Intersections of Planar Spline Curves using Knot Insertion</b>"</a>, <br>
+To appear in Computer Aided Geometric Design (July 2008) <br>
+  </td>
+</tr>
+
+
+<tr><td colspan="2">&nbsp;</td></tr>
+
+
+<tr>
+  <td valign="TOP">
+    <a href="https://folk.uio.no/martinre/Images/tangle.png"><img src="./Martin Reimers homepage_files/raycast_teaser.png" border="0"></a>
+
+  </td>
+  <td>&nbsp;</td>
+  <td valign="MIDDLE">
+M. Reimers and J. Seland,<br>
+<a href="https://folk.uio.no/martinre/Publications/FF-draft.pdf">"<b>Ray Casting Algebraic Surfaces using the Frustum Form"</b></a>, <br>
+Computer Graphics Forum, 27(2): 361-370, 2008  (Proceedings of Eurographics)<br>
+<a href="http://folk.uio.no/johans/eg.avi">[video]</a><br>
+  </td>
+</tr>
+
+
+
+
+
+
+
+<tr><td colspan="2">&nbsp;</td></tr>
+
+
+
+<tr>
+  <td valign="TOP">
+    <img src="./Martin Reimers homepage_files/collision_teaser.png">
+
+  </td>
+  <td>&nbsp;</td>
+  <td valign="MIDDLE">
+T. Morvan, M. Reimers and E. Samset,<br>
+<a href="https://folk.uio.no/martinre/Publications/collision-draft.pdf">"<b>High Performance GPU-based Proximity Queries using Distance Fields</b>"</a>, <br>
+Computer Graphics Forum, Volume 27 Issue 8, Pages 2040 - 2052<br>
+<a href="http://folk.uio.no/martinre/Publications/collision_video.avi">[video]</a><br>
+  </td>
+</tr>
+
+
+<tr><td colspan="2">&nbsp;</td></tr>
+
+
+<tr>
+  <td valign="TOP">
+    <img src="./Martin Reimers homepage_files/framelets_teaser.png">
+
+  </td>
+  <td>&nbsp;</td>
+  <td valign="MIDDLE">
+M. Reimers,<br> 
+<a href="https://folk.uio.no/martinre/Publications/irregular.pdf">"<b>A Local Construction for Non-uniform Spline Tight Wavelet Frames</b>"</a>,<br>
+in Approximation Theory XII: San Antonio 2007, M. Neamtu and L. L.
+Schumaker (eds.), Nashboro Press, 2008
+  </td>
+</tr>
+
+
+<tr><td colspan="2">&nbsp;</td></tr>
+
+
+
+<tr> 
+  <td valign="TOP">
+    <img src="./Martin Reimers homepage_files/gpusilhouette_teaser.png">
+
+  </td>
+  <td>&nbsp;</td>
+  <td valign="MIDDLE">
+C. Dyken, M. Reimers and J. Seland,<br> 
+<a href="http://www.blackwell-synergy.com/doi/abs/10.1111/j.1467-8659.2007.01030.x">"<b>Real-Time GPU Silhouette Refinement using adaptively blended Bezier Patches</b>"</a>, <br> 
+Computer Graphics Forum, 27(1): 1-12, 2008<br>
+<a href="https://folk.uio.no/martinre/Publications/silhouetteGPU.pdf">[draft]</a><br>
+  </td>
+</tr>
+
+
+<tr><td colspan="2">&nbsp;</td></tr>
+
+
+<tr>
+  <td valign="TOP">
+    <img src="./Martin Reimers homepage_files/zero_teaser.png">
+
+  </td>
+  <td>&nbsp;</td>
+  <td valign="MIDDLE">
+K. Mørken and M. Reimers,<br>
+<a href="https://folk.uio.no/martinre/Publications/splinezero.pdf">"<b>An unconditionally convergent method for computing zeros of splines and polynomials</b>"</a>,<br>
+Mathematics of Computation 76  (2007), 845-865
+  </td>
+</tr>
+<!--www.ams.org/mcom/2007-76-258/S0025-5718-07-01923-0/S0025-5718-07-01923-0.pdf-->
+
+</tbody></table>
+
+
+
+
+
+<p></p><p>
+</p><h2>Students</h2>
+<p>
+</p><ul class="link">
+<li> <a href="http://folk.uio.no/solveio">Solveig Bruvoll</a> (PhD)
+</li><li> <a href="http://folk.uio.no/eivindlm">Eivind Lyche Melvær</a> (PhD)
+</li><li> Tangui Morvan (PhD)
+</li><li> <a href="http://folk.uio.no/bartloms">Bart Siwek</a> (PhD)
+</li><li> Erik W. Bjønnes (MSc 2010)
+</li><li> Svein Atle Arnesen (MSc 2010)
+</li><li> <a href="http://folk.uio.no/chrischu">Christian Schultz</a> (PhD 2009)
+</li><li> <a href="http://folk.uio.no/johans">Johan Seland</a> (PhD 2008)
+</li><li> Øyvind Bratne (MSc 2008)
+</li><li> Magnar Marthinsen (MSc 2006)
+</li></ul>
+
+
+<p></p><p>
+</p><h2>Teaching</h2>
+<ul class="link">
+<li> <b>Computer graphics and discrete geometry</b>, <a href="http://www.uio.no/studier/emner/matnat/ifi/INF3320/h08/">INF3320</a>, fall 2008, 2009, 2010
+</li><li> <b>Spline methods</b>                         , <a href="http://www.uio.no/studier/emner/matnat/ifi/INF-MAT5340/v04/">INF-MAT5340</a>, spring 2004
+<p></p>
+</li></ul>
+
+
+
+<p></p><p>
+</p><h2>Outdoors</h2>
+
+<img src="./Martin Reimers homepage_files/DSC03050.JPG" width="300"> <br>
+
+Pictures etc from various trips outdoors can be found <a href="https://folk.uio.no/martinre/private.html">here</a>
+<hr>
+
+
+
+
+
+
+
+
+
+
+
+<div id="window-resizer-tooltip" style="display: block;"><a href="https://folk.uio.no/martinre/#" title="Edit settings"></a><span class="tooltipTitle">Window size: </span><span class="tooltipWidth" id="winWidth">1920</span> x <span class="tooltipHeight" id="winHeight">1007</span><br><span class="tooltipTitle">Viewport size: </span><span class="tooltipWidth" id="vpWidth">1745</span> x <span class="tooltipHeight" id="vpHeight">811</span></div></body><autoscroll></autoscroll></html>
