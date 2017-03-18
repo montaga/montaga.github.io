@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+    <title>Cindy JS</title>
+    <script type="text/javascript" src="Cindy.js"></script>
+    <script type="text/javascript" src="CindyGL.js"></script>
+		<style type="text/css">
+		  html,body { margin: 0px; padding: 0px; }
+		  html,body,#CSCanvas { width: 100%; height: 100%; max-width: 1000px; max-height: 600px;}
+		</style>
+  </head>
+    
+	<body>
+  
+    <script id="csinit" type="text/x-cindyscript">
+			resetclock();
+			refl(p, x, t) := sin(|x,p|+|L,p|-t)*max(0,(x-p).y/|x-p|);// + exp(-.05*|(x-p)*([[0,1],[-1,0]]*(p-L))|)*sin(|x,L|-t);=
+      phi(x, t) := refl(A,x,t)+refl(B,x,t)+refl(C,x,t)+refl(D,x,t)+refl(E,x,t);
+			colorize(v) := (v/2+1/2, v/3+2/3, v/4+3/4);
+			
+			//E(x, t) := cos(|L,A|/2+|x,A|/2-|L,B|/2+|x-B|/2)^2; // sin(a)+sin(b) = 2*sin(a/2+b/2)*cos(a/2-b/2)
+			E2(p, q, x) := cos((|L,p|+|x,p|-|L,q|-|x,q|)/2);
+			E(x) := (E2(A,B,x)+E2(B,C,x)+E2(C,D,x)+E2(D,E,x))^2; //cos(|L,A|/2+|x,A|/2-|L,B|/2+|x-B|/2)^2; // sin(a)+sin(b) = 2*sin(a/2+b/2)*cos(a/2-b/2)
+			screen(v) := gray(v);
+    </script>
+    
+    <script id="csdraw" type="text/x-cindyscript">
+      t = seconds()*3;
+      colorplot(
+				//if(#.y<30,
+					colorize(phi(#, t))
+					
+				//	,screen(E((#.x,30)))
+				//)
+			);
+			
+			drawlaser(p) := (
+				i = 0;
+				r = pi*(p-L)/|p-L|;
+				delta = mod(t,2*pi)*(p-L)/|p-L|;
+				while(|i*r|<|L,p|,
+					draw( (L+i*r+delta, L+(i+1)*r+delta), color->[1,.7,.7],size->3);
+					i = i+2;
+				);
+			);
+			
+			//draw((L + (p-L)/|p-L|*mod(t,pi) ,p), color->red(1), dashpattern->3.7*[pi,pi]);
+			
+			drawlaser(A);
+			drawlaser(B);
+			drawlaser(C);
+			drawlaser(D);
+			drawlaser(E);
+			
+			fillpoly([A,B,C,D,E,(-10,-20),(-10,-30),(-50,-30),(-50,-20)], color->(.7,.5,.4));
+			drawtext((-30,-25), "dough or bread", size->40, align->"mid");
+			drawtext(L, "Laser", size->40, offset->(1,1));
+			
+    </script>
+    
+
+    <div  id="CSCanvas" style="height:100%"></div>
+    
+    <script type="text/javascript">
+        
+        var gslp=[
+									{name:"L", kind:"P", type:"Free", pos:[30,20]},
+                  {name:"A", kind:"P", type:"Free", pos:[-45,-21]},
+                  {name:"B", kind:"P", type:"Free", pos:[-35,-18]},
+									{name:"C", kind:"P", type:"Free", pos:[-30,-21]},
+									{name:"D", kind:"P", type:"Free", pos:[-22,-19]},
+									{name:"E", kind:"P", type:"Free", pos:[-15,-21]},
+                  ];
+        cdy = CindyJS({canvasname:"CSCanvas",
+                    scripts: "cs*",
+                    geometry:gslp,
+                    animation: {autoplay: true},
+										use: ["CindyGL"],
+                    ports: [{
+                      id: "CSCanvas",
+                      transform: [ { visibleRect: [ -70,-50, 70,50 ] } ]
+                    }]
+                  });
+									
+    </script>              
+	</body>
+</html>

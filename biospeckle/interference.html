@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+    <title>Cindy JS</title>
+    <script type="text/javascript" src="Cindy.js"></script>
+    <script type="text/javascript" src="CindyGL.js"></script>
+		<style type="text/css">
+		  html,body { margin: 0px; padding: 0px; }
+		  html,body,#CSCanvas { width: 100%; height: 100%; max-width: 1000px; max-height: 600px;}
+		</style>
+  </head>
+    
+    
+	<body>
+  
+    <script id="csinit" type="text/x-cindyscript">
+			resetclock();
+      phi(x, t) := sin(|x,A|-t)+sin(|x,B|-t);
+			colorize(v) := (v/2+1/2, v/3+2/3, v/4+3/4);
+			
+			E(x, t) := cos(|x,A|/2-|x-B|/2)^2; // sin(a)+sin(b) = 2*sin(a/2+b/2)*cos(a/2-b/2)
+			screen(v) := gray(v);
+    </script>
+    
+    <script id="csdraw" type="text/x-cindyscript">
+      t = seconds();
+      colorplot(
+				if(#.y<30,
+					colorize(phi(#, t)),
+					screen(E((#.x,30),t))
+				)
+			);
+    </script>
+    
+
+    <div  id="CSCanvas" style="height:100%"></div>
+    
+    <script type="text/javascript">
+        
+        var gslp=[
+                  {name:"A", kind:"P", type:"Free", pos:[-30,-15]},
+                  {name:"B", kind:"P", type:"Free", pos:[30,-10]},
+                  ];
+        cdy = CindyJS({canvasname:"CSCanvas",
+                    scripts: "cs*",
+                    geometry:gslp,
+                    animation: {autoplay: true},
+										use: ["CindyGL"],
+                    ports: [{
+                      id: "CSCanvas",
+                      transform: [ { visibleRect: [ -70,-50, 70,50 ] } ]
+                    }]
+                  });
+									
+    </script>              
+	</body>
+</html>
