@@ -106,7 +106,7 @@ sy = mouse().y;
 
 
 RKstep();
-x = apply(1..min(N,100), i,
+x = apply(1..min(N,1000), i,
   (mat*imagergb(L, R, "y", (i, 0))) ++ [mod(i,2)];
 );
 
@@ -116,7 +116,7 @@ forall(sort(x, -#_3), p,
 
 //drawimage((-1,-1),(1,-1),"y");
 
-if(N>100, drawtext((0,0), "only 100 atoms are drawn!",align->"mid"));
+if(N>1000, drawtext((0,0), "only 1000 atoms are drawn!",align->"mid"));
 </script>
 <script type="text/javascript">
 var cdy = CindyJS({
