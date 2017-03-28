@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Cindy JS</title>
+    <script type="text/javascript" src="Cindy.js"></script>
+    <script type="text/javascript" src="CindyGL.js"></script>
+    <script type="text/javascript" src="../../plugins/symbolic/src/js/symbolic.js"></script>
+    <link rel="stylesheet" href="cindy.css">
+  </head>
+    
+  <body style="font-family:Arial;">
+  <h1>Complex Analytic Landscapes</h1>
+  <div style="float: left; padding:20px">
+      
+      <script id="csmousedown" type="text/x-cindyscript">
+      sx = mouse().x;
+      sy = mouse().y;
+      dragging = sx < .5;
+      </script>
+      <script id="csmouseup" type="text/x-cindyscript">
+      dragging = false;
+      </script>
+      
+      <script id="csinit" type="text/x-cindyscript">
+      dx = .05; dy =.0;
+      speciala = .5;
+      smootha(x) := if(x<speciala,
+        (-1/(speciala+.01))*(x-speciala)^2+speciala,
+        (1/(1.01-speciala))*(x-speciala)^2+speciala      
+      );
+      
+      seta(na) := (
+        a = na;
+        speciala = na;
+        PA.y = (na-.5)*.7;
+      );
+      
+      setzoom(zoom) := (
+        PC.y = (zoom);
+      );
+      
+      mat = [[0,0,1],[1,0,0],[0,1,0]] * (
+          (1, 0, 0),
+          (0, cos(.3), -sin(.3)),
+          (0, sin(.3), cos(.3))
+      );
+
+      sx = mouse().x;
+      sy = mouse().y;
+      dragging = false;
+    
+      zoom = 2.2;
+      a = 0.3;
+      alpha = .7;
+      
+      //we stand at position mat*(1, 0, -5) and watch to (0,0,0).
+      //ray(pixel, t) is the point in R^3 that lies at position t the ray behind the pixel at location pixel(vec2)
+      //t=0 is corresponds to points within the interesting area near (0,0,0)
+      ray(t) := mat * (t * rd + (0, 0, -5));
+      
+      //fun is the user defined function
+      fun(z) := (z-1)/(z*z+1);
+      
+      
+      F(z) := fun(z/zoom)*zoom;
+    
+      color(z) := ( //what color should be given to a complex number z?
+			  regional(n, grey1, grey2);
+			  n = 12;
+			  z = log(z)/2/pi;
+
+			  zfract = n*z - floor(n*z); //value of n*z in C mod Z[i]
+
+			  grey1 = im(zfract);
+			  grey2 = re(zfract);
+				
+			  hue(im(z))*(.6+.4*re(sqrt(grey1*grey2)));
+		  );
+      
+      init() := (
+        phi = -.1;
+        lambda = .2;
+        dx = .05; dy =.02;
+        diff(F(z), z, dF(z) := #);
+        normal(z) := (dz = dF(z); fz = F(z); dabs = dz/fz*|fz|; v = (re(dabs), -im(dabs), -1); v/|v|);//
+      );
+      init();
+      
+      </script>
+      
+      <script id="csdraw" type="text/x-cindyscript">
+      //the following is executed for every rendered frame
+      if (dragging,
+          dx = 3 * (sx - mouse().x); dy = 3 * (sy - mouse().y);,
+          dx = .9*dx; dy = .9*dy;
+      );
+      
+      sx = mouse().x;
+      sy = mouse().y;
+      
+      //the rotation matrix: It is modified either if the user is dragging or time passes
+      phi = phi + dx;
+      lambda = lambda + dy;
+      mat =  
+      (
+        (1,0,0),
+        (0,0,1),
+        (0,1,0)
+      )*
+      (
+          (cos(phi), 0, -sin(phi)),
+          (0, 1, 0),
+          (sin(phi), 0, cos(phi))
+      )*
+      (
+          (1, 0, 0),
+          (0, cos(lambda), -sin(lambda)),
+          (0, sin(lambda), cos(lambda))
+      );
+      
+      
+      //the 3 sliders at the left.
+      PA.x = 0.55;
+      if (PA.y > .4, PA.y = .4);
+      if (PA.y < -.4, PA.y = -.4);
+      a = smootha((.5 + PA.y/.7));
+
+
+
+      PC.x = 0.65;
+      if (PC.y > .4, PC.y = .4);
+      if (PC.y < -.4, PC.y = -.4);
+      zoom = exp(3 * PC.y - 1);
+      
+      
+      error(t) := (
+        regional(cp, cf, acf);
+        cp = ray(t);
+        cf = F(cp.x+i*cp.y);
+        acf = |cf|-.7;
+        cp.z-acf
+      );
+      
+      bisectf(x0, x1) := (
+          regional(v0, v1, m, vm);
+          v0 = error(x0);
+          v1 = error(x1);
+          repeat(11,
+              m = (x0 + x1) / 2; vm = error(m);
+              if (min(v0,vm) <= 0 & 0 <= max(v0, vm), //sgn(v0)!=sgn(vm); avoid products due numerics
+                  (x1 = m; v1 = vm;),
+                  (x0 = m; v0 = vm;)
+              );
+          );
+          m //return value   
+      );
+      
+      rd = (0,0,1);
+      colorplot(
+        t = 0;
+        rd = (sin(.5*#.x), sin(.5*#.y), cos(.5*#.x)*cos(.5*#.y)); //unit length vector of ray direction
+        cp = ray(t);
+        repeat(10,it,
+          cp = ray(t);
+          ma = max([|cp.x|,|cp.y|,|cp.z|]);
+          //ma = |cp|;
+          //if(ma>1,
+            
+            t = t+(ma-1);
+          //)
+        );
+        
+        lval = error(t);
+        lt = t;
+        done = false;
+        repeat(50,it,
+          if(!done,
+            cp = ray(t);
+            nval = error(t);
+            if(lval*nval<0,
+              done = true;
+              ,
+              lval = nval;
+              lt = t;
+              //delta = abs(nval);
+              delta = abs(nval*normal(cp.x+i*cp.y)_3);
+              t = t + min(delta,.05)+.001;
+              //t = t+ max(min(delta,.1),0.02);
+              
+              //t = t + .1;
+              //t = t + min(0.5, max(delta, .02));
+            )  
+          );
+        );
+        if(done,
+          t = bisectf(t, lt);
+          cp = ray(t);
+        );
+        
+        if(done & (max([|cp.x|,|cp.y|,|cp.z|])<1.1),
+          n =  normal(cp.x+i*cp.y);
+          color(F(cp.x+i*cp.y))*(.5+.5*abs(n*(.3,.5,.6)))
+          + .5*[1,1,1]*(n*(ray(0)/|ray(0)|))^4
+          ,//*if(cp.z<acf,.3,1),
+          grey(0.7)
+          //grey(sin(10*t));
+        )//+if(done,[1,0,0],[0,0,0])
+        //color(cf)*(.5+.5*sin(t))
+        //(.5+.5*sin(t),(.5+.5*cos(t)),(.5+.5*sin(t+1)))
+        //color(cf);
+      ); //render the scene. # is the pixel coordinate
+    
+      //lines for the sliders
+      draw((.55, .4), (.55, -.4), color -> (0, 0, 0));
+      
+      draw((.65, .4), (.65, -.4), color -> (0, 0, 0));    
+      </script>
+
+      <div  id="CSCanvas" style="border:0px"></div>
+      
+      <script type="text/javascript">
+          var cdy = CindyJS({canvasname:"CSCanvas",
+                      scripts: "cs*",
+                      animation: {autoplay: true},
+                      use : ["CindyGL","katex", "symbolic"],
+                      geometry: [ { name:"PA", kind:"P", type:"Free", pos: [.5,.37,1], narrow: true, color: [1,1,1], size:8 },
+                                  { name:"PC", kind:"P", type:"Free", pos: [.5,.1,1], narrow: true, color: [1,1,1], size:8 } ],
+                      ports: [{
+                        id: "CSCanvas",
+                        width: 700,
+                        height: 500,
+                        transform: [ { visibleRect: [ -0.7, -0.5, 0.7, 0.5 ] } ]
+                      }]
+          });
+      </script>
+      <input type="text" id="inp" value="(z-1)/(z*z+1)"  onkeypress="if((event.which ? event.which : event.keyCode)==13) { cdy.evokeCS('fun(z) := (' + this.value + '); init();'); }" size="80" style="font-size:18px">
+      </div>
+  <p>Non-algebraic functions are approximated by polynomials.
+  Roots are isolated by Descartes Method in Bernstein basis.</p>
+  <p>You can enter your own implicit surfaces or select one of the following list:</p>
+  <p><select id="sel" size="15" style="width:20em;">
+    <option data-a="1">z</option>
+    <option data-a="1">1/z</option>
+    <option data-a="1">1/(z^5-1)</option>
+    <option data-a="1">z^a</option>
+    <option data-a="1">z^(i*a)</option>
+    <option data-a="1">(z-1)/(z*z+1)</option>
+    <option data-a="1">sqrt(z)</option>
+    <option data-a="1">log(z)</option>
+    <option data-a="1">(z*z+1)/(z*z-1)</option>
+    <option data-a="1">sin(z)</option>
+    <option data-a="1">exp(z)</option>
+    <option data-a="1">sqrt(1-z*z)</option>
+    <option data-a="1" data-zoom="0">tan(z)</option>
+    <option data-a=".2">sin(z+3*a)/sin(z+i)</option>
+    <option data-a="1">1/(z^round(20*a-10)-1)</option>
+    
+  </select></p>
+  <script type="text/javascript">
+  var select = document.getElementById("sel");
+  select.addEventListener('change', function(event) {
+    document.getElementById('inp').value = this.value;
+    cdy.evokeCS('fun(z) := (' + this.value + '); init();');
+
+    var a = this.options[this.selectedIndex].getAttribute("data-a") || .5;
+    cdy.evokeCS('seta(' + a + ')');
+
+    var zoom = this.options[this.selectedIndex].getAttribute("data-zoom");
+    if(zoom) cdy.evokeCS('setzoom(' + zoom + ')');
+
+  }, false);
+  </script>
+
+  </body>
+</html>

@@ -1079,8 +1079,9 @@ function callFunctionNow(f) {
 }
 
 function loadExtraModules() {
-    if (usedFunctions.convexhull3d$1)
-        loadExtraPlugin("quickhull3d", "quickhull3d/quickhull3d.nocache.js");
+    if (usedFunctions.convexhull3d$1) {
+        loadExtraPlugin("QuickHull3D", "QuickHull3D.js");
+    }
 }
 
 var modulesToLoad = 1;
@@ -1678,7 +1679,7 @@ function setuplisteners(canvas, data) {
                     reader.readAsText(file);
                 } else if ((/^image\//).test(file.type)) {
                     reader.onload = function() {
-                        imgDone(reader.result);
+                        imgDone(i, reader.result);
                     };
                     reader.readAsDataURL(file);
                 } else {
@@ -1785,7 +1786,7 @@ function setuplisteners(canvas, data) {
                 reported = true;
                 oneDone(i,
 
-                    (img));
+                    loadImage(img, false));
             };
             img.onerror = function(err) {
                 if (reported) return;
@@ -2158,7 +2159,7 @@ function cs_onDrop(lst, pos) {
 function cindy_cancelmove() {
     move = undefined;
 }
-var version = [0,8,3,73,"g9bdd7a9"];
+var version = [0,8,4,4,"gb202fde"];
 //==========================================
 //      Complex Numbers
 //==========================================
@@ -9660,7 +9661,7 @@ eval_helper.shapeop = function(a, b, op) {
     var solution_paths = new ClipperLib.Paths();
     cpr.Execute(clipType, solution_paths, subject_fillType, clip_fillType);
     ClipperLib.JS.ScaleDownPaths(solution_paths, scale);
-    //    console.log(JSON.stringify(solution_paths));    
+    //    console.log(JSON.stringify(solution_paths));
     return {
         ctype: "shape",
         type: "polygon",
@@ -9919,7 +9920,7 @@ evaluator.replace$2 = function(args, modifs) {
         return s;
     }
 
-    //////////////// 
+    ////////////////
 
     var v0 = evaluate(args[0]);
     var v1 = evaluate(args[1]);
@@ -10385,7 +10386,7 @@ evaluator.halfplane$2 = function(args, modifs) {
         var l = w1;
         if (u0 === "Line" || u1 === "Point") {
             p = w1;
-            l = v0;
+            l = w0;
         }
         //OK im Folgenden lässt sich viel optimieren
         var tt = List.turnIntoCSList([l.value[0], l.value[1], CSNumber.zero]);

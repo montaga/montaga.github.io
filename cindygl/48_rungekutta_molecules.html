@@ -1,0 +1,140 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>Runge-Kutta</title>
+<meta charset="UTF-8">
+<script type="text/javascript" src="Cindy.js"></script>
+<script type="text/javascript" src="CindyGL.js"></script>
+<script id="csinit" type="text/x-cindyscript">
+N = 50; //number of bodies
+h = 1e-2; //stepsize
+
+
+evalf(y, alpha, k, res) := ( //evals f(y+alpha*k) where f(y)=y'. Here y = (x_1,...x_N, v_1,...v_N) and saves result to res
+  colorplot(L, R, res,
+    i = round(#.x);
+    vi =  imagergba(L, R, y, (i,1), interpolate->false) + alpha*imagergba(L, R, k, (i,1), interpolate->false);
+    if(#.y <= .5,
+      //y_(i,0)'=x_i' = v_i = y_(i+N)
+      vi
+    ,
+      //y_(i,1)' = v_i' = a_i = F_i/m_i
+      sum = [0,0,0,0];
+      
+      xi =  imagergba(L, R, y, (i,0), interpolate->false) + alpha*imagergba(L, R, k, (i,0), interpolate->false);
+      repeat(N, j, if(i!=j,
+        xj =  imagergba(L, R, y, (j,0), interpolate->false)  + alpha*imagergba(L, R, k, (j,0), interpolate->false);
+        sum = sum + (2*mod(i+j,2)-1)*(xj-xi)/max(|xi-xj|^3, 1e-2); //sgn depends on charge (odd i=positive, even i = negative)
+      ));
+      
+      ai = sum - .1*vi; //friction
+      if(|xi|>1, 
+        ai-xi, //push inside unit sphere
+        ai
+      ) + .1*[random()-.5, random()-.5, random()-.5, 0] //temperature
+    )
+  );
+);
+
+RKstep() := (
+  evalf("y", 0, "y", "k1");
+  evalf("y", h/2, "k1", "k2");
+  evalf("y", h/2, "k2", "k3");
+  evalf("y", h, "k3", "k4");
+  colorplot(L, R, "y",
+    imagergba(L, R, "y", #, interpolate->false) +
+    h/6*(
+      imagergba(L, R, "k1", #, interpolate->false) +
+      2*imagergba(L, R, "k2", #, interpolate->false) +
+      2*imagergba(L, R, "k3", #, interpolate->false) +
+      imagergba(L, R, "k4", #, interpolate->false)
+    )
+  );
+);
+
+
+
+reset() := (
+  RKstep(); //for some reason we need this in order to write to textures properly
+  colorplot(L, R, "y", if(#.y <= .5, 2*[random()-.5,random()-.5,random()-.5, 0], [0,0,0,0]));
+);
+
+updateN(n):=(
+  N = n;
+  L = [.5,-.5];
+  R = [N+.5,-.5];
+  createimage("y", N, 2);
+  createimage("k1", N, 2);
+  createimage("k2", N, 2);
+  createimage("k3", N, 2);
+  createimage("k4", N, 2);
+  
+  reset();
+);
+
+mat = [[1,0,0],[0,1,0],[0,0,1]];
+dragging = false;
+updateN(N);
+
+</script>
+<script id="csmousedown" type="text/x-cindyscript">
+dragging = true;
+</script>
+
+<script id="csmouseup" type="text/x-cindyscript">
+dragging = false;
+</script>
+
+<script id="csdraw" type="text/x-cindyscript">
+if (dragging,
+    dx = 3 * (sx - mouse().x); dy = 3 * (sy - mouse().y);
+    mat = mat * (
+        (1, 0, 0),
+        (0, cos(dy), -sin(dy)),
+        (0, sin(dy), cos(dy))
+    ) * (
+        (cos(dx), 0, -sin(dx)),
+        (0, 1, 0),
+        (sin(dx), 0, cos(dx))
+    );
+);
+
+sx = mouse().x;
+sy = mouse().y;
+
+
+RKstep();
+x = apply(1..min(N,100), i,
+  (mat*imagergb(L, R, "y", (i, 0))) ++ [mod(i,2)];
+);
+
+forall(sort(x, -#_3), p,
+  draw((p_1, p_2)/(p_3+2), color->hue(p_4/2), size->10/(p_3+2));
+);
+
+//drawimage((-1,-1),(1,-1),"y");
+
+if(N>100, drawtext((0,0), "only 100 atoms are drawn!",align->"mid"));
+</script>
+<script type="text/javascript">
+var cdy = CindyJS({
+  ports: [{id: "CSCanvas", transform:[{visibleRect:[-1,-1,1,1]}]}],
+  scripts: "cs*",
+  language: "en",
+  autoplay: true,
+  geometry: [],
+  use: ["CindyGL"]
+});
+</script>
+</head>
+
+<body style="font-family:Arial;">
+  <div id="CSCanvas" style="width:500px; height:500px; border:2px solid #000000;"></div>
+  <button onclick="cdy.evokeCS('reset()')" type="button">Reset</button>
+  
+  <div>N = <input type="text" id="inp" value="50"  onkeypress="if((event.which ? event.which : event.keyCode)==13) { cdy.evokeCS('updateN('+this.value+')');}" size="80" style="font-size:18px"></div>
+</body>
+
+</html>

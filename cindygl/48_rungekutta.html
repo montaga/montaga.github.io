@@ -1,0 +1,87 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>Runge-Kutta</title>
+<meta charset="UTF-8">
+<script type="text/javascript" src="Cindy.js"></script>
+<script type="text/javascript" src="CindyGL.js"></script>
+<script id="csinit" type="text/x-cindyscript">
+N = 5; //number of bodies
+h = 1e-2; //stepsize
+
+L = [.5,-.5];
+R = [2*N+.5,-.5];
+evalf(y, alpha, k, res) := ( //evals f(y+alpha*k) where f(y)=y'. Here y = (x_1,...x_N, v_1,...v_N) and saves result to res
+  colorplot(L, R, res,
+    i = round(#.x);
+    if(i <= N,
+      imagergba(L, R, y, #+(N, 0), interpolate->false) + alpha*imagergba(L, R, k, #+(N, 0), interpolate->false) //y_i'=x_i' = v_i = y_(i+N)
+    ,
+      i = i - N;
+      //y_(i+N)' = v_i' = a_i = F_i/m_i
+      sum = [0,0,0,0];
+      xi =  imagergba(L, R, y, (i,0), interpolate->false) + alpha*imagergba(L, R, k, (i,0), interpolate->false);
+      repeat(N, j, if(i!=j,
+        xj =  imagergba(L, R, y, (j,0), interpolate->false)  + alpha*imagergba(L, R, k, (j,0), interpolate->false);
+        sum = sum + (xj-xi)/max(|xi-xj|^3,1e-2);
+      ));
+      sum - xi //drag to middle
+      //sum
+    )
+  );
+);
+createimage("y", 2*N, 1);
+createimage("k1", 2*N, 1);
+createimage("k2", 2*N, 1);
+createimage("k3", 2*N, 1);
+createimage("k4", 2*N, 1);
+
+colorplot(L, R, "y", if(#.x <= N, [random(),random(),random(), 1], [0,0,0,0]));
+
+RKstep() := (
+  evalf("y", 0, "y", "k1");
+  evalf("y", h/2, "k1", "k2");
+  evalf("y", h/2, "k2", "k3");
+  evalf("y", h, "k3", "k4");
+  colorplot(L, R, "y",
+    imagergba(L, R, "y", #, interpolate->false) +
+    h/6*(
+      imagergba(L, R, "k1", #, interpolate->false) +
+      2*imagergba(L, R, "k2", #, interpolate->false) +
+      2*imagergba(L, R, "k3", #, interpolate->false) +
+      imagergba(L, R, "k4", #, interpolate->false)
+    )
+  );
+);
+</script>
+<script id="csdraw" type="text/x-cindyscript">
+RKstep();
+
+repeat(min(N,10), i,
+  xi = imagergba(L, R, "y", (i, 0));
+  vi = imagergba(L, R, "y", (i+N, 0));
+  draw((xi_1, xi_2)/(xi_3+2), color->hue(i/N), size->10/(xi_3+2));
+  //draw((xi_1, xi_2), (xi_1, xi_2)+(vi_1, vi_2)/10, color->hue(i/N), arrow->true, arrowshape->"full");
+);
+
+drawimage((-1,-1),(1,-1),"y");
+</script>
+<script type="text/javascript">
+var cdy = CindyJS({
+  ports: [{id: "CSCanvas", transform:[{visibleRect:[-1,-1,1,1]}]}],
+  scripts: "cs*",
+  language: "en",
+  autoplay: true,
+  geometry: [],
+  use: ["CindyGL"]
+});
+</script>
+</head>
+
+<body style="font-family:Arial;">
+  <div id="CSCanvas" style="width:800px; height:800px;"></div>
+</body>
+
+</html>
