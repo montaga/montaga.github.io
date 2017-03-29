@@ -52,6 +52,7 @@ RKstep() := (
   evalf(linearcomb("y", h/2, "k1"), "k2");
   evalf(linearcomb("y", h/2, "k2"), "k3");
   evalf(linearcomb("y", h, "k3"), "k4");
+  
   colorplot(L, R, "y",
     imagergba(L, R, "y", #, interpolate->false) +
     h/6*(
@@ -67,7 +68,7 @@ RKstep() := (
 
 reset() := (
   RKstep(); //for some reason we need this in order to write to textures properly
-  colorplot(L, R, "y", if(#.y <= .5, radius*2*[random()-.5,random()-.5,random()-.5, 0], [0,0,0,0]));
+  colorplot(L, R, "y", if(#.y <= .5, radius*2*[random()-.5,random()-.5,random()-.5, 1], [0,0,0,0]));
 );
 
 updateN(n):=(
@@ -131,7 +132,7 @@ forall(sort(x, -#_3), p,
   draw((p_1, p_2)/(p_3), color->hue(p_5/2), size->20/(p_3));
 );
 
-//drawimage((-1,-1),(1,-1),"y");
+drawimage((-1,-1),(1,-1),"y");
 
 </script>
 <script type="text/javascript">
