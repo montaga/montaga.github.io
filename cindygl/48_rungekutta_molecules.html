@@ -108,11 +108,11 @@ sy = mouse().y;
 
 RKstep();
 x = apply(1..min(N,1000), i,
-  (mat*imagergb(L, R, "y", (i, 0))) ++ [mod(i,2)];
+  mat*imagergb(L, R, "y", (i, 0))+(0,0,max(2*radius,1)) ++ [mod(i,2)];
 );
 
 forall(sort(x, -#_3), p,
-  draw((p_1, p_2)/(p_3+1.7*radius), color->hue(p_4/2), size->20/(p_3+1.7*radius));
+  draw((p_1, p_2)/(p_3), color->hue(p_4/2), size->20/(p_3));
 );
 
 //drawimage((-1,-1),(1,-1),"y");
