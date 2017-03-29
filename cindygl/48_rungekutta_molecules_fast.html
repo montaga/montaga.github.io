@@ -31,7 +31,7 @@ evalf(y, alpha, k, res) := ( //evals f(y+alpha*k) where f(y)=y'. Here y = (x_1,.
       
       ai = sum - .8*vi; //friction
       if(|xi|>re(N^1/3)/10, 
-        ai-xi, //push inside sphere
+        ai-xi, //push inside unit sphere
         ai
       ) //+ .1*[random()-.5, random()-.5, random()-.5, 0] //temperature
     )

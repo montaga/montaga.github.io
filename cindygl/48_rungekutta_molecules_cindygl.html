@@ -9,7 +9,7 @@
 <script type="text/javascript" src="CindyGL.js"></script>
 <script id="csinit" type="text/x-cindyscript">
 N = 50; //number of bodies
-h = 5e-2; //stepsize
+h = 1e-2; //stepsize
 
 
 evalf(y, alpha, k, res) := ( //evals f(y+alpha*k) where f(y)=y'. Here y = (x_1,...x_N, v_1,...v_N) and saves result to res
@@ -26,12 +26,12 @@ evalf(y, alpha, k, res) := ( //evals f(y+alpha*k) where f(y)=y'. Here y = (x_1,.
       xi =  imagergba(L, R, y, (i,0), interpolate->false) + alpha*imagergba(L, R, k, (i,0), interpolate->false);
       repeat(N, j, if(i!=j,
         xj =  imagergba(L, R, y, (j,0), interpolate->false)  + alpha*imagergba(L, R, k, (j,0), interpolate->false);
-        sum = sum + (2*mod(i+j,2)-1)*(xj-xi)/max(|xi-xj|^3, 1e-2) + 1e-3*(xi-xj)/max(|xi-xj|^12, 1e-6); //sgn depends on charge (odd i=positive, even i = negative)
+        sum = sum + (2*mod(i+j,2)-1)*(xj-xi)/max(|xi-xj|^3, 1e-2); //sgn depends on charge (odd i=positive, even i = negative)
       ));
       
-      ai = sum - .8*vi; //friction
-      if(|xi|>re(N^1/3)/10, 
-        ai-xi, //push inside sphere
+      ai = sum - .2*vi; //friction
+      if(|xi|>1, 
+        ai-xi, //push inside unit sphere
         ai
       ) //+ .1*[random()-.5, random()-.5, random()-.5, 0] //temperature
     )
@@ -106,17 +106,28 @@ sy = mouse().y;
 
 
 RKstep();
+
+/*
 x = apply(1..min(N,1000), i,
   (mat*imagergb(L, R, "y", (i, 0))) ++ [mod(i,2)];
 );
 
 forall(sort(x, -#_3), p,
-  draw((p_1, p_2)/(p_3+3), color->hue(p_4/2), size->20/(p_3+3));
+  draw((p_1, p_2)/(p_3+2), color->hue(p_4/2), size->10/(p_3+2));
 );
 
 //drawimage((-1,-1),(1,-1),"y");
 
 if(N>1000, drawtext((0,0), "only 1000 atoms are drawn!",align->"mid"));
+*/
+colorplot(
+  col = [0,0,0];
+  repeat(N, i,
+    p = (mat*imagergb(L, R, "y", (i, 0)));
+    col += exp(-|(p_1, p_2)/(p_3+2)|)*[1,1,1];
+  )
+  col
+)
 </script>
 <script type="text/javascript">
 var cdy = CindyJS({
