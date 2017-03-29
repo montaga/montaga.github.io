@@ -9,31 +9,31 @@
 <script type="text/javascript" src="CindyGL.js"></script>
 <script id="csinit" type="text/x-cindyscript">
 N = 50; //number of bodies
-h = 1e-2; //stepsize
+h = 5e-2; //stepsize
 
 
 evalf(y, alpha, k, res) := ( //evals f(y+alpha*k) where f(y)=y'. Here y = (x_1,...x_N, v_1,...v_N) and saves result to res
   colorplot(L, R, res,
     i = round(#.x);
-    vi =  imagergba(L, R, y, (i,1), interpolate->false) + alpha*imagergba(L, R, k, (i,1), interpolate->false);
+    vi = imagergba(L, R, y, (i,1), interpolate->false) + alpha*imagergba(L, R, k, (i,1), interpolate->false);
+    xi = imagergba(L, R, y, (i,0), interpolate->false) + alpha*imagergba(L, R, k, (i,0), interpolate->false);
     if(#.y <= .5,
-      //y_(i,0)'=x_i' = v_i = y_(i+N)
-      vi
+      //y_(i,0)'=x_i' = v_i = y_(i,1)
+      if(|xi|>radius,
+        vi+(radius*xi/|xi|-xi), //push inside sphere
+        vi 
+      )
     ,
       //y_(i,1)' = v_i' = a_i = F_i/m_i
       sum = [0,0,0,0];
       
-      xi =  imagergba(L, R, y, (i,0), interpolate->false) + alpha*imagergba(L, R, k, (i,0), interpolate->false);
       repeat(N, j, if(i!=j,
         xj =  imagergba(L, R, y, (j,0), interpolate->false)  + alpha*imagergba(L, R, k, (j,0), interpolate->false);
-        sum = sum + (2*mod(i+j,2)-1)*(xj-xi)/max(|xi-xj|^3, 1e-2); //sgn depends on charge (odd i=positive, even i = negative)
+        sum = sum + (2*mod(i+j,2)-1)*(xj-xi)/max(|xi-xj|^3, 1e-2) + 1e-6*(xi-xj)/max(|xi-xj|^12, 1e-8); //sgn depends on charge (odd i=positive, even i = negative)
       ));
       
-      ai = sum - .2*vi; //friction
-      if(|xi|>1, 
-        ai-xi, //push inside unit sphere
-        ai
-      ) //+ .1*[random()-.5, random()-.5, random()-.5, 0] //temperature
+      ai = sum - .4*vi; //friction
+      ai + .0*[random()-.5, random()-.5, random()-.5, 0] //temperature
     )
   );
 );
@@ -55,21 +55,22 @@ RKstep() := (
 );
 
 
-
 reset() := (
   RKstep(); //for some reason we need this in order to write to textures properly
-  colorplot(L, R, "y", if(#.y <= .5, 2*[random()-.5,random()-.5,random()-.5, 0], [0,0,0,0]));
+  colorplot(L, R, "y", if(#.y <= .5, radius*2*[random()-.5,random()-.5,random()-.5, 0], [0,0,0,0]));
 );
 
 updateN(n):=(
   N = n;
   L = [.5,-.5];
   R = [N+.5,-.5];
+  radius = re(N^1/3)/20;
   createimage("y", N, 2);
   createimage("k1", N, 2);
   createimage("k2", N, 2);
   createimage("k3", N, 2);
   createimage("k4", N, 2);
+  createimage("p", N, 1);
   
   reset();
 );
@@ -104,29 +105,48 @@ if (dragging,
 sx = mouse().x;
 sy = mouse().y;
 
-
-RKstep();
-
+repeat(5,
+  RKstep();
+);
 /*
 x = apply(1..min(N,1000), i,
-  (mat*imagergb(L, R, "y", (i, 0))) ++ [mod(i,2)];
+  mat*imagergb(L, R, "y", (i, 0))+(0,0,max(2*radius,1)) ++ [mod(i,2)];
 );
 
 forall(sort(x, -#_3), p,
-  draw((p_1, p_2)/(p_3+2), color->hue(p_4/2), size->10/(p_3+2));
+  draw((p_1, p_2)/(p_3), color->hue(p_4/2), size->20/(p_3));
 );
 
 //drawimage((-1,-1),(1,-1),"y");
 
 if(N>1000, drawtext((0,0), "only 1000 atoms are drawn!",align->"mid"));
 */
+colorplot(L, R, "p",
+  mat*imagergb(L, R, "y", #, interpolate->false)+(0,0,max(1.2*radius,2));
+);
+
+if(N<200,
+colorplot(
+  col = [0,0,0];
+  z = 100;
+  repeat(N, i,
+    p = imagergb(L, R, "p", (i, 0), interpolate->false);
+    if(p_3<z & |#,(p_1, p_2)/(p_3)|<.1/p_3,
+      col = hue(i/2)*max(1-|#,(p_1, p_2)/(p_3)|*p_3*5,0);
+      z = p_3;
+    )
+  );
+  col
+);
+,
 colorplot(
   col = [0,0,0];
   repeat(N, i,
-    p = (mat*imagergb(L, R, "y", (i, 0)));
-    col += exp(-|(p_1, p_2)/(p_3+2)|)*[1,1,1];
-  )
+    p = imagergb(L, R, "p", (i, 0), interpolate->false);
+    col = col+hue(i/2)*max(1-|#,(p_1, p_2)/(p_3)|*p_3*5,0);
+  );
   col
+);
 )
 </script>
 <script type="text/javascript">
