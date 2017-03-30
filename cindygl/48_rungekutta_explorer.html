@@ -10,7 +10,7 @@
 <script id="csinit" type="text/x-cindyscript">
 N = 200; //number of bodies
 h = .1; //stepsize
-k = 20; //steps per frame
+k = 10; //steps per frame
 temp = .1;
 char1 = 1;
 char2 = 1;
@@ -27,7 +27,7 @@ linearcomb(y, alpha, k) := ( //saves y+alpha*k to "h"
   "h" //return value
 );
 
-type(i) := i/N<=char2/max(char1+char2,1); //total charge should be 0
+type(i) := i<=N*char2/max(char1+char2,1); //total charge should be 0
 
 charge(i) := if(type(i), -char1, char2);  //avoid if: if(type(i), -char1, char2)
 col(i) := if(type(i), col1, col2);
@@ -304,7 +304,7 @@ var cdy = CindyJS({
   <button onclick="cdy.evokeCS('reset()')" type="button">Reset</button>
   
   <div>Number of particles: <input type="text" value="200"  onchange="cdy.evokeCS('updateN('+this.value+')');" size="10" style="font-size:18px"></div>
-  <div>RK-steps per frame: <input type="text" value="20"  onchange="cdy.evokeCS('k = '+this.value+'');" size="10" style="font-size:18px"></div>
+  <div>RK-steps per frame: <input type="text" value="10"  onchange="cdy.evokeCS('k = '+this.value+'');" size="10" style="font-size:18px"></div>
   <div>size of a single RK-step: <input type="text" value="0.1"  onchange="cdy.evokeCS('h = '+this.value+'');" size="10" style="font-size:18px"></div>
 </body>
 
