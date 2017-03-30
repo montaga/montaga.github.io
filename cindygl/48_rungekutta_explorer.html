@@ -9,7 +9,7 @@
 <script type="text/javascript" src="CindyGL.js"></script>
 <script id="csinit" type="text/x-cindyscript">
 N = 200; //number of bodies
-h = 8e-1; //stepsize
+h = .5; //stepsize
 
 temp = .1;
 char1 = 1;
@@ -27,9 +27,9 @@ linearcomb(y, alpha, k) := ( //saves y+alpha*k to "h"
   "h" //return value
 );
 
-charge(i) := (char1+char2)*round((i)/N)-char1;  //avoid if: if(i<N/2,-char1,+char2);
-col(i) := (col2-col1)*round((i)/N)+col1;
-rad(i) := (r2-r1)*round((i)/N)+r1;
+charge(i) := (char1+char2)*round((i-1)/N)-char1;  //avoid if: if(i<N/2,-char1,+char2);
+col(i) := (col2-col1)*round((i-1)/N)+col1;
+rad(i) := (r2-r1)*round((i-1)/N)+r1;
 
 evalf(y, res) := ( //evals f(y)=y'. Here y = (x_1,...x_N, v_1,...v_N) and saves result to res
   colorplot(Lc, Rc, res,
@@ -49,7 +49,7 @@ evalf(y, res) := ( //evals f(y)=y'. Here y = (x_1,...x_N, v_1,...v_N) and saves 
         r = |xi-xj|;
         cj = charge(j);
         rj = rad(j);
-        sum = sum + (xj-xi)*(-ci*cj/(r^3+1e-1) - 1/((r/(ri+rj))^12+1e-1))// maximum 10, equality if r=ri+rj
+        sum = sum + (xj-xi)*(-ci*cj/(r^3+1e-2) - 1/((r/(ri+rj))^12+1e-2))// maximum 100, equality if r=ri+rj
         
       ));
       
@@ -185,7 +185,7 @@ draw((10,-10),(10,10), color->[0,0,0]);
           if(x<V1.x,x=V1.x);
           if(x>V2.x,x=V2.x);
           V.xy=(x,V1.y);
-          friction=|V,V1|/|V1,V2|*.7+.01;
+          friction=|V,V1|/|V1,V2|*.2+1e-3;
 
 
 
