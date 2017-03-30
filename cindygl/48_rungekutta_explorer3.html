@@ -9,7 +9,8 @@
 <script type="text/javascript" src="CindyGL.js"></script>
 <script id="csinit" type="text/x-cindyscript">
 N = 200; //number of bodies
-h = .5; //stepsize
+k = 10; //steps per frame
+h = 1/10; //stepsize
 
 temp = .1;
 char1 = 1;
@@ -51,7 +52,7 @@ evalf(y, res) := ( //evals f(y)=y'. Here y = (x_1,...x_N, v_1,...v_N) and saves 
         r = |xi-xj|;
         cj = charge(j);
         rj = rad(j);
-        sum = sum + (xj-xi)*(-ci*cj/(r^3+1e-2) - 1/((r/(ri+rj))^12+1e-2))// maximum 100, equality if r=ri+rj
+        sum = sum + (xj-xi)*(-ci*cj/(r^3+1e-4) - 1/((r/(ri+rj))^12+1e-4))// maximum 1e4, equality if r=ri+rj
         
       ));
       
@@ -131,7 +132,7 @@ if (dragging,
 sx = mouse().x;
 sy = mouse().y;
 
-repeat(1,
+repeat(k,
   RKstep()
 );
 
@@ -285,7 +286,7 @@ var cdy = CindyJS({
       
      {name:"P1", type:"Free", pos:[12,-8],color:[0,0,0],pinned:true,size:2},
       {name:"P2", type:"Free", pos:[20,-8],color:[0,0,0],pinned:true,size:2},
-      {name:"P", type:"Free", pos:[12,-8],color:[1,1,1],pinned:false,size:4},
+      {name:"P", type:"Free", pos:[13,-8],color:[1,1,1],pinned:false,size:4},
       {name:"pl", type:"Segment", args:["P1","P2"],color:[0,0,0],pinned:false,size:2},
       
 
