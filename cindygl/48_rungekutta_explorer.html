@@ -9,8 +9,8 @@
 <script type="text/javascript" src="CindyGL.js"></script>
 <script id="csinit" type="text/x-cindyscript">
 N = 200; //number of bodies
-h = .1; //stepsize
-k = 10; //steps per frame
+h = .5; //stepsize
+k = 1; //steps per frame
 temp = .1;
 char1 = 1;
 char2 = 1;
@@ -19,6 +19,7 @@ r2 = 1.1;
 friction = .2;
 temp = .1;
 pressure = .01;
+maxforce = 2;
 
 linearcomb(y, alpha, k) := ( //saves y+alpha*k to "h"
   colorplot(Lc, Rc, "h",
@@ -51,7 +52,7 @@ evalf(y, res) := ( //evals f(y)=y'. Here y = (x_1,...x_N, v_1,...v_N) and saves 
         r = |xi-xj|;
         cj = charge(j);
         rj = rad(j);
-        sum = sum + (xj-xi)*(-ci*cj/(r^3+1e-4) - 1/((r/(ri+rj))^12+1e-4))// maximum 1e4, equality if r=ri+rj
+        sum = sum + (xj-xi)*(-ci*cj/(r^3+1/maxforce) - 1/((r/(ri+rj))^12+1/maxforce))//, equality if r=ri+rj
         
       ));
       
@@ -304,8 +305,9 @@ var cdy = CindyJS({
   <button onclick="cdy.evokeCS('reset()')" type="button">Reset</button>
   
   <div>Number of particles: <input type="text" value="200"  onchange="cdy.evokeCS('updateN('+this.value+')');" size="10" style="font-size:18px"></div>
-  <div>RK-steps per frame: <input type="text" value="10"  onchange="cdy.evokeCS('k = '+this.value+'');" size="10" style="font-size:18px"></div>
-  <div>size of a single RK-step: <input type="text" value="0.1"  onchange="cdy.evokeCS('h = '+this.value+'');" size="10" style="font-size:18px"></div>
+  <div>RK-steps per frame: <input type="text" value="1"  onchange="cdy.evokeCS('k = '+this.value+'');" size="10" style="font-size:18px"></div>
+  <div>size of a single RK-step: <input type="text" value="0.5"  onchange="cdy.evokeCS('h = '+this.value+'');" size="10" style="font-size:18px"></div>
+  <div>maximal force: <input type="text" value="2"  onchange="cdy.evokeCS('maxforce = '+this.value+'');" size="10" style="font-size:18px"></div>
 </body>
 
 </html>
