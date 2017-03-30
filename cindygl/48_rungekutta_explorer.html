@@ -10,7 +10,7 @@
 <script id="csinit" type="text/x-cindyscript">
 N = 200; //number of bodies
 h = .5; //stepsize
-k = 1; //steps per frame
+k = 5; //steps per frame
 temp = .1;
 char1 = 1;
 char2 = 1;
@@ -305,7 +305,7 @@ var cdy = CindyJS({
   <button onclick="cdy.evokeCS('reset()')" type="button">Reset</button>
   
   <div>Number of particles: <input type="text" value="200"  onchange="cdy.evokeCS('updateN('+this.value+')');" size="10" style="font-size:18px"></div>
-  <div>RK-steps per frame: <input type="text" value="1"  onchange="cdy.evokeCS('k = '+this.value+'');" size="10" style="font-size:18px"></div>
+  <div>RK-steps per frame: <input type="text" value="5"  onchange="cdy.evokeCS('k = '+this.value+'');" size="10" style="font-size:18px"></div>
   <div>size of a single RK-step: <input type="text" value="0.5"  onchange="cdy.evokeCS('h = '+this.value+'');" size="10" style="font-size:18px"></div>
   <div>maximal force: <input type="text" value="2"  onchange="cdy.evokeCS('maxforce = '+this.value+'');" size="10" style="font-size:18px"></div>
 </body>
