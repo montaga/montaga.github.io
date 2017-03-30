@@ -49,7 +49,7 @@ evalf(y, res) := ( //evals f(y)=y'. Here y = (x_1,...x_N, v_1,...v_N) and saves 
         r = |xi-xj|;
         cj = charge(j);
         rj = rad(j);
-        sum = sum + (xj-xi)*(-ci*cj/(r^3+1e-2) - 1/((r/(ri+rj))^12+1e-2))// maximum 100, equality if r=ri+rj
+        sum = sum + (xj-xi)*(-ci*cj/(r^3+1e-1) - 1/((r/(ri+rj))^12+1e-1))// maximum 10, equality if r=ri+rj
         
       ));
       
@@ -198,7 +198,7 @@ grestore();
           if(x<P1.x,x=P1.x);
           if(x>P2.x,x=P2.x);
           P.xy=(x,P1.y);
-          pressure=|P,P1|/|P1,P2|*.1;
+          pressure=|P,P1|/|P1,P2|*.2;
           errc(pressure);
 
 
