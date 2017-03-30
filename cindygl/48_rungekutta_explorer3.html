@@ -51,7 +51,7 @@ evalf(y, res) := ( //evals f(y)=y'. Here y = (x_1,...x_N, v_1,...v_N) and saves 
         r = |xi-xj|;
         cj = charge(j);
         rj = rad(j);
-        sum = sum + (xj-xi)*(-ci*cj/((r^3+1e-2) - 1/((r/(ri+rj))^12+1e-2))// maximum 100, equality if r=ri+rj
+        sum = sum + (xj-xi)*(-ci*cj/(r^3+1e-2) - 1/((r/(ri+rj))^12+1e-2))// maximum 100, equality if r=ri+rj
         
       ));
       
