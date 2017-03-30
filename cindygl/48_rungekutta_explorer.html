@@ -10,7 +10,7 @@
 <script id="csinit" type="text/x-cindyscript">
 N = 200; //number of bodies
 h = .1; //stepsize
-
+k = 20; //steps per frame
 temp = .1;
 char1 = 1;
 char2 = 1;
@@ -131,7 +131,7 @@ if (dragging,
 sx = mouse().x;
 sy = mouse().y;
 
-repeat(1,
+repeat(k,
   RKstep()
 );
 
@@ -187,7 +187,7 @@ draw((10,-10),(10,10), color->[0,0,0]);
           if(x<V1.x,x=V1.x);
           if(x>V2.x,x=V2.x);
           V.xy=(x,V1.y);
-          friction=|V,V1|/|V1,V2|*.2+1e-3;
+          friction=|V,V1|/|V1,V2|*.1+1e-3;
 
 
 
@@ -285,7 +285,7 @@ var cdy = CindyJS({
       
      {name:"P1", type:"Free", pos:[12,-8],color:[0,0,0],pinned:true,size:2},
       {name:"P2", type:"Free", pos:[20,-8],color:[0,0,0],pinned:true,size:2},
-      {name:"P", type:"Free", pos:[13,-8],color:[1,1,1],pinned:false,size:4},
+      {name:"P", type:"Free", pos:[12.2,-8],color:[1,1,1],pinned:false,size:4},
       {name:"pl", type:"Segment", args:["P1","P2"],color:[0,0,0],pinned:false,size:2},
       
 
@@ -304,7 +304,8 @@ var cdy = CindyJS({
   <div id="CSCanvas" style="width:870px; height:500px; border:2px solid #000000;"></div>
   <button onclick="cdy.evokeCS('reset()')" type="button">Reset</button>
   
-  <div>N = <input type="text" id="inp" value="200"  onkeypress="if((event.which ? event.which : event.keyCode)==13) { cdy.evokeCS('updateN('+this.value+')');}" size="80" style="font-size:18px"></div>
+  <div>Number of particles: <input type="text" id="inp" value="200"  onkeypress="if((event.which ? event.which : event.keyCode)==13) { cdy.evokeCS('updateN('+this.value+')');}" size="10" style="font-size:18px"></div>
+  <div>RK-steps per frame: <input type="text" id="inp" value="20"  onkeypress="if((event.which ? event.which : event.keyCode)==13) { cdy.evokeCS('k = '+this.value+'');}" size="10" style="font-size:18px"></div>
 </body>
 
 </html>
