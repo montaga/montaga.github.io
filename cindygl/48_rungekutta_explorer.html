@@ -306,6 +306,7 @@ var cdy = CindyJS({
   
   <div>Number of particles: <input type="text" id="inp" value="200"  onkeypress="if((event.which ? event.which : event.keyCode)==13) { cdy.evokeCS('updateN('+this.value+')');}" size="10" style="font-size:18px"></div>
   <div>RK-steps per frame: <input type="text" id="inp" value="20"  onkeypress="if((event.which ? event.which : event.keyCode)==13) { cdy.evokeCS('k = '+this.value+'');}" size="10" style="font-size:18px"></div>
+  <div>size of a single RK-step: <input type="text" id="inp" value="0.1"  onkeypress="if((event.which ? event.which : event.keyCode)==13) { cdy.evokeCS('h = '+this.value+'');}" size="10" style="font-size:18px"></div>
 </body>
 
 </html>
