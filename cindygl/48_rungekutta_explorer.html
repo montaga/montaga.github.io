@@ -135,7 +135,6 @@ repeat(1,
 
 
 
-draw((10,-10),(10,10), color->[0,0,0]);
 
 
 drawtext(S2+(.5,-.2),"radius",size->16);
@@ -163,7 +162,7 @@ repeat(char2,r,
 
 
 colorplot(Lc, Rc, "p",
-  mat*imagergb(Lc, Rc, "y", #, interpolate->false)+(0,0,1.5*radius);
+  mat*imagergb(Lc, Rc, "y", #, interpolate->false)+(0,0,1.8*radius);
 );
 
 x = readpixels("p");
@@ -172,10 +171,12 @@ x = apply(1..N, i, x_i++[i]);
 clip(screen()~~halfplane(join((10,10),(10,-10)),(0,0)));
 forall(sort(x, -#_3), p,
   if(p_3>0,
-    draw(10*(p_1, p_2)/(p_3), color->col(p_5), size->rad(p_5)*200/(p_3));
+    draw(10*(p_1, p_2)/(p_3), color->col(p_5), size->rad(p_5)*200/(p_3), alpha->.9);
   );
 );
 grestore();
+draw((10,-10),(10,10), color->[0,0,0]);
+
 
 </script>
 
