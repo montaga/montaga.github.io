@@ -271,6 +271,10 @@ if(dragging,
        R.color=col1;
        T.color=col2;
        U.color=col2;
+       
+       Dragpt1.xy = [5,6];
+       Dragpt2.xy = [5,0];
+       Dragpt2.xy = [5,-6];
 </script>
 <script type="text/javascript">
 var cdy = CindyJS({
@@ -316,7 +320,13 @@ var cdy = CindyJS({
       {name:"Z1", type:"Free", pos:[9,-9],color:[0,0,0],pinned:true,size:2},
        {name:"Z2", type:"Free", pos:[9,9],color:[0,0,0],pinned:true,size:2},
        {name:"Z", type:"Free", pos:[9,0],color:[1,1,1],pinned:false,size:8},
-       {name:"zl", type:"Segment", args:["Z1","Z2"],color:[0,0,0],pinned:false,size:2}    
+       {name:"zl", type:"Segment", args:["Z1","Z2"],color:[0,0,0],pinned:false,size:2},
+
+     
+     {name:"Dragpt1", type:"Free", pos:[5,6],color:[1,0,0],pinned:false,alpha:0},
+     {name:"Dragpt2", type:"Free", pos:[5,0],color:[1,0,0],pinned:false,alpha:0},
+     {name:"Dragpt3", type:"Free", pos:[5,-6],color:[1,0,0],pinned:false,alpha:0},
+    
   ],
   use: ["CindyGL"]
 });
