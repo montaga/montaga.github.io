@@ -177,7 +177,7 @@ x = apply(1..N, i, x_i++[i]);
 
 clip(screen()~~halfplane(join((10,10),(10,-10)),(0,0)));
 forall(sort(x, -#_3), p,
-  if(p_3>0,
+  if(p_3>zoom*radius,
     draw(10*(p_1, p_2)/(p_3), color->col(p_5), size->rad(p_5)*300/(p_3), alpha->.9);
   );
 );
