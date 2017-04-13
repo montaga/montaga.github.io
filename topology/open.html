@@ -64,29 +64,29 @@ init():=(
 init();
 
 scnfball(x, r) := (
-	v = x/|x|;
+	v = x/|a|;
 	vd = (v_2, -v_1)/200;
-	ans = polygon([x+v*r+vd, x+v*r-vd, x-v*min(r, |x|)-vd, x-v*min(r, |x|)+vd]);
-	if(r>|x|,
-		ans = ans ++ circle((0,0), r-|x|);
+	ans = polygon([x+v*r+vd, x+v*r-vd, x-v*min(r, |a|)-vd, x-v*min(r, |a|)+vd]);
+	if(r>|a|,
+		ans = ans ++ circle((0,0), r-|a|);
 	);
 	ans
 );
 
 riverball(x, r) := (
 	v = (0,1);
-	h = |x_2|;
+	h = |a_y|;
 	vd = (1,0)/N/2;
 	
 	
 	ans = polygon([x+v*r-vd, x-v*r-vd, x-v*r+vd, x+v*r+vd]);
 	if(r>h,
-		if(x_2>0,
-			ans = polygon([x+v*r-vd, (x_1,0)-vd, (x_1,0)+vd, x+v*r+vd]),
-			ans = polygon([x-v*r-vd, (x_1,0)-vd, (x_1,0)+vd, x-v*r+vd])
+		if(a_y>0,
+			ans = polygon([x+v*r-vd, (a_x,0)-vd, (a_x,0)+vd, x+v*r+vd]),
+			ans = polygon([x-v*r-vd, (a_x,0)-vd, (a_x,0)+vd, x-v*r+vd])
 		);
 		k = r-h;
-		ans = ans ++ polygon([(x_1,k), (x_1+k,0), (x_1,-k), (x_1-k,0)]);
+		ans = ans ++ polygon([(a_x,k), (a_x+k,0), (a_x,-k), (a_x-k,0)]);
 	);
 	ans
 );
@@ -103,11 +103,11 @@ riverball(x, r) := (
 		if(mode=="scnf",
 			k = arctan2(x)/(2*pi)*N;
 			phi = round(k)/N*2*pi;
-			x = (cos(phi),sin(phi))*|x|;
+			x = (cos(phi),sin(phi))*|a|;
 		);
 		
 		if(mode=="river",
-			x_1 = round(N*x_1)/N;
+			a_x = round(N*a_x)/N;
 		);
 		if(!inside(x,shape) & seconds()>.2,
 			x = (-1,1)/20;
@@ -137,8 +137,8 @@ riverball(x, r) := (
 				[x,y] = x;
 				fill( polygon([(x+r,y),(x,y+r),(x-r,y),(x,y-r)]), color->(1,0,0), alpha->.3),
 			if(mode=="box",
-				drawtext(x, "$\forall p \in O \exists x_0,x_1,y_0,y_1\in\mathbb{R}:$
-				$\color{red}{ x \in (x_0,x_1) \times (y_0,y_1) \subset O}$");
+				drawtext(x, "$\forall p \in O \exists x_0,a_x,y_0,b_x\in\mathbb{R}:$
+				$\color{red}{ x \in (x_0,a_x) \times (y_0,b_x) \subset O}$");
 				draw(x, alpha -> .2);
 				r = (boxdst(x, shape))*.9;
 				[x,y] = x;
@@ -174,39 +174,39 @@ riverball(x, r) := (
 <h2>Metric topologies</h2>
 Let $d: X \times X \rightarrow \mathbb{R}$ be a metric, i.e. 
 <ul>
-	<li>$ d(x,y)\geq 0 $ for all $x \neq y$ non-negativity </li>
-	<li>$ d(x,y)=0\Leftrightarrow x=y $</li>
-	<li>$d(x,y)=d(y,x)$ symmetry</li>
-	<li>$d(x,z)\leq d(x,y)+d(y,z)$ triangle inequality</li>
+	<li>$ d(a,b)\geq 0 $ for all $a \neq b$ non-negativity </li>
+	<li>$ d(a,b)=0\Leftrightarrow a=b $</li>
+	<li>$d(a,b)=d(b,a)$ symmetry</li>
+	<li>$d(a,c)\leq d(a,b)+d(b,c)$ triangle inequality</li>
 </ul>
-Metric topologies have the open balls $B_r(x) = \{ y \in X \mid d(x,y) < r \}$ as basis, i.e. every open set $O$ can be written as an (probably infinite) union of balls. The triangle inequality implies that this is equivalent to: $$\forall x\in O \,\exists \varepsilon>0: B_{\varepsilon}(x) \subset O$$.
+Metric topologies have the open balls $B_r(a) = \{ b \in X \mid d(a,b) < r \}$ as basis, i.e. every open set $O$ can be written as an (probably infinite) union of balls. The triangle inequality implies that this is equivalent to: $$\forall x\in O \,\exists \varepsilon>0: B_{\varepsilon}(x) \subset O$$.
 <h3>Standard-Metric</h3>
-The standard-metric is induced by the $\ell_{2}$-norm, i.e. $$d(x,y) = ||x-y||_2 = \sqrt{(x_1-y_1)^2+(x_2-y_2)^2}$$
+The standard-metric is induced by the $\ell_{2}$-norm, i.e. $$d(a,b) = ||a-b||_2 = \sqrt{(a_x-b_x)^2+(a_y-b_y)^2}$$
 <h3>Manhattan distance</h3>
-THe Manhatten metric is induced by the $\ell_{1}$-norm, i.e. $$d(x,y) = ||x-y||_1 = |x_1-y_1|+|x_2-y_2|$$
+THe Manhatten metric is induced by the $\ell_{1}$-norm, i.e. $$d(a,b) = ||a-b||_1 = |a_x-b_x|+|a_y-b_y|$$
 The name is motivated by the grid layout of most streets on the island of Manhattan.
 
 The Manhatten metric induces the same topology as the standard metric.
 <h3>SCNF-metric</h3>
-If you want to travel by train in France, it is very likely that the fastes connection goes through Paris. In $\mathbb{R}^2$ this can be modelled as:
+If you want to travel by train in France, it is very likely that the fastest connection goes through Paris. In $\mathbb{R}^2$ this can be modelled as:
 <ul>
-	<li>$d(x,y)=||x-y||_2$ if $x$ and $y$ have the same phase and</li>
-	<li>$d(x,y)=||x||_2 + ||y||_2$</li> in all other cases (i.e. going through $0$ = Paris)
+	<li>$d(a,b)=||a-b||_2$ if $x$ and $y$ have the same phase and</li>
+	<li>$d(a,b)=||a||_2 + ||y||_2$</li> in all other cases (i.e. passing through $0$ = Paris)
 </ul>
 The induced topological space corresponds to an uncountable a set of disjoint rays joined at a point.
 
 <h3>Jungle-River-metric</h3>
 Here, we assume that one can only travel on vertical lines and the x-axis.
 <ul>
-	<li>$d(x,y)=|x_2-y_2|$ if $x_1=y_1$ and</li>
-	<li>$d(x,y)=|x_2| + |x_1-y_1| + |y_2|$</li> in all other cases (i.e. we are traveling on the x-axis)
+	<li>$d(a,b)=|a_y-b_y|$ if $a_x=b_x$ and</li>
+	<li>$d(a,b)=|a_y| + |a_x-b_x| + |b_y|$</li> in all other cases (i.e. we are traveling on the x-axis)
 </ul>
 
 <h2>Box topology</h2>
 A basis of the box topology in $\mathbb{R} \times \mathbb{R}$ can be formed by sets $B_1 \times B_2$ where $B_1$, $B_2$ are basis elements of the standard topology in $\mathbb{R}$. In finite $\mathbb{R}$ vectorspaces, this construction gives the same topology as the one that is induced by the $\ell$-norms
 
 <h2>Discrete topology</h2>
-Any set in this topology is a open set. The set of singletons can be considered as basis.
+Any set in this topology is an open set. The set of singletons can be considered as basis.
 
 </div>
 </body>
