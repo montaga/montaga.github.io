@@ -4,6 +4,7 @@
 		<meta charset="utf-8">
             <title>Cindy JS</title>
             <script type="text/javascript" src="Cindy.js"></script>
+						<script type="text/javascript" src="CindyGL.js"></script>
             <script type="text/javascript" src="shapeop.js"></script>
 						<script type="text/x-mathjax-config">
 MathJax.Hub.Config({
@@ -33,13 +34,31 @@ init():=(
 			e = v*(.15+.8*random());
 			shape = shape++polygon([(0,0), 2*vd, e+vd, e+vd/2, e, e-vd/2, e-vd, -2*vd]);
 		);
+		,
+	if(mode=="river",
+		N = 50;
+		//shape=circle((0,0),0.3);
+		e=1/(3*N);
+		shape = polygon([(-1,e),(0,.2),(1,e),(1,-e),(0,-.2),(-1,-e)]);
+		//shape = polygon(apply(1..2*pi/.01, .2*(cos(#),sin(#))));
 		
+		forall((-N+1)..N-1,
+			x = #/N;
+			v0 = (x, -.2*(x+1)*(x-1)-.8*(x+1)*(x-1)*random());
+			v1 = (x, .2*(x+1)*(x-1)+.8*(x+1)*(x-1)*random());
+			vd = (1,0)*e;
+			vm = (0,1)*e;
+			errc(v0);
+			errc(v1);
+			shape = shape++polygon([v0+vd, v0+vm, v0-vd, v1-vd, v1-vm, v1+vd]);
+		);
+	 
 	,
 		shape=circle((0,0),0.2);
 		repeat(50,
 					 shape=shape++circle( 1.3*(random()-.5,random()-.5),.3*random());
 		);
-	)
+	))
 );
 
 init();
@@ -54,16 +73,41 @@ scnfball(x, r) := (
 	ans
 );
 
+riverball(x, r) := (
+	v = (0,1);
+	h = |x_2|;
+	vd = (1,0)/N/2;
+	
+	
+	ans = polygon([x+v*r-vd, x-v*r-vd, x-v*r+vd, x+v*r+vd]);
+	if(r>h,
+		if(x_2>0,
+			ans = polygon([x+v*r-vd, (x_1,0)-vd, (x_1,0)+vd, x+v*r+vd]),
+			ans = polygon([x-v*r-vd, (x_1,0)-vd, (x_1,0)+vd, x-v*r+vd])
+		);
+		k = r-h;
+		ans = ans ++ polygon([(x_1,k), (x_1+k,0), (x_1,-k), (x_1-k,0)]);
+	);
+	ans
+);
+
 </script>
 
 <script id='csdraw' type='text/x-cindyscript'>
     fill(shape,color->(1,0.85,0.6));
 		draw(shape, color->(1,0.85,0.6));
+		if(mode=="discrete",
+			colorplot(if(random()>.2+|#|*.4,(1,0.85,0.6),(1,1,1)));
+	,
     x = mouse();
 		if(mode=="scnf",
 			k = arctan2(x)/(2*pi)*N;
 			phi = round(k)/N*2*pi;
 			x = (cos(phi),sin(phi))*|x|;
+		);
+		
+		if(mode=="river",
+			x_1 = round(N*x_1)/N;
 		);
 		if(!inside(x,shape) & seconds()>.2,
 			x = (-1,1)/20;
@@ -81,7 +125,11 @@ scnfball(x, r) := (
 				draw(x, alpha -> .2);
 	      r = (scnfdst(x, shape))*.9;
 				fill( scnfball(x, r), color->(1,0,0), alpha->.3),
-				//draw( scnfball(x, r), color->(1,0,0), alpha->.3),
+			if(mode=="river",
+				drawtext(x, "$\forall x \in O \,\color{red}{ \exists \varepsilon>0: B_{\varepsilon}(x) \subset O}$");
+				draw(x, alpha -> .2);
+	      r = (riverdst(x, shape))*.9;
+				fill( riverball(x, r), color->(1,0,0), alpha->.3),
 			if(mode=="manhatten",
 				drawtext(x, "$\forall x \in O \,\color{red}{ \exists \varepsilon>0: B_{\varepsilon}(x) \subset O}$");
 				draw(x, alpha -> .2);
@@ -95,9 +143,8 @@ scnfball(x, r) := (
 				r = (boxdst(x, shape))*.9;
 				[x,y] = x;
 				fill( polygon([(x+r,y+r),(x-r,y+r),(x-r,y-r),(x+r,y-r)]), color->(1,0,0), alpha->.3),
-			))))
-			
-		);
+			)))))
+		));
 </script>
 
 <script type="text/javascript">
@@ -105,7 +152,7 @@ scnfball(x, r) := (
 		var cdy = CindyJS({
 			ports: [{id: "CSCanvas", transform:[{visibleRect:[-1,-1,1, 1]}]}],
 		csconsole: false,
-		use: ["katex", "shapeop"],
+		use: ["katex", "shapeop", "CindyGL"],
 								scripts:"cs*",
 								geometry:[]});
 		</script>
@@ -114,11 +161,13 @@ scnfball(x, r) := (
 				
 					<div><h3>Select one topology of the following list:</h3></div>
 					<div>
-						<select id="sel" size="5" onchange='cdy.evokeCS("mode := (\"" + this.value + "\"); init();");' style="width:20em;">  
+						<select id="sel" size="6" onchange='cdy.evokeCS("mode := (\"" + this.value + "\"); init();");' style="width:20em;">  
 						  <option value="standard">Topology induced by standard-metric</option>
-							<option value="manhatten">Topology induced by manhatten-metric</option>
+							<option value="manhatten">Topology induced by Manhatten-metric</option>
 							<option value="scnf">Topology induced by SCNF-metric</option>
+							<option value="river">Topology induced by Jungle-River-metric</option>
 						  <option value="box">Box topology</option>
+							<option value="discrete">Discrete topology</option>
 						</select>
 					</div>
 <div>
@@ -145,10 +194,20 @@ If you want to travel by train in France, it is very likely that the fastes conn
 	<li>$d(x,y)=||x||_2 + ||y||_2$</li> in all other cases (i.e. going through $0$ = Paris)
 </ul>
 The induced topological space corresponds to an uncountable a set of disjoint rays joined at a point.
-</div>
 
-<h3>Box topology</h3>
+<h3>Jungle-River-metric</h3>
+Here, we assume that one can only travel on vertical lines and the x-axis.
+<ul>
+	<li>$d(x,y)=|x_2-y_2|$ if $x_1=y_1$ and</li>
+	<li>$d(x,y)=|x_2| + |x_1-y_1| + |y_2|$</li> in all other cases (i.e. we are traveling on the x-axis)
+</ul>
+
+<h2>Box topology</h2>
 A basis of the box topology in $\mathbb{R} \times \mathbb{R}$ can be formed by sets $B_1 \times B_2$ where $B_1$, $B_2$ are basis elements of the standard topology in $\mathbb{R}$. In finite $\mathbb{R}$ vectorspaces, this construction gives the same topology as the one that is induced by the $\ell$-norms
 
+<h2>Discrete topology</h2>
+Any set in this topology is a open set. The set of singletons can be considered as basis.
+
+</div>
 </body>
 </html>

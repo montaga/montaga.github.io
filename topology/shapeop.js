@@ -41,11 +41,27 @@ CindyJS.registerPlugin(1, "shapeop", function(api) {
         for (j = 0; j < a.value.length; j++) {
         for (i = 0; i < a.value[j].length; i++) {
             var pt = a.value[j][i];
-            ans = Math.min(ans,Math.abs( Math.atan2(x.x,x.y)-Math.atan2(pt.X,pt.Y)) <.02 ? Math.hypot(pt.X-x.x,pt.Y-x.y) : Math.hypot(x.x,x.y)+Math.hypot(pt.X,pt.Y));
+            ans = Math.min(ans,Math.abs( Math.atan2(x.x,x.y)-Math.atan2(pt.X,pt.Y)) <0.02 ? Math.hypot(pt.X-x.x,pt.Y-x.y) : Math.hypot(x.x,x.y)+Math.hypot(pt.X,pt.Y));
         }}
     }
     return real(ans);
   });
+  
+  api.defineFunction("riverdst", 2, function(args, modifs) {
+    var x = api.extractPoint(api.evaluate(args[0]));
+    var a = api.evaluate(args[1]);
+    var ans = 0;
+    if (a.type === "polygon") {
+        ans = 1e10;
+        for (j = 0; j < a.value.length; j++) {
+        for (i = 0; i < a.value[j].length; i++) {
+            var pt = a.value[j][i];
+            ans = Math.min(ans, Math.abs(x.x-pt.X) <1e-4 ? Math.abs(pt.Y-x.y) : Math.abs(pt.X-x.x)+Math.abs(x.y)+Math.abs(pt.Y));
+        }}
+    }
+    return real(ans);
+  });
+  
   
   api.defineFunction("manhattendst", 2, function(args, modifs) {
     var x = api.extractPoint(api.evaluate(args[0]));
