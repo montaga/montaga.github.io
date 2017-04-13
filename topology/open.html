@@ -25,12 +25,12 @@ init():=(
 	if(mode=="scnf",
 		shape=circle((0,0),0.1);
 		//shape = polygon(apply(1..2*pi/.01, .2*(cos(#),sin(#))));
-		
-		repeat(100,
-			phi = #/100*2*pi;
+		N = 100;
+		repeat(N,
+			phi = #/N*2*pi;
 			v = (cos(phi),sin(phi));
 			vd = (v_2, -v_1)/300;
-			e = v*(.2+.8*random());
+			e = v*(.15+.8*random());
 			shape = shape++polygon([(0,0), 2*vd, e+vd, e+vd/2, e, e-vd/2, e-vd, -2*vd]);
 		);
 		
@@ -60,6 +60,11 @@ scnfball(x, r) := (
     fill(shape,color->(1,0.85,0.6));
 		draw(shape, color->(1,0.85,0.6));
     x = mouse();
+		if(mode=="scnf",
+			k = arctan2(x)/(2*pi)*N;
+			phi = round(k)/N*2*pi;
+			x = (cos(phi),sin(phi))*|x|;
+		);
 		if(!inside(x,shape) & seconds()>.2,
 			x = (-1,1)/20;
 			drawtext((0,-.8),"Move the mouse inside the shape!", align->"mid");
