@@ -64,29 +64,29 @@ init():=(
 init();
 
 scnfball(x, r) := (
-	v = x/|a|;
+	v = x/|x|;
 	vd = (v_2, -v_1)/200;
-	ans = polygon([x+v*r+vd, x+v*r-vd, x-v*min(r, |a|)-vd, x-v*min(r, |a|)+vd]);
-	if(r>|a|,
-		ans = ans ++ circle((0,0), r-|a|);
+	ans = polygon([x+v*r+vd, x+v*r-vd, x-v*min(r, |x|)-vd, x-v*min(r, |x|)+vd]);
+	if(r>|x|,
+		ans = ans ++ circle((0,0), r-|x|);
 	);
 	ans
 );
 
 riverball(x, r) := (
 	v = (0,1);
-	h = |a_y|;
+	h = |x_2|;
 	vd = (1,0)/N/2;
 	
 	
 	ans = polygon([x+v*r-vd, x-v*r-vd, x-v*r+vd, x+v*r+vd]);
 	if(r>h,
-		if(a_y>0,
-			ans = polygon([x+v*r-vd, (a_x,0)-vd, (a_x,0)+vd, x+v*r+vd]),
-			ans = polygon([x-v*r-vd, (a_x,0)-vd, (a_x,0)+vd, x-v*r+vd])
+		if(x_2>0,
+			ans = polygon([x+v*r-vd, (x_1,0)-vd, (x_1,0)+vd, x+v*r+vd]),
+			ans = polygon([x-v*r-vd, (x_1,0)-vd, (x_1,0)+vd, x-v*r+vd])
 		);
 		k = r-h;
-		ans = ans ++ polygon([(a_x,k), (a_x+k,0), (a_x,-k), (a_x-k,0)]);
+		ans = ans ++ polygon([(x_1,k), (x_1+k,0), (x_1,-k), (x_1-k,0)]);
 	);
 	ans
 );
@@ -103,11 +103,11 @@ riverball(x, r) := (
 		if(mode=="scnf",
 			k = arctan2(x)/(2*pi)*N;
 			phi = round(k)/N*2*pi;
-			x = (cos(phi),sin(phi))*|a|;
+			x = (cos(phi),sin(phi))*|x|;
 		);
 		
 		if(mode=="river",
-			a_x = round(N*a_x)/N;
+			x_1 = round(N*x_1)/N;
 		);
 		if(!inside(x,shape) & seconds()>.2,
 			x = (-1,1)/20;
@@ -137,8 +137,8 @@ riverball(x, r) := (
 				[x,y] = x;
 				fill( polygon([(x+r,y),(x,y+r),(x-r,y),(x,y-r)]), color->(1,0,0), alpha->.3),
 			if(mode=="box",
-				drawtext(x, "$\forall p \in O \exists x_0,a_x,y_0,b_x\in\mathbb{R}:$
-				$\color{red}{ x \in (x_0,a_x) \times (y_0,b_x) \subset O}$");
+				drawtext(x, "$\forall p \in O \exists x_0,x_1,y_0,b_x\in\mathbb{R}:$
+				$\color{red}{ x \in (x_0,x_1) \times (y_0,b_x) \subset O}$");
 				draw(x, alpha -> .2);
 				r = (boxdst(x, shape))*.9;
 				[x,y] = x;
