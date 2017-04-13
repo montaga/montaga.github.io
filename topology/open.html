@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+            <title>Cindy JS</title>
+            <script type="text/javascript" src="Cindy.js"></script>
+            <script type="text/javascript" src="shapeop.js"></script>
+						<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+});
+</script>
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+  </head>
+
+	<body>
+
+        <h1>Topologies in $\mathbb{R}^2$</h1>
+
+<script id='csinit' type='text/x-cindyscript'>
+mode = "standard";
+init():=(
+	if(mode=="scnf",
+		shape=circle((0,0),0.1);
+		//shape = polygon(apply(1..2*pi/.01, .2*(cos(#),sin(#))));
+		
+		repeat(100,
+			phi = #/100*2*pi;
+			v = (cos(phi),sin(phi));
+			vd = (v_2, -v_1)/300;
+			e = v*(.2+.8*random());
+			shape = shape++polygon([(0,0), 2*vd, e+vd, e+vd/2, e, e-vd/2, e-vd, -2*vd]);
+		);
+		
+	,
+		shape=circle((0,0),0.2);
+		repeat(50,
+					 shape=shape++circle( 1.3*(random()-.5,random()-.5),.3*random());
+		);
+	)
+);
+
+init();
+
+scnfball(x, r) := (
+	v = x/|x|;
+	vd = (v_2, -v_1)/200;
+	ans = polygon([x+v*r+vd, x+v*r-vd, x-v*min(r, |x|)-vd, x-v*min(r, |x|)+vd]);
+	if(r>|x|,
+		ans = ans ++ circle((0,0), r-|x|);
+	);
+	ans
+);
+
+</script>
+
+<script id='csdraw' type='text/x-cindyscript'>
+    fill(shape,color->(1,0.85,0.6));
+		draw(shape, color->(1,0.85,0.6));
+    x = mouse();
+		if(!inside(x,shape) & seconds()>.2,
+			x = (-1,1)/20;
+			drawtext((0,-.8),"Move the mouse inside the shape!", align->"mid");
+		);
+		
+		if(inside(x,shape),
+			if(mode=="standard",
+				drawtext(x, "$\forall x \in O \,\color{red}{ \exists \varepsilon>0: B_{\varepsilon}(x) \subset O}$");
+				draw(x, alpha -> .2);
+	      r = (dst(x, shape))*.9;
+				fill( circle(x, r), color->(1,0,0), alpha->.3),
+			if(mode=="scnf",
+				drawtext(x, "$\forall x \in O \,\color{red}{ \exists \varepsilon>0: B_{\varepsilon}(x) \subset O}$");
+				draw(x, alpha -> .2);
+	      r = (scnfdst(x, shape))*.9;
+				fill( scnfball(x, r), color->(1,0,0), alpha->.3),
+				//draw( scnfball(x, r), color->(1,0,0), alpha->.3),
+			if(mode=="manhatten",
+				drawtext(x, "$\forall x \in O \,\color{red}{ \exists \varepsilon>0: B_{\varepsilon}(x) \subset O}$");
+				draw(x, alpha -> .2);
+				r = (manhattendst(x, shape))*.9;
+				[x,y] = x;
+				fill( polygon([(x+r,y),(x,y+r),(x-r,y),(x,y-r)]), color->(1,0,0), alpha->.3),
+			if(mode=="box",
+				drawtext(x, "$\forall p \in O \exists x_0,x_1,y_0,y_1\in\mathbb{R}:$
+				$\color{red}{ x \in (x_0,x_1) \times (y_0,y_1) \subset O}$");
+				draw(x, alpha -> .2);
+				r = (boxdst(x, shape))*.9;
+				[x,y] = x;
+				fill( polygon([(x+r,y+r),(x-r,y+r),(x-r,y-r),(x+r,y-r)]), color->(1,0,0), alpha->.3),
+			))))
+			
+		);
+</script>
+
+<script type="text/javascript">
+
+		var cdy = CindyJS({
+			ports: [{id: "CSCanvas", transform:[{visibleRect:[-1,-1,1, 1]}]}],
+		csconsole: false,
+		use: ["katex", "shapeop"],
+								scripts:"cs*",
+								geometry:[]});
+		</script>
+		<div>In the following applet differerent topologies in $\mathbb{R}^2$ are visualized. The orange shape corresponds to an open set in the given topology.</div>
+        <div  id="CSCanvas" style="float: left; width:700px; height:700px; border:2px solid #000000; margin:30px;"></div>
+				
+					<div><h3>Select one topology of the following list:</h3></div>
+					<div>
+						<select id="sel" size="5" onchange='cdy.evokeCS("mode := (\"" + this.value + "\"); init();");' style="width:20em;">  
+						  <option value="standard">Topology induced by standard-metric</option>
+							<option value="manhatten">Topology induced by manhatten-metric</option>
+							<option value="scnf">Topology induced by SCNF-metric</option>
+						  <option value="box">Box topology</option>
+						</select>
+					</div>
+<div>
+<h2>Metric topologies</h2>
+Let $d: X \times X \rightarrow \mathbb{R}$ be a metric, i.e. 
+<ul>
+	<li>$ d(x,y)\geq 0 $ for all $x \neq y$ non-negativity </li>
+	<li>$ d(x,y)=0\Leftrightarrow x=y $</li>
+	<li>$d(x,y)=d(y,x)$ symmetry</li>
+	<li>$d(x,z)\leq d(x,y)+d(y,z)$ triangle inequality</li>
+</ul>
+Metric topologies have the open balls $B_r(x) = \{ y \in X \mid d(x,y) < r \}$ as basis, i.e. every open set $O$ can be written as an (probably infinite) union of balls. The triangle inequality implies that this is equivalent to: $$\forall x\in O \,\exists \varepsilon>0: B_{\varepsilon}(x) \subset O$$.
+<h3>Standard-Metric</h3>
+The standard-metric is induced by the $\ell_{2}$-norm, i.e. $$d(x,y) = ||x-y||_2 = \sqrt{(x_1-y_1)^2+(x_2-y_2)^2}$$
+<h3>Manhattan distance</h3>
+THe Manhatten metric is induced by the $\ell_{1}$-norm, i.e. $$d(x,y) = ||x-y||_1 = |x_1-y_1|+|x_2-y_2|$$
+The name is motivated by the grid layout of most streets on the island of Manhattan.
+
+The Manhatten metric induces the same topology as the standard metric.
+<h3>SCNF-metric</h3>
+If you want to travel by train in France, it is very likely that the fastes connection goes through Paris. In $\mathbb{R}^2$ this can be modelled as:
+<ul>
+	<li>$d(x,y)=||x-y||_2$ if $x$ and $y$ have the same phase and</li>
+	<li>$d(x,y)=||x||_2 + ||y||_2$</li> in all other cases (i.e. going through $0$ = Paris)
+</ul>
+The induced topological space corresponds to an uncountable a set of disjoint rays joined at a point.
+</div>
+
+<h3>Box topology</h3>
+A basis of the box topology in $\mathbb{R} \times \mathbb{R}$ can be formed by sets $B_1 \times B_2$ where $B_1$, $B_2$ are basis elements of the standard topology in $\mathbb{R}$. In finite $\mathbb{R}$ vectorspaces, this construction gives the same topology as the one that is induced by the $\ell$-norms
+
+</body>
+</html>
