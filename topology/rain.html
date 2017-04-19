@@ -30,7 +30,7 @@
 
 <div>
         <h1>Random continuous functions on metric induced topologies on $\mathbb{R}^2$</h1>
-Let $\mathcal{T}$ be the topology induced by a metric $d$ on $\mathbb{R}^2$. Then a random continuous function $$f: (\mathbb{R}^2, \mathcal{T}) \rightarrow (\mathbb{R}, \text{standard topology})$$ can give an idea about the "shape" of the topological space $(\mathbb{R}^2, \mathcal{T})$: if $f(x)$ and $f(y)$ differ, then $x$ and $y$ cannot be arbitary "close".
+Let $\mathcal{T}$ be the topology induced by a metric $d$ on $\mathbb{R}^2$. Then a random continuous function $$f: (\mathbb{R}^2, \mathcal{T}) \rightarrow (\mathbb{R}, \text{standard topology})$$ can give an idea about the "shape" of the topological space $(\mathbb{R}^2, \mathcal{T})$: If $f(x)$ and $f(y)$ differ, then $x$ and $y$ cannot be arbitary "close".
 
 <h2>Generation of random continuous functions $f: (\mathbb{R}^2, \mathcal{T}) \rightarrow (\mathbb{R}, \text{standard topology})$</h2>
 Let ${(x_i)}_{i\in \mathbb{N}}$ be a random sequence in $\mathbb{R}^2$.
@@ -118,23 +118,23 @@ In the visualization, an approximate $f$ is computed for an arbitrary metric $d:
 							geometry:[]});
 														
 	var code = {
-		standard: `d(x,y) := |x-y|`,
-		bounded: `d(x,y) := |x-y|/(1+|x-y|)`,
-		manhatten: `d(x,y) := |x_1-y_1|+|x_2-y_2|`,
-		linf: `d(x,y) := max(|x_1-y_1|,|x_2-y_2|)`,
-		scnf: `d(x,y) :=
- if( round(300*arctan2(x)/2/pi) == round(300*arctan2(y)/2/pi), //x and y have almost same phase
-  |x-y|,
-  |x|+|y|
+		standard: `d(a,b) := |a-b|`,
+		bounded: `d(a,b) := |a-b|/(1+|a-b|)`,
+		manhatten: `d(a,b) := |a.x-b.x|+|a.y-b.y|`,
+		linf: `d(a,b) := max(|a.x-b.x|,|a.y-b.y|)`,
+		scnf: `d(a,b) :=
+ if( round(300*arctan2(a)/2/pi) == round(300*arctan2(b)/2/pi), //a and b have almost same phase
+  |a-b|,
+  |a|+|b|
  )`,
-		river: `d(x,y):=
- if( round(100*x_1) == round(100*y_1),
-  |x_2-y_2|,
-  |x_2| + |y_2| + |x_1-y_1|
+		river: `d(a,b):=
+ if( round(100*a.x) == round(100*b.x),
+  |a.y-b.y|,
+  |a.y| + |b.y| + |a.x-b.x|
 )`,
-		rings: `d(x,y) :=
- if( round(100*|x|)==round(100*|y|) < .01, //x and y have same length
-  |x-y|,
+		rings: `d(a,b) :=
+ if( round(100*|a|)==round(100*|b|) < .01, //a and b have same length
+  |a-b|,
   1
 )`
 	};
