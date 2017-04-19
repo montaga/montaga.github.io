@@ -53,7 +53,7 @@ In the visualization, an approximate $f$ is computed for an arbitrary metric $d:
 	cmd():= ();
 
 	d(x,y) :=
-	 if( abs(x/|x|-y/|y|) < .01, //x and y have almost same phase
+	 if( round(300*arctan2(x)/2/pi) == round(300*arctan2(y)/2/pi), //x and y have almost same phase
 	  |x-y|,
 	  |x|+|y|
 	 )
@@ -120,12 +120,12 @@ In the visualization, an approximate $f$ is computed for an arbitrary metric $d:
 		manhatten: `d(x,y) := |x_1-y_1|+|x_2-y_2|`,
 		linf: `d(x,y) := max(|x_1-y_1|,|x_2-y_2|)`,
 		scnf: `d(x,y) :=
- if( abs(x/|x|-y/|y|) < .01, //x and y have almost same phase
+ if( round(300*arctan2(x)/2/pi) == round(300*arctan2(y)/2/pi), //x and y have almost same phase
   |x-y|,
   |x|+|y|
  )`,
 		river: `d(x,y):=
- if( |x_1-y_1| < .01,
+ if( round(100*x_1) == round(100*y_1),
   |x_2-y_2|,
   |x_2| + |y_2| + |x_1-y_1|
 )`,
