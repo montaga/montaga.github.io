@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+			<title>Cindy JS</title>
+			<script src="https://codemirror.net/lib/codemirror.js"></script>
+			<script src="https://codemirror.net/mode/clike/clike.js"></script>
+			<script src="https://codemirror.net/addon/edit/matchbrackets.js"></script>
+			<script src="https://codemirror.net/addon/edit/closebrackets.js"></script>
+			<link rel="stylesheet" href="https://codemirror.net/lib/codemirror.css">
+			<link rel="stylesheet" href="https://codemirror.net/theme/base16-dark.css">
+
+			<script type="text/javascript" src="Cindy.js"></script>
+			<script type="text/javascript" src="CindyGL.js"></script>
+			<script type="text/javascript" src="shapeop.js"></script>
+
+			<script type="text/x-mathjax-config">
+				MathJax.Hub.Config({
+				  tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+				});
+			</script>
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+  </head>
+
+	<body>
+
+        <h1>Shapes of metric induced topologies on $\mathbb{R}^2$</h1>
+
+<script id='csinit' type='text/x-cindyscript'>
+	mode = "standard";
+	createimage("top", 1000, 1000);
+	init():=(
+		cnt = 0;
+		colorplot("top", 0);
+	);
+
+	init();
+	cmd():= ();
+
+	d(x,y):= 
+if( abs(x-|x|*y/|y|) < .01, //x and y have almost same phase
+|x-y|,
+|x|+|y|
+);
+</script>
+
+<script id='csdraw' type='text/x-cindyscript'>
+	cmd();
+	if( (|mouse().x|<.1 & |mouse().y| < 1) % cnt<500,
+		repeat(10,
+			cnt = cnt + 1;
+			x = 2*[random()-.5,random()-.5]; //raindrop on x
+			sgn = if(imagergb((-1,-1), (1,-1),"top", x)_1>0,-1,1);
+	    colorplot("top",
+				y = #;
+				cur = imagergb("top", y, interpolation->false).r;
+				dst = 2*d(x,y);
+				(cur + sgn*(1-dst/|(dst,1)|))
+			);	
+		)
+	);
+
+	//output the current content of top
+	colorplot(
+		y = #;
+		cur = imagergb("top", y, interpolation->false).r;
+		sin(.7*cur)/2+1/2;
+	);	
+</script>
+
+<div>In the following applet differerent topologies in $\mathbb{R}^2$ are visualized. The orange shape corresponds to an open set in the given topology.</div>
+		<div  id="CSCanvas" style="float: left; width:700px; height:700px; margin:30px;"></div>
+		
+
+					
+
+
+					<div><h3>Select one metric from the following list:</h3></div>
+					<div>
+						<select id="sel" size="6" onchange="myCodeMirror.setValue(code[this.value]);" style="width:20em;">  
+							<option value="scnf">Topology induced by SCNF-metric</option>
+							<option value="river">Topology induced by Jungle-River-metric</option>
+							<option value="rings">disjoint rings</option>
+						  <option value="standard">Topology induced by standard-metric</option>
+							<option value="bounded">Topology induced by bounded standard-metric</option>
+							<option value="manhatten">metric induced by l1-norm</option>
+							<option value="linf">metric induced by max-norm</option>
+						</select>
+					</div>
+					
+					<div id="code"></div>
+					<script type="text/javascript">
+
+						var cdy = CindyJS({
+							ports: [{id: "CSCanvas", transform:[{visibleRect:[-1,-1,1, 1]}]}],
+							csconsole: false,
+							autoplay: true,
+							use: ["katex", "shapeop", "CindyGL"],
+							scripts:"cs*",
+							geometry:[]});
+														
+	var code = {
+		standard: `d(x,y) := |x-y|`,
+		bounded: `d(x,y) := |x-y|/(1+|x-y|)`,
+		manhatten: `d(x,y) := |x_1-y_1|+|x_2-y_2|`,
+		linf: `d(x,y) := max(|x_1-y_1|,|x_2-y_2|)`,
+		scnf: `d(x,y) :=
+ if( abs(x-|x|*y/|y|) < .01, //x and y have almost same phase
+  |x-y|,
+  |x|+|y|
+ )`,
+		river: `d(x,y):=
+ if( |x_1-y_1| < .01,
+  |x_2-y_2|,
+  |x_2| + |y_2| + |x_1-y_1|
+)`,
+		rings: `d(x,y) :=
+ if( abs(|x|-|y|) < .01, //x and y have same length
+  |x-y|,
+  1
+)`
+	};
+												
+														
+						var myCodeMirror = CodeMirror(document.getElementById("code"), {
+						  value: code['scnf'],
+						  autoCloseBrackets: true,
+						  matchBrackets: true,
+						  theme: "base16-dark"
+						});
+						myCodeMirror.on("change", function(cm, change) {
+						  console.log("something changed! (" + change.origin + ")");
+						  cdy.evokeCS(`init();
+						    cmd() := (
+						      ${cm.getValue()}
+						    )
+						    `);
+						});
+							</script>
+<div>
+<h2>Metric topologies</h2>
+Let $d: X \times X \rightarrow \mathbb{R}$ be a metric, i.e. 
+<ul>
+	<li>$ d(a,b)\geq 0 $ for all $a \neq b$ non-negativity </li>
+	<li>$ d(a,b)=0\Leftrightarrow a=b $</li>
+	<li>$d(a,b)=d(b,a)$ symmetry</li>
+	<li>$d(a,c)\leq d(a,b)+d(b,c)$ triangle inequality</li>
+</ul>
+Metric topologies have the open balls $B_r(a) = \{ b \in X \mid d(a,b) < r \}$ as basis, i.e. every open set $O$ can be written as an (probably infinite) union of balls. The triangle inequality implies that this is equivalent to: $$\forall x\in O \,\exists \varepsilon>0: B_{\varepsilon}(x) \subset O$$.
+<h3>Standard-Metric</h3>
+The standard-metric is induced by the $\ell_{2}$-norm, i.e. $$d(a,b) = ||a-b||_2 = \sqrt{(a_x-b_x)^2+(a_y-b_y)^2}$$
+<h3>Manhattan distance</h3>
+THe Manhatten metric is induced by the $\ell_{1}$-norm, i.e. $$d(a,b) = ||a-b||_1 = |a_x-b_x|+|a_y-b_y|$$
+The name is motivated by the grid layout of most streets on the island of Manhattan.
+
+The Manhatten metric induces the same topology as the standard metric.
+<h3>SCNF-metric</h3>
+If you want to travel by train in France, it is very likely that the fastest connection goes through Paris. In $\mathbb{R}^2$ this can be modelled as:
+<ul>
+	<li>$d(a,b)=||a-b||_2$ if $x$ and $y$ have the same phase and</li>
+	<li>$d(a,b)=||a||_2 + ||y||_2$</li> in all other cases (i.e. passing through $0$ = Paris)
+</ul>
+The induced topological space corresponds to an uncountable a set of disjoint rays joined at a point.
+
+<h3>Jungle-River-metric</h3>
+Here, we assume that one can only travel on vertical lines and the x-axis.
+<ul>
+	<li>$d(a,b)=|a_y-b_y|$ if $a_x=b_x$ and</li>
+	<li>$d(a,b)=|a_y| + |a_x-b_x| + |b_y|$</li> in all other cases (i.e. we are traveling on the x-axis)
+</ul>
+
+<h2>Box topology</h2>
+A basis of the box topology in $\mathbb{R} \times \mathbb{R}$ can be formed by sets $B_1 \times B_2$ where $B_1$, $B_2$ are basis elements of the standard topology in $\mathbb{R}$. In finite $\mathbb{R}$ vectorspaces, this construction gives the same topology as the one that is induced by the $\ell$-norms
+
+<h2>Discrete topology</h2>
+Any set in this topology is an open set. The set of singletons can be considered as basis.
+
+</div>
+</body>
+</html>

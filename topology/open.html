@@ -123,12 +123,12 @@ riverball(x, r) := (
 			if(mode=="scnf",
 				drawtext(x, "$\forall x \in O \,\color{red}{ \exists \varepsilon>0: B_{\varepsilon}(x) \subset O}$");
 				draw(x, alpha -> .2);
-	      r = (scnfdst(x, shape))*.9;
+	      r = (scnfdst(x, shape))*.8;
 				fill( scnfball(x, r), color->(1,0,0), alpha->.3),
 			if(mode=="river",
 				drawtext(x, "$\forall x \in O \,\color{red}{ \exists \varepsilon>0: B_{\varepsilon}(x) \subset O}$");
 				draw(x, alpha -> .2);
-	      r = (riverdst(x, shape))*.9;
+	      r = (riverdst(x, shape))*.7;
 				fill( riverball(x, r), color->(1,0,0), alpha->.3),
 			if(mode=="manhatten",
 				drawtext(x, "$\forall x \in O \,\color{red}{ \exists \varepsilon>0: B_{\varepsilon}(x) \subset O}$");
@@ -137,8 +137,8 @@ riverball(x, r) := (
 				[x,y] = x;
 				fill( polygon([(x+r,y),(x,y+r),(x-r,y),(x,y-r)]), color->(1,0,0), alpha->.3),
 			if(mode=="box",
-				drawtext(x, "$\forall p \in O \exists x_0,x_1,y_0,b_x\in\mathbb{R}:$
-				$\color{red}{ x \in (x_0,x_1) \times (y_0,b_x) \subset O}$");
+				drawtext(x, "$\forall p \in O \exists x_0,x_1,y_0,y_1\in\mathbb{R}:$
+				$\color{red}{ x \in (x_0,x_1) \times (y_0,y_1) \subset O}$");
 				draw(x, alpha -> .2);
 				r = (boxdst(x, shape))*.9;
 				[x,y] = x;
@@ -183,7 +183,7 @@ Metric topologies have the open balls $B_r(a) = \{ b \in X \mid d(a,b) < r \}$ a
 <h3>Standard-Metric</h3>
 The standard-metric is induced by the $\ell_{2}$-norm, i.e. $$d(a,b) = ||a-b||_2 = \sqrt{(a_x-b_x)^2+(a_y-b_y)^2}$$
 <h3>Manhattan distance</h3>
-THe Manhatten metric is induced by the $\ell_{1}$-norm, i.e. $$d(a,b) = ||a-b||_1 = |a_x-b_x|+|a_y-b_y|$$
+The Manhatten metric is induced by the $\ell_{1}$-norm, i.e. $$d(a,b) = ||a-b||_1 = |a_x-b_x|+|a_y-b_y|$$
 The name is motivated by the grid layout of most streets on the island of Manhattan.
 
 The Manhatten metric induces the same topology as the standard metric.
