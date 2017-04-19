@@ -1,0 +1,9 @@
+
+body {
+    max-width: 1000px;
+    
+    margin: 20px auto 100px auto;
+    font-family: Trebuchet MS, Tahoma, Arial, Helvetica, sans-serif;
+    background-color: #edf1f3;
+    font-size: 16px;
+}
