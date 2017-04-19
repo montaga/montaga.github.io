@@ -6,6 +6,7 @@
             <script type="text/javascript" src="Cindy.js"></script>
 						<script type="text/javascript" src="CindyGL.js"></script>
             <script type="text/javascript" src="shapeop.js"></script>
+						<link rel="stylesheet" href="style.css">
 						<script type="text/x-mathjax-config">
 MathJax.Hub.Config({
   tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
@@ -97,7 +98,7 @@ riverball(x, r) := (
     fill(shape,color->(1,0.85,0.6));
 		draw(shape, color->(1,0.85,0.6));
 		if(mode=="discrete",
-			colorplot(if(random()>.2+|#|*.4,(1,0.85,0.6),(1,1,1)));
+			colorplot(if(random()>.2+|#|*.4,(1,0.85,0.6,1),(1,1,1,0)));
 	,
     x = mouse();
 		if(mode=="scnf",
@@ -157,7 +158,7 @@ riverball(x, r) := (
 								geometry:[]});
 		</script>
 		<div>In the following applet differerent topologies in $\mathbb{R}^2$ are visualized. The orange shape corresponds to an open set in the given topology.</div>
-        <div  id="CSCanvas" style="float: left; width:700px; height:700px; margin:30px;"></div>
+        <div  id="CSCanvas" style="float: left; width:600px; height:600px; margin:15px;"></div>
 				
 					<div><h3>Select one topology of the following list:</h3></div>
 					<div>

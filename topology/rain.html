@@ -9,7 +9,8 @@
 			<script src="https://codemirror.net/addon/edit/matchbrackets.js"></script>
 			<script src="https://codemirror.net/addon/edit/closebrackets.js"></script>
 			<link rel="stylesheet" href="https://codemirror.net/lib/codemirror.css">
-			<link rel="stylesheet" href="https://codemirror.net/theme/base16-dark.css">
+			<link rel="stylesheet" href="https://codemirror.net/theme/elegant.css">
+			<link rel="stylesheet" href="style.css">
 
 			<script type="text/javascript" src="Cindy.js"></script>
 			<script type="text/javascript" src="CindyGL.js"></script>
@@ -32,11 +33,13 @@
 Let $\mathcal{T}$ be the topology induced by a metric $d$ on $\mathbb{R}^2$. Then a random continuous function $$f: (\mathbb{R}^2, \mathcal{T}) \rightarrow (\mathbb{R}, \text{standard topology})$$ can give an idea about the "shape" of the topological space $(\mathbb{R}^2, \mathcal{T})$: if $f(x)$ and $f(y)$ differ, then $x$ and $y$ cannot be arbitary "close".
 
 <h2>Generation of random continuous functions $f: (\mathbb{R}^2, \mathcal{T}) \rightarrow (\mathbb{R}, \text{standard topology})$</h2>
-For a given $x_0$ the function $$\mathbb{R}^2 \rightarrow \mathbb{R}, x \mapsto d(x_0, x)$$ is continuous for the topology on $\mathbb{R}^2$ that is induced by the metric. Now we choose a random sequence ${(x_i)}_{i\in \mathbb{N}}$ in $\mathbb{R}^2$. Since $x \mapsto \frac{1}{d(x_i, x)^2 + 1}$  is both continuous and bounded by $1$, the sum in
+Let ${(x_i)}_{i\in \mathbb{N}}$ be a random sequence in $\mathbb{R}^2$.
+
+For a given $x_i$ the function $$\mathbb{R}^2 \rightarrow \mathbb{R}, x \mapsto d(x_i, x)$$ is continuous for the topology on $\mathbb{R}^2$ that is induced by the metric $d$. Since $x \mapsto \frac{1}{d(x_i, x)^2 + 1}$  is both continuous and bounded by $1$, the sum in
 $$
 f(x) := \sin\left(\sum_{n=0}^{\infty} (-0.995)^n \frac{1}{d(x_i, x)^2 + 1}\right)
 $$
-converges uniformly and gives raise to a random continuous function.
+converges uniformly and gives raise to a random continuous function $f: (\mathbb{R}^2, \mathcal{T}) \rightarrow (\mathbb{R}, \text{standard topology})$.
 
 In the visualization, an approximate $f$ is computed for an arbitrary metric $d:\mathbb{R}^2 \times \mathbb{R}^2 \rightarrow \mathbb{R}$. A pixel $x$ is colored with the value of $f(x)$ where $-1$ will displayed as black and $+1$ as white.
 </div>
@@ -83,7 +86,7 @@ In the visualization, an approximate $f$ is computed for an arbitrary metric $d:
 	);	
 </script>
 
-		<div  id="CSCanvas" style="float: left; width:700px; height:700px; margin:30px;"></div>
+		<div  id="CSCanvas" style="float: left; width:500px; height:500px; margin:10px;"></div>
 		
 
 					
@@ -91,7 +94,7 @@ In the visualization, an approximate $f$ is computed for an arbitrary metric $d:
 
 					<div><h3>You can select a metric from the following list:</h3></div>
 					<div>
-						<select id="sel" size="7" onchange="myCodeMirror.setValue(code[this.value]);" style="width:20em;">  
+						<select id="sel" size="7" onchange="myCodeMirror.setValue(code[this.value]);">  
 							<option value="scnf">SCNF-metric</option>
 							<option value="river">Jungle-River-metric</option>
 						  <option value="standard">standard-metric</option>
@@ -141,7 +144,9 @@ In the visualization, an approximate $f$ is computed for an arbitrary metric $d:
 						  value: code['scnf'],
 						  autoCloseBrackets: true,
 						  matchBrackets: true,
-						  theme: "base16-dark"
+							lineWrapping: true,
+
+						  theme: "elegant"
 						});
 						myCodeMirror.on("change", function(cm, change) {
 						  console.log("something changed! (" + change.origin + ")");
