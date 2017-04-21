@@ -133,7 +133,7 @@ In the visualization, an approximate $f$ is computed for an arbitrary metric $d:
   |a.y| + |b.y| + |a.x-b.x|
 )`,
 		rings: `d(a,b) :=
- if( round(100*|a|)==round(100*|b|) < .01, //a and b have same length
+ if( round(100*|a|)==round(100*|b|), //a and b have same length
   |a-b|,
   1
 )`
