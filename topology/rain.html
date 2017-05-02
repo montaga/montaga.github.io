@@ -68,7 +68,8 @@ In the visualization, an approximate $f$ is computed for an arbitrary metric $d:
 		repeat(20,
 			cnt = cnt + 1;
 			x = 2*[random()-.5,random()-.5]; //raindrop on x
-			sgn = if(imagergb((-1,-1), (1,-1),"sum", x)_1>0,-1,1);
+			//sgn = if(imagergb((-1,-1), (1,-1),"sum", x)_1>0,-1,1);
+			sgn = (-1)^cnt;
 	    colorplot("sum",
 				y = #;
 				cur = imagergb("sum", y, interpolation->false).r;
@@ -82,7 +83,7 @@ In the visualization, an approximate $f$ is computed for an arbitrary metric $d:
 	colorplot(
 		y = #;
 		cur = imagergb("sum", y, interpolation->false).r;
-		sin(cur)/2+1/2;
+		sin(cur/2)/2+1/2;
 	);	
 </script>
 

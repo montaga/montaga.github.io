@@ -2159,7 +2159,7 @@ function cs_onDrop(lst, pos) {
 function cindy_cancelmove() {
     move = undefined;
 }
-var version = [0,8,4,14,"g2184a86"];
+var version = [0,8,4,16,"g196e9c3!"];
 //==========================================
 //      Complex Numbers
 //==========================================
@@ -13865,9 +13865,9 @@ evaluator.readpixels$1 = function(args, modifs) {
     var data = readPixelsIndirection(img, 0, 0, img.width, img.height);
     var pixels = [];
     for (var i = 0; i + 3 < data.length; i += 4) {
-        pixels.push(List.turnIntoCSList([CSNumber.real(data[i + 0]), CSNumber.real(data[i + 1]), CSNumber.real(data[i + 2]), CSNumber.real(data[i + 3])]))
+        pixels.push(List.turnIntoCSList([CSNumber.real(data[i + 0]), CSNumber.real(data[i + 1]), CSNumber.real(data[i + 2]), CSNumber.real(data[i + 3])]));
     }
-    return List.turnIntoCSList(pixels)
+    return List.turnIntoCSList(pixels);
 };
 /*jshint -W030 */
 'use strict'; // So this file can be used as a stand-alone node module
