@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+    <title>Cindy JS</title>
+    <script type="text/javascript" src="Cindy.js"></script>
+    <script type="text/javascript" src="CindyGL.js"></script>
+		<link rel="stylesheet" href="CindyJS.css">
+  </head>
+    
+	<body style="font-family:Arial;">
+    
+    <h1>generating formulas f(x,y):=0</h1>
+    
+    
+
+    <script id="csinit" type="text/x-cindyscript">
+			f(x, y):=1;
+			drawf(x,y) := f(x,y);
+			cstr = "1";
+			colorize(v) := gray(if(|v|<1,0,if(v>0,.6,.9)));
+			
+			stack = [];
+			dragging = false;
+			mergemode = false;
+			cnt = 0;
+			L = (-100,-100);
+			R = (100,-100);
+			
+			applymerge() := (
+				cstr = "("+round(g(A.x,A.y))+"*"+fmstr+" - (" + round(f(A.x,A.y)) + ")*"+gmstr+")";
+				parse("f(x,y) := "+cstr);
+				drawf(x,y) := f(x,y);
+				mergemode = false;
+				Merge.visible = true;
+				ApplyMerge.visible = false;
+				A.xy = (0,0);
+				A.visible = false;
+			);
+			
+			merge() := (
+				if(cstr!="1", save());
+				Merge.visible = false;
+				ApplyMerge.visible = true;
+				A.visible = true;
+				mergemode = true;
+				
+				fmstr = stack_1_1;
+				gmstr = stack_2_1;
+				parse("f(x,y) := "+fmstr);
+				parse("g(x,y) := "+gmstr);
+				
+				drawf(x,y) := (
+					f(x,y)*g(A.x,A.y)- g(x,y)*f(A.x,A.y)
+				);
+				
+				
+			);
+			
+			reset() := (
+				if(mergemode, applymerge());
+				f(x, y):=1;
+				drawf(x,y) := f(x,y);
+				cstr = "1";
+			);
+			
+			save() := (
+				if(mergemode, applymerge());
+				cnt = cnt+1;
+				if(cnt>=1, Merge.visible= true);
+				img = "img"+cnt;
+				createimage(img, 200,200);
+				colorplot(L, R, img, colorize(drawf(#.x,#.y)));
+				stack = stack ++ [[cstr, img]];
+				reset();
+			);
+    </script>
+		
+		<script id="csmousedown" type="text/x-cindyscript">
+		if(!mergemode,
+			p = mouse();
+			dragging = true;
+		);
+		</script>
+		
+		
+		
+		<script id="csmouseup" type="text/x-cindyscript">
+		if(!mergemode & dragging,
+			dragging = false;
+			
+			factor = "(" + round(v.x) + "*x+(" + round(v.y) + ")*y+(" + round(-v*p) + "))";
+			cstr = if(cstr=="1", factor, cstr + " * " + factor);
+			parse("f(x,y) := "+cstr);
+			drawf(x,y) := f(x,y);
+		);
+		</script>
+		
+		<script id="csdraw" type="text/x-cindyscript">
+		if(dragging,
+			v = p-mouse()+[.1,.1];
+			drawf(x,y) := f(x,y)*(v*[x,y]-v*p);
+			
+			if(|p,mouse()|>20,
+				dragging = false;
+				drawf(x,y) := f(x,y);
+			)
+		);
+		if(mergemode,
+			cstr = "("+round(g(A.x,A.y))+"*"+fmstr+" - (" + round(f(A.x,A.y)) + ")*"+gmstr+")";
+		);
+		
+			colorplot(colorize(drawf(#.x,#.y)));
+			if(cstr=="1" & !dragging,
+				drawtext((0,0), "click and drag to add line");
+			);
+			drawtext((-80,80), "f(x,y) = " + cstr);
+			
+			y = 60;
+			forall(stack, s,
+				drawimage((60,y),(90,y), s_2);
+				draw(polygon([(60,y),(90,y),(90,y+30),(60,y+30)]));
+				y = y-40;
+			);
+		</script>
+    
+
+    <div  id="CSCanvas" style="width:600px; height:600px; border:2px solid #000000"></div>
+    
+    <script type="text/javascript">
+        
+        var gslp=[
+                  {name:"A", kind:"P", type:"Free", pos:[-7,-1,1], visible: false},
+                  {name:"B", kind:"P", type:"Free", pos:[10,1,1], visible: false},
+									{name: "Save", type: "Button", pos: [80,-80], color: [0.0, 0.0, 0.0], text: "Save", script: "save()"},
+									{name: "Reset", type: "Button", pos: [60,-80], color: [0.0, 0.0, 0.0], text: "Reset", script: "reset()"},
+									{name: "Merge", type: "Button", pos: [-80,-80], color: [0.0, 0.0, 0.0], text: "Merge", script: "merge()", visible: false},
+									{name: "ApplyMerge", type: "Button", pos: [-80,-80], color: [0.0, 0.0, 0.0], text: "apply merge", script: "applymerge()", visible: false},
+                  ];
+        var cdy = CindyJS({canvasname:"CSCanvas",
+										use: ["CindyGL"],
+                    scripts: "cs*",
+                    geometry:gslp,
+										ports: [{
+                      id: "CSCanvas",
+                      width: 800,
+                      height: 800,
+                      transform: [ { visibleRect: [ -100, -100, 100, 100 ] } ]
+                    }]
+                  });
+    </script>              
+	</body>
+</html>

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+    <title>Cindy JS</title>
+    <script type="text/javascript" src="Cindy.js"></script>
+    <script type="text/javascript" src="CindyGL.js"></script>
+		<link rel="stylesheet" href="style.css">
+  </head>
+    
+	<body>
+    
+    <h1>Generating formulas f(x,y):=0</h1>
+    
+    
+
+    <script id="csinit" type="text/x-cindyscript">
+			f(x, y):=1;
+			drawf(x,y) := f(x,y);
+			cstr = "1";
+			colorize(v) := if(v>0,.6,.9*min(1,.4+|v|/3));
+			
+			stack = [];
+			dragging = false;
+			mergemode = false;
+			cnt = 0;
+			L = (-100,-100);
+			R = (100,-100);
+			
+			
+			reparse() := (
+				parse("f(x,y) := "+cstr);
+				drawf(x,y) := f(x,y);
+				repaint();
+			);
+			
+			load(f) := (
+				cstr = "("+f+")";
+				reparse();
+			);
+			
+			applymerge() := (
+				cstr = "("+round(g(A.x,A.y))+"*"+fmstr+" - (" + round(f(A.x,A.y)) + ")*"+gmstr+")";
+				reparse();
+				mergemode = false;
+				//Merge.visible = true;
+				//ApplyMerge.visible = false;
+				A.xy = (0,0);
+				A.visible = false;
+			);
+			
+			merge() := (
+				if(cstr!="1", save());
+				//Merge.visible = false;
+				//ApplyMerge.visible = true;
+				A.visible = true;
+				mergemode = true;
+				
+				//fmstr = javascript("selected[0].formula");
+				//gmstr = javascript("selected[1].formula");
+				parse("f(x,y) := "+fmstr);
+				parse("g(x,y) := "+gmstr);
+				
+				drawf(x,y) := (
+					f(x,y)*g(A.x,A.y)- g(x,y)*f(A.x,A.y)
+				);
+				
+				
+			);
+			
+			reset() := (
+				if(mergemode, applymerge());
+				f(x, y):=1;
+				drawf(x,y) := f(x,y);
+				cstr = "1";
+			);
+			
+			save() := (
+				if(mergemode, applymerge());
+				javascript("savesurfacefromcdy();");
+				reset();
+			);
+    </script>
+		
+		<script id="csmousedown" type="text/x-cindyscript">
+		if(!mergemode,
+			p = mouse();
+			dragging = true;
+		);
+		</script>
+		
+		
+		
+		<script id="csmouseup" type="text/x-cindyscript">
+		if(!mergemode & dragging,
+			dragging = false;
+			
+			factor = "(" + round(v.x) + "*x+(" + round(v.y) + ")*y+(" + round(-v*p) + "))";
+			cstr = if(cstr=="1", factor, cstr + " * " + factor);
+			parse("f(x,y) := "+cstr);
+			drawf(x,y) := f(x,y);
+		);
+		</script>
+		
+		<script id="csdraw" type="text/x-cindyscript">
+		if(dragging,
+			v = p-mouse()+[.1,.1];
+			drawf(x,y) := f(x,y)*(v*[x,y]-v*p);
+			
+			if(|p,mouse()|>20,
+				dragging = false;
+				drawf(x,y) := f(x,y);
+			)
+		);
+		if(mergemode,
+			cstr = "("+round(g(A.x,A.y))+"*"+fmstr+" - (" + round(f(A.x,A.y)) + ")*"+gmstr+")";
+		);
+		
+			colorplot(colorize(drawf(#.x,#.y)));
+			if(cstr=="1" & !dragging,
+				drawtext((0,0), "click and drag to add line");
+			);
+
+		</script>
+    
+<div class="container">
+    <div  id="CSCanvas"></div>
+	
+				<div id="buttons">
+		    <button onclick="unmerge(); cdy.evalcs('save()');">Save</button>
+				<button onclick="unmerge(); cdy.evalcs('reset()');">Reset</button>
+				<button onclick="merge(); cdy.evalcs('merge()');">Merge</button>
+				</div>
+					<div id="surfaces"></div>
+</div>
+    <script type="text/javascript">
+        
+        var gslp=[
+                  {name:"A", kind:"P", type:"Free", pos:[-7,-1,1], visible: false},
+                  {name:"B", kind:"P", type:"Free", pos:[10,1,1], visible: false},
+						/*			{name: "Save", type: "Button", pos: [80,-80], color: [0.0, 0.0, 0.0], text: "Save", script: "save()"},
+									{name: "Reset", type: "Button", pos: [60,-80], color: [0.0, 0.0, 0.0], text: "Reset", script: "reset()"},
+									{name: "Merge", type: "Button", pos: [-80,-80], color: [0.0, 0.0, 0.0], text: "Merge", script: "merge()", visible: false},
+									{name: "ApplyMerge", type: "Button", pos: [-80,-80], color: [0.0, 0.0, 0.0], text: "apply merge", script: "applymerge()", visible: false},*/
+                  ];
+        var cdy = CindyJS({canvasname:"CSCanvas",
+										use: ["CindyGL"],
+                    scripts: "cs*",
+                    geometry:gslp,
+										ports: [{
+                      id: "CSCanvas",
+//                      width: 800,
+  //                    height: 800,
+                      transform: [ { visibleRect: [ -100, -100, 100, 100 ] } ]
+                    }]
+                  });
+				
+				var surfaces = [];
+				var selected = [];
+				var surfaceselement = document.getElementById('surfaces');
+			var mergemode = false;
+			
+			var updatemergefunctions = function() {
+				cdy.evalcs(`fmstr = "${selected[0].formula}";
+					gmstr = "${selected[1].formula}";
+					parse("f(x,y) := "+fmstr);
+					parse("g(x,y) := "+gmstr);`);
+			}
+			
+			var merge = function() {
+					selected = [surfaces[surfaces.length-1], surfaces[surfaces.length-2]];
+					for(i in selected) {
+							selected[i].div.classList.add("selected");
+					}
+					updatemergefunctions();
+					
+					mergemode = true;
+			};
+			
+			var unmerge = function() {
+					for(i in selected) {
+							selected[i].div.classList.remove("selected");
+					}
+					mergemode = false;
+			};
+			
+			var savesurfacefromcdy = function(){
+				let formula = cdy.evalcs("cstr").value;
+				console.log(formula);
+				savesurface(formula, cdy.canvas.toDataURL());
+			};
+			
+			var savesurface = function(formula, imgsrc) {
+				if(mergemode) {
+					
+				}
+				let img = new Image();
+				img.src = imgsrc;
+				img.width = 50;
+				img.height = 50;
+				img.alt = formula;
+				
+				let div = document.createElement("div");
+				div.class = "surfaceholder";
+				div.appendChild(img);
+				div.style.backgroundImage = `url(${img})`;
+				div.appendChild(document.createTextNode(formula));
+				let current = {
+					image: img,
+					formula: formula,
+					div: div
+				};
+				div.onclick = function() {
+					if(mergemode) {
+						selected[0].div.classList.remove("selected");
+						current.div.classList.add("selected");
+						selected = [selected[1], current];
+						updatemergefunctions();
+					} else
+						cdy.evalcs(`load("${formula}")`);
+				}
+				surfaces.push(current);
+				surfaceselement.appendChild(div);
+			};
+			
+			savesurface("1", "constant.png");
+			savesurface("x^2+y^2-1000", "circle.png");
+    </script>            
+	</body>
+</html>
