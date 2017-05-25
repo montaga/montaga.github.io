@@ -26,7 +26,7 @@
 				ua = "ua";
 
 				forall(["ua", "d", "p", "u", "img"], img,
-						createimage(img, N, N); colorplot(L, R, img, imagergba(L, R, img, #, repeat -> true) + [0, 0, 0, 0]);
+						createimage(img, N, N); colorplot(L, R, img, [0, 0, 0, 0]);
 				);
 
 				pixel2coord(x) := x / N * 4 + (-2, -2);
@@ -58,10 +58,12 @@
 				);
 
 				pressure(d, res) := (
-						p = res; colorplot(L, R, p,
-								0
-						);
-						repeat(50,
+						p = res;
+						/*colorplot(L, R, p,
+								0 
+						);*/ 
+						//use old value of p for starting point for Jacobi iteration
+						repeat(20,
 								colorplot(L, R, p,
 										(
 												imagergba(L, R, d, #, repeat -> true, interpolate -> false) _1 +

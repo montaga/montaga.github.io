@@ -26,7 +26,7 @@
 				ua = "ua";
 
 				forall(["ua", "d", "p", "u", "img"], img,
-						createimage(img, N, N); colorplot(L, R, img, imagergba(L, R, img, #, repeat -> true) + [0, 0, 0, 0]);
+						createimage(img, N, N); colorplot(L, R, img, [0, 0, 0, 0]);
 				);
 
 				pixel2coord(x) := x / N * 4 + (-2, -2);
@@ -36,7 +36,7 @@
 						if ( | x - (0, -1) | < .2, -5, 0)
 				);
 
-				dt = .5;
+				dt = .3;
 				rho = .1;
 				eps = 1;
 
@@ -58,20 +58,22 @@
 				);
 
 				pressure(d, res) := (
-						p = res; colorplot(L, R, p,
-								0
-						);
-						repeat(15,
-								colorplot(L, R, p,
-										(
-												imagergba(L, R, d, #, repeat -> true, interpolate -> false) _1 +
-												imagergba(L, R, p, #+(2, 0), repeat -> true, interpolate -> false) _1 +
-												imagergba(L, R, p, #+(-2, 0), repeat -> true, interpolate -> false) _1 +
-												imagergba(L, R, p, #+(0, 2), repeat -> true, interpolate -> false) _1 +
-												imagergba(L, R, p, #+(0, -2), repeat -> true, interpolate -> false) _1
-										) / 4
-								);
-						); p
+						p = res;
+						/*colorplot(L, R, p,
+									0 
+							);*/ 
+							//use old value of p for starting point for Jacobi iteration
+							repeat(10,
+									colorplot(L, R, p,
+											(
+													imagergba(L, R, d, #, repeat -> true, interpolate -> false) _1 +
+													imagergba(L, R, p, #+(2, 0), repeat -> true, interpolate -> false) _1 +
+													imagergba(L, R, p, #+(-2, 0), repeat -> true, interpolate -> false) _1 +
+													imagergba(L, R, p, #+(0, 2), repeat -> true, interpolate -> false) _1 +
+													imagergba(L, R, p, #+(0, -2), repeat -> true, interpolate -> false) _1
+											) / 4
+									);
+							); p
 				);
 
 
@@ -119,10 +121,10 @@
 
     <script id="csdraw" type="text/x-cindyscript">
 				colorplot(L, R, img,
-			    if (dragging & |mouse() - pixel2coord(#)| < .1, hue(seconds()),
+			  //  if (dragging & |mouse() - pixel2coord(#)| < .1, hue(seconds()),
 			        imagergb(L, R, img, #)
 							+ .003*imagergb(L, R, u, #) //just add some color based on u to make it less greyish
-			    )
+			  //  )
 				);
 
 				delta = 5 * (last - mouse());
