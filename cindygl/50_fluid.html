@@ -59,11 +59,11 @@
 
 				pressure(d, res) := (
 						p = res;
-						/*colorplot(L, R, p,
-									0 
-							);*/ 
-							//use old value of p for starting point for Jacobi iteration
-							repeat(12,
+						if(dragging,
+							colorplot(L, R, p, 0); //init value
+						);
+						//else: use old value of p for starting point for Jacobi iteration
+							repeat(4,
 									colorplot(L, R, p,
 											(
 													imagergba(L, R, d, #, repeat -> true, interpolate -> false) _1 +

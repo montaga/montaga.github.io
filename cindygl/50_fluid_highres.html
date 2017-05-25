@@ -24,6 +24,7 @@
 				d = "d";
 				p = "p";
 				ua = "ua";
+				dragging = false;
 
 				forall(["ua", "d", "p", "u", "img"], img,
 						createimage(img, N, N); colorplot(L, R, img, [0, 0, 0, 0]);
@@ -59,10 +60,10 @@
 
 				pressure(d, res) := (
 						p = res;
-						/*colorplot(L, R, p,
-								0 
-						);*/ 
-						//use old value of p for starting point for Jacobi iteration
+						if(dragging,
+							colorplot(L, R, p, 0); //init value
+						);
+						//else: use old value of p for starting point for Jacobi iteration
 						repeat(20,
 								colorplot(L, R, p,
 										(
@@ -99,7 +100,7 @@
 
 
 				colorplot(img, mod(round(#.x * 5) + round(#.y * 5), 2));
-				dragging = false;
+				
 				last = (random(), random());
     </script>
 
