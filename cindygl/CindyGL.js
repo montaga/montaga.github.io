@@ -1,127 +1,3025 @@
 (function(){
-'use strict';var aa="function"==typeof Object.defineProperties?Object.defineProperty:function(a,b,c){if(c.get||c.set)throw new TypeError("ES3 does not support getters and setters.");a!=Array.prototype&&a!=Object.prototype&&(a[b]=c.value)},e="undefined"!=typeof window&&window===this?this:"undefined"!=typeof global?global:this;
-function ba(a,b){if(b){var c=e;a=a.split(".");for(var d=0;d<a.length-1;d++){var f=a[d];f in c||(c[f]={});c=c[f]}a=a[a.length-1];d=c[a];b=b(d);b!=d&&null!=b&&aa(c,a,{configurable:!0,writable:!0,value:b})}}
-ba("String.prototype.repeat",function(a){return a?a:function(a){var c;if(null==this)throw new TypeError("The 'this' value for String.prototype.repeat must not be null or undefined");c=this+"";if(0>a||1342177279<a)throw new RangeError("Invalid count value");a|=0;for(var d="";a;)if(a&1&&(d+=c),a>>>=1)c+=c;return d}});function ca(){ca=function(){};e.Symbol||(e.Symbol=da)}var ea=0;function da(a){return"jscomp_symbol_"+(a||"")+ea++}
-function fa(){ca();var a=e.Symbol.iterator;a||(a=e.Symbol.iterator=e.Symbol("iterator"));"function"!=typeof Array.prototype[a]&&aa(Array.prototype,a,{configurable:!0,writable:!0,value:function(){return ga(this)}});fa=function(){}}function ga(a){var b=0;return ha(function(){return b<a.length?{done:!1,value:a[b++]}:{done:!0}})}function ha(a){fa();a={next:a};a[e.Symbol.iterator]=function(){return this};return a}
-ba("Array.from",function(a){return a?a:function(a,c,d){fa();c=c?c:function(a){return a};var f=[],g=a[Symbol.iterator];if("function"==typeof g)for(a=g.call(a);!(g=a.next()).done;)f.push(c.call(d,g.value));else for(var g=a.length,h=0;h<g;h++)f.push(c.call(d,a[h]));return f}});
-function ia(a,b){fa();a instanceof String&&(a+="");var c=0,d={next:function(){if(c<a.length){var f=c++;return{value:b(f,a[f]),done:!1}}d.next=function(){return{done:!0,value:void 0}};return d.next()}};d[Symbol.iterator]=function(){return d};return d}ba("Array.prototype.keys",function(a){return a?a:function(){return ia(this,function(a){return a})}});
-ba("Array.prototype.fill",function(a){return a?a:function(a,c,d){var f=this.length||0;0>c&&(c=Math.max(0,f+c));if(null==d||d>f)d=f;d=Number(d);0>d&&(d=Math.max(0,f+d));for(c=Number(c||0);c<d;c++)this[c]=a;return this}});
-var ja={addc:"vec2 addc(vec2 a,vec2 b){\nreturn a+b;\n}\n",arccosc:"vec2 arccosc(vec2 a){\nvec2 t2=multc(a,negc(a));\nvec2 tmp=sqrtc(addc(vec2(1.0,0.0),t2));\nvec2 tmp1=addc(multc(a,vec2(0.0,1.0)),tmp);\nvec2 erg=addc(multc(logc(tmp1),vec2(0.0,1.0)),vec2(pi*0.5,0.0));\nreturn erg;\n}\n",arcsinc:"vec2 arcsinc(vec2 a){\nvec2 t2=multc(a,negc(a));\nvec2 tmp=sqrtc(addc(vec2(1.0,0.0),t2));\nvec2 tmp1=addc(multc(a,vec2(0.0,1.0)),tmp);\nvec2 erg=multc(logc(tmp1),vec2(0.0,-1.0));\nreturn erg;\n}\n",arctan2c:"\n\n\n\nvec2 arctan2c(vec2 x,vec2 y){\nvec2 r=logc(divc(x+vec2(-y.y,y.x),sqrtc(multc(x,x)+multc(y,y))));\nreturn vec2(r.y, -r.x);\n}\n",
-arctan2cvec2:"vec2 arctan2cvec2(cvec2 v){\nreturn arctan2c(v.real,v.imag);\n}\n",arctan2vec2:"float arctan2vec2(vec2 v){\nreturn atan(v.y,v.x);\n}\n",arctanc:"vec2 arctanc(vec2 a){\nvec2 t1=logc(addc(multc(a,vec2(0.0,-1.0)),vec2(1.0,0.0)));\nvec2 t2=logc(addc(multc(a,vec2(0.0,1.0)),vec2(1.0,0.0)));\nvec2 erg=multc(subc(t1,t2),vec2(0.0,0.5));\nreturn erg;\n}\n",blue:"vec3 blue(float f)\n{\nreturn vec3(0.,0.,clamp(f,0.,1.));\n}\n",cimag:"float imagc(vec2 a){\nreturn a.y;\n}\n",conjugate:"vec2 conjugate(vec2 a){\nreturn vec2(a.x, -a.y);\n}\n",
-copytexture_f:"#ifdef GL_ES\nprecision highp float;\n#endif\n\nuniform sampler2D sampler;\nvarying vec2 cgl_pixel;\n\nvoid main(void){\ngl_FragColor=texture2D(sampler,cgl_pixel);\n}\n",copytexture_v:"attribute vec3 aPos;\nattribute vec2 aTexCoord;\nvarying vec2 cgl_pixel;\n\nvoid main(void){\ngl_Position=vec4(aPos,1.);\ncgl_pixel=aTexCoord;\n}\n",cosc:"vec2 cosc(vec2 a){\n\nfloat n=exp(a.y);\nfloat imag1=n*sin(-a.x);\nfloat real1=n*cos(-a.x);\nn=exp(-a.y);\nfloat imag2=n*sin(a.x);\nfloat real2=n*cos(a.x);\nfloat i= (imag1+imag2) /2.0;\nfloat r= (real1+real2) /2.0;\n\nreturn vec2(r,i);\n}\n",
-creal:"float realc(vec2 a){\nreturn a.x;\n}\n",dehomogenize:"vec2 dehomogenize(vec3 z){\nreturn vec2(z.x,z.y)/z.z;\n}\n",divc:"vec2 divc(vec2 a,vec2 b){\nreturn vec2(dot(a,b),dot(a,vec2(-b.y,b.x)))/dot(b,b);\n}\n",divfc:"vec2 divfc(float a,vec2 b){\nreturn a*vec2(b.x,-b.y)/dot(b,b);\n}\n",expc:"vec2 expc(vec2 a){\nfloat n=exp(a.x);\nfloat r=n*cos(a.y);\nfloat i=n*sin(a.y);\nreturn vec2(r,i);\n}\n",float2color:"vec4 float2color(float f)\n{\nreturn vec4(f,f,f,1.);\n}\n",gray:"vec3 gray(float f)\n{\nf=clamp(f,0.,1.);\nreturn vec3(f,f,f);\n}\n",
-green:"vec3 green(float f)\n{\nreturn vec3(0.,clamp(f,0.,1.),0.);\n}\n",hsv2rgb:"vec3 hsv2rgb(vec3 c)\n{\nvec4 K=vec4(1.0,2.0/3.0,1.0/3.0,3.0);\nvec3 p=abs(fract(c.xxx+K.xyz) *6.0-K.www);\nreturn c.z*mix(K.xxx,clamp(p-K.xxx,0.0,1.0),c.y);\n}\n",hue:"vec3 hue(float a){\nreturn hsv2rgb(vec3(a,1.,1.));\n}\n",imagc:"float imagc(vec2 a){\nreturn a.y;\n}\n",invc:"vec2 invc(vec2 a){\nfloat n=a.x*a.x+a.y*a.y;\nreturn vec2(a.x/n,-a.y/n);\n}\n",logc:"vec2 logc(vec2 a){\nfloat re=a.x;\nfloat im=a.y;\nfloat s=sqrt(re*re+im*im);\nfloat i=im;\nfloat imag=atan(im,re);\nif(i<0.0){\nimag+= (2.0*pi);\n}\nif(i==0.0&&re<0.0){\nimag=pi;\n}\nif(imag>pi){\nimag-= (2.0*pi);\n};\nfloat real=log(s);\n\nreturn vec2(real,imag);\n}\n",
-logr:"vec2 logr(float a){\nif(a>=0.)return vec2(log(a),0);\nelse return vec2(log(-a),pi);\n}\n",mat2complex:"mat4 mat2complex(mat2 a)\n{\nreturn mat4(\nvec4(a[0][0],0,a[0][1],0),\nvec4(0,a[0][0],0,a[0][1]),\nvec4(a[1][0],0,a[1][1],0),\nvec4(0,a[1][0],0,a[1][1])\n);\n}\n",multc:"vec2 multc(vec2 a,vec2 b){\nreturn vec2(dot(a,vec2(b.x,-b.y)),dot(a,b.yx));\n}\n",negc:"vec2 negc(vec2 a){\nreturn vec2(-a.x,-a.y);\n}\n",powc:"vec2 powc(vec2 a,vec2 b){\nreturn expc(multc(logc(a),b));\n}\n",powi:"float powi(float a,int b){\nif(mod(float(b),2.) < .5)\nreturn pow(abs(a),float(b));\nelse\nreturn sign(a)*pow(abs(a),float(b));\n}\n",
-random:"uniform float rnd_;\n\nfloat last_rnd= .1231;\nfloat random(){\nfloat a=mod(rnd_*plain_pixel.x*32.23,1.21);\nfloat b=mod(last_rnd*plain_pixel.y*54.21,1.32);\nlast_rnd=mod(a+b+12232.2213*(1.+rnd_)*dot(plain_pixel,plain_pixel)+a+sin(b)+b*sin(dot(plain_pixel,vec2(232.121+rnd_,2232.11))+last_rnd*121.11)*129.12+rnd_,1.);\nreturn last_rnd;\n\n\n}\n",realc:"float realc(vec2 a){\nreturn a.x;\n}\n",red:"vec3 red(float f)\n{\nreturn vec3(clamp(f,0.,1.),0.,0.);\n}\n",rgb2hsv:"vec3 rgb2hsv(vec3 c)\n{\nvec4 K=vec4(0.0, -1.0/3.0,2.0/3.0, -1.0);\nvec4 p=mix(vec4(c.bg,K.wz),vec4(c.gb,K.xy),step(c.b,c.g));\nvec4 q=mix(vec4(p.xyw,c.r),vec4(c.r,p.yzx),step(p.x,c.r));\n\nfloat d=q.x-min(q.w,q.y);\nfloat e=1.0e-10;\nreturn vec3(abs(q.z+ (q.w-q.y) / (6.0*d+e)),d/ (q.x+e),q.x);\n}\n",
-sinc:"\n\nvec2 sinc(vec2 a){\n\nfloat n=exp(a.y);\nfloat imag1=n*sin(-a.x);\nfloat real1=n*cos(-a.x);\nn=exp(-a.y);\nfloat imag2=n*sin(a.x);\nfloat real2=n*cos(a.x);\nfloat r= -(imag1-imag2) /2.0;\nfloat i= (real1-real2) /2.0;\n\nreturn vec2(r,i);\n}\n",sqrtc:"vec2 sqrtc(vec2 a){\nreturn expc(multc(logc(a),vec2(0.5,0.0)));\n}\n",sqrtf:"vec2 sqrtf(float a){\nif(a>=0.)return vec2(sqrt(a),0.);\nelse return vec2(0.,sqrt(-a));\n}\n",standardFragmentHeader:"#ifdef GL_ES\nprecision highp float;\nprecision highp int;\n#endif\n\n#define pi 3.141592653589793\n\nvarying vec2 cgl_pixel;\nvarying vec2 plain_pixel;\n",
-subc:"vec2 subc(vec2 a,vec2 b){\nreturn a-b;\n}\n",tanc:"vec2 tanc(vec2 a){\nvec2 s=sinc(a);\nvec2 c=cosc(a);\nreturn divc(s,c);\n}\n",vec2complex:"vec4 vec2complex(vec2 a)\n{\nreturn vec4(a.x,0.,a.y,0);\n}\n",vshader:"attribute vec3 aPos;\nattribute vec2 aTexCoord;\nvarying vec2 cgl_pixel;\nvarying vec2 plain_pixel;\nuniform mat3 transformMatrix;\nvoid main(void){\ngl_Position=vec4(aPos,1.);\nplain_pixel=aTexCoord;\nvec3 r=transformMatrix*vec3(plain_pixel,1);\ncgl_pixel=r.xy/r.z;\n}\n"};var ka=!1,k,m,n,u,v=!1,ma,w=!1,na=1;
-function oa(){function a(c){k.removeEventListener("webglcontextcreationerror",a,!1);c.statusMessage&&(b=c.statusMessage)}if(!ka){k=document.createElement("canvas");k.id="glcanvas";k.style.display="none";k.width=k.height=0;document.body.appendChild(k);m=document.createElement("canvas");m.id="tmpcanvas";m.style.display="none";m.width=m.height=0;document.body.appendChild(m);var b="Unknown";k.addEventListener("webglcontextcreationerror",a,!1);(n=k.getContext("webgl"))||(n=k.getContext("experimental-webgl"));
-if(!n)throw new pa("Could not obtain a WebGL context.\nReason: "+b);k.removeEventListener("webglcontextcreationerror",a,!1);w=n.getExtension("OES_texture_float")&&n.getExtension("OES_texture_float_linear");w||(console.error("Your browser does not suppert OES_texture_float, trying OES_texture_half_float..."),(v=(ma=n.getExtension("OES_texture_half_float"))&&n.getExtension("OES_texture_half_float_linear"))||console.error("Your browser does not suppert OES_texture_half_float, will use 8-bit textures."));
-navigator.userAgent.match(/(iPad|iPhone)/i)&&(console.log("You are  using an iPhone/iPad."),w=v=!1,n.getExtension("OES_texture_half_float")&&n.getExtension("OES_texture_half_float_linear")&&n.getExtension("EXT_color_buffer_half_float")?v=!0:console.error("Your browser does not suppert writing to half_float textures, we will use 8-bit textures."));ka=!0}};function qa(a){var b;if(null==a||"object"!=typeof a)return a;if(a instanceof Array){b=[];for(var c=0,d=a.length;c<d;c++)b[c]=qa(a[c]);return b}if(a instanceof Object){b={};for(c in a)a.hasOwnProperty(c)&&(0<="oper impl args ctype stack name arglist value real imag key obj body".split(" ").indexOf(c)&&(b[c]=qa(a[c])),a.modifs&&(b.modifs=a.modifs));return b}}
-function ra(a,b){if(null==a||"object"!=typeof a)return a===b;if(a instanceof Array&&b instanceof Array){if(a.length!=b.length)return!1;for(var c=0,d=a.length;c<d;c++)if(!ra(a[c],b[c]))return!1;return!0}if(a instanceof Object&&b instanceof Object){c="oper impl args ctype stack name modifs arglist value real imag key obj body".split(" ");for(d=0;d<c.length;d++){var f=c[d];if(!ra(a[f],b[f]))return!1}return!0}return!1}function x(a){return-1===a.indexOf("$")?a:a.substr(0,a.indexOf("$"))}
-function y(a){if("boolean"===a.ctype)return z.B;if("number"===a.ctype)return a=a.value,1E-5>Math.abs(a.imag)?(a.real|0)===a.real?z.w:z.f:z.h;if("list"===a.ctype){var b=a.value;if(0<b.length){for(var c=y(b[0]),d=1;d<b.length;d++)c=B(c,y(b[d]));if(c)return{type:"list",length:b.length,i:c}}}else if("string"===a.ctype||"image"===a.ctype)return z.image;console.error("Cannot guess type of the following type:");console.log(a);return!1}var sa=0;function C(){sa++;return"_h"+sa}
-function ta(a,b){if(a>k.width||b>k.height)k.width=Math.ceil(a),k.height=Math.ceil(b)}function ua(a,b,c){a=a.getInitialMatrix();b-=a.tx;c+=a.ty;return{x:(b*a.d-c*a.b)/a.det,y:-(-b*a.c+c*a.a)/a.det}}function va(a){return ua(a,0,a.instance.canvas.clientHeight)}function wa(a){return ua(a,a.instance.canvas.clientWidth,a.instance.canvas.clientHeight)}var xa=new Float32Array(1),ya=new Int32Array(xa.buffer);
-function za(a){xa[0]=a;a=ya[0];var b=a>>16&32768,c=(a&2147483647)+4096;if(1199570944<=c)return 1199570944<=(a&2147483647)?2139095040>c?b|31744:b|31744|(a&8388607)>>13:b|31743;if(947912704<=c)return b|c-939524096>>13;if(855638016>c)return b;c=(a&2147483647)>>23;return b|(a&8388607|8388608)+(8388608>>>c-102)>>126-c}
-function Aa(a){if(w)return new Float32Array(a);if(v){for(var b=new Uint16Array(a.length),c=0;c<a.length;c++)b[c]=za(a[c]);return b}b=new Uint8Array(a.length);for(c=0;c<a.length;c++)b[c]=255*a[c];return b}function Ba(a){return w?new Float32Array(a):v?new Uint16Array(a):new Uint8Array(a)}function Ca(){return w?n.FLOAT:v?ma.HALF_FLOAT_OES:n.UNSIGNED_BYTE}
-function Da(a){for(var b=[],c=0;c<a.length;c++)if(w)b.push(a[c]);else if(v){var d=a[c],f=(d&31744)>>10,g=d&1023;b.push((d>>15?-1:1)*(f?31===f?g?NaN:Infinity:Math.pow(2,f-15)*(1+g/1024):g/1024*6.103515625E-5))}else b.push(a[c]/255);return b}function Ea(a){for(var b=1;b<a;)b<<=1;return b};function Fa(a,b){a.hasOwnProperty("readcanvaswrappers")||(a.readcanvaswrappers=Array(4));var c=2*b.U+b.aa;a.readcanvaswrappers.hasOwnProperty(c)||(a.writecanvaswrapper&&a.writecanvaswrapper.generation>a.generation&&a.writecanvaswrapper.ma(),a.readcanvaswrappers[c]=new Ga(a,b),a.ready||(console.error("Image not ready. Creating onload event."),a.whenReady(function(){a.generation=Math.max(a.generation,a.readcanvaswrappers[c].generation+1)})));a.writecanvaswrapper&&(a.writecanvaswrapper=a.readcanvaswrappers[c]);
-return a.readcanvaswrappers[c]}function Ha(a){if(!a.hasOwnProperty("writecanvaswrapper")){var b=-1;if(a.readcanvaswrappers)for(var c=3;0<=c;c--)a.readcanvaswrappers.hasOwnProperty(b)&&(b=c);else a.readcanvaswrappers=Array(4);-1==b&&(c={aa:!0,U:!1,repeat:!1},b=2*c.U+c.aa,a.readcanvaswrappers[b]=new Ga(a,c));a.writecanvaswrapper=a.readcanvaswrappers[b]}a.readPixels=a.writecanvaswrapper.readPixels.bind(a.writecanvaswrapper);return a.writecanvaswrapper}
-function Ga(a,b){this.canvas=a;this.S=b;this.K=a.width;this.G=a.height;Ia(this);this.l=0;this.s=[];this.ca=[];this.generation=-1;this.bindTexture();a.drawTo=this.drawTo.bind(this);a.readPixels=this.readPixels.bind(this);a.cdyUpdate=this.ma.bind(this);a=Ba(this.Y*this.L*4);for(var c=0;2>c;c++)this.s[c]=n.createTexture(),n.bindTexture(n.TEXTURE_2D,this.s[c]),n.pixelStorei(n.UNPACK_ALIGNMENT,1),n.texImage2D(n.TEXTURE_2D,0,n.RGBA,this.Y,this.L,0,n.RGBA,Ca(),a),b.U?n.texParameteri(n.TEXTURE_2D,n.TEXTURE_MIN_FILTER,
-b.aa?n.LINEAR_MIPMAP_LINEAR:n.NEAREST_MIPMAP_LINEAR):n.texParameteri(n.TEXTURE_2D,n.TEXTURE_MIN_FILTER,b.aa?n.LINEAR:n.NEAREST),n.texParameteri(n.TEXTURE_2D,n.TEXTURE_MAG_FILTER,b.aa?n.LINEAR:n.NEAREST),this.ca[c]=n.createFramebuffer(),n.bindFramebuffer(n.FRAMEBUFFER,this.ca[c]),n.framebufferTexture2D(n.FRAMEBUFFER,n.COLOR_ATTACHMENT0,n.TEXTURE_2D,this.s[c],0);this.ba=new Ja(ja.copytexture_v,ja.copytexture_f);b=n.createBuffer();n.bindBuffer(n.ARRAY_BUFFER,b);b=new Float32Array([-1,-1,0,1,-1,0,-1,
-1,0,1,1,0]);a=n.getAttribLocation(this.ba.l,"aPos");n.enableVertexAttribArray(a);c=n.getAttribLocation(this.ba.l,"aTexCoord");n.enableVertexAttribArray(c);var d=new Float32Array([0,0,1,0,0,1,1,1]),f=b.byteLength;n.bufferData(n.ARRAY_BUFFER,f+d.byteLength,n.STATIC_DRAW);n.bufferSubData(n.ARRAY_BUFFER,0,b);n.bufferSubData(n.ARRAY_BUFFER,f,d);n.vertexAttribPointer(a,3,n.FLOAT,!1,0,0);n.vertexAttribPointer(c,2,n.FLOAT,!1,0,f)}
-function Ia(a){a.Y=Ea(a.K+a.K/2*(a.S.U&&a.S.repeat));a.L=Ea(a.G+a.G/2*(a.S.U&&a.S.repeat))}Ga.prototype.bindTexture=function(){n.bindTexture(n.TEXTURE_2D,this.s[this.l])};Ga.prototype.bindFramebuffer=function(){n.bindFramebuffer(n.FRAMEBUFFER,this.ca[this.l^1]);this.l^=1};
-Ga.prototype.ma=function(){var a;this.canvas.img.hasOwnProperty("getContext")?a=this.canvas.img.getContext("2d"):(this.canvas.img=document.createElement("canvas"),this.canvas.img.style.display="none",this.canvas.img.width=this.K,this.canvas.img.height=this.G,a=this.canvas.img.getContext("2d"));a.clearRect(0,0,this.K,this.G);this.drawTo(a,0,0);this.canvas.img.generation++};
-function Ka(a){if(a.canvas.live||a.canvas.ready&&!(a.generation>=a.canvas.generation)){if(a.K!=a.canvas.width||a.G!=a.canvas.height){a.K=a.canvas.width;a.G=a.canvas.height;Ia(a);for(var b=Ba(a.Y*a.L*4),c=0;2>c;c++)n.bindTexture(n.TEXTURE_2D,a.s[c]),n.texImage2D(n.TEXTURE_2D,0,n.RGBA,a.Y,a.L,0,n.RGBA,Ca(),b)}a.bindTexture();n.pixelStorei(n.UNPACK_FLIP_Y_WEBGL,1);a.S.repeat?(m.width=a.Y,m.height=a.L,b=m.getContext("2d"),b.drawImage(a.canvas.img,0,a.L-a.G),b.drawImage(a.canvas.img,a.K,a.L-a.G),b.drawImage(a.canvas.img,
-0,a.L-2*a.G),b.drawImage(a.canvas.img,a.K,a.L-2*a.G),n.texSubImage2D(n.TEXTURE_2D,0,0,0,n.RGBA,Ca(),m)):n.texSubImage2D(n.TEXTURE_2D,0,0,0,n.RGBA,Ca(),a.canvas.img);a.S.U&&n.generateMipmap(n.TEXTURE_2D);n.pixelStorei(n.UNPACK_FLIP_Y_WEBGL,0);a.generation=a.canvas.generation;console.log("Image has been loaded to GPU")}}
-Ga.prototype.drawTo=function(a,b,c){ta(this.K,this.G);n.viewport(0,0,this.Y,this.L);n.useProgram(this.ba.l);n.activeTexture(n.TEXTURE0);n.bindTexture(n.TEXTURE_2D,this.s[this.l]);this.ba.s.sampler([0]);n.bindFramebuffer(n.FRAMEBUFFER,null);n.drawArrays(n.TRIANGLE_STRIP,0,4);n.flush();a.drawImage(k,0,k.height-this.G,this.K,this.G,b,c,this.K,this.G)};
-Ga.prototype.readPixels=function(a,b,c,d){n.bindFramebuffer(n.FRAMEBUFFER,this.ca[this.l]);n.framebufferTexture2D(n.FRAMEBUFFER,n.COLOR_ATTACHMENT0,n.TEXTURE_2D,this.s[this.l],0);var f=Ba(c*d*4);n.readPixels(a,this.G-b-d,c,d,n.RGBA,Ca(),f);a=[];for(--d;0<=d;d--)a=a.concat(Da(f.slice(d*c*4,(d+1)*c*4)));return a};function La(a,b){this.C=a;this.S=b;Ma(this)}
-function Ma(a){var b=Na(new Oa(a.C),a.S);a.s=b.D;a.F=b.F;a.ia=b.ia;a.ba=ja.standardFragmentHeader+b.code;a.ca=ja.vshader;a.l=new Ja(a.ca,a.ba);b=n.createBuffer();n.bindBuffer(n.ARRAY_BUFFER,b);var b=new Float32Array([-1,-1,0,1,-1,0,-1,1,0,1,1,0]),c=n.getAttribLocation(a.l.l,"aPos");n.enableVertexAttribArray(c);a=n.getAttribLocation(a.l.l,"aTexCoord");n.enableVertexAttribArray(a);var d=new Float32Array([0,0,1,0,0,1,1,1]),f=b.byteLength;n.bufferData(n.ARRAY_BUFFER,f+d.byteLength,n.STATIC_DRAW);n.bufferSubData(n.ARRAY_BUFFER,
-0,b);n.bufferSubData(n.ARRAY_BUFFER,f,d);n.vertexAttribPointer(c,3,n.FLOAT,!1,0,0);n.vertexAttribPointer(a,2,n.FLOAT,!1,0,f)}
-function Pa(a){function b(a,c,d){if(a)if("function"===typeof a)switch(c){case z.h:a([d.value.real,d.value.imag]);break;case z.B:d.value?a([1]):a([0]);break;case z.w:case z.f:a([d.value.real]);break;default:if("list"===c.type&&c.i===z.f)a(d.value.map(function(a){return a.value.real}));else if("list"===c.type&&"list"===c.i.type&&c.i.i===z.f){for(var f=[],p=0;p<c.length;p++)for(var r=0;r<c.i.length;r++)f.push(d.value[p].value[r].value.real);a(f)}else console.error("Don't know how to set uniform of type "+
-D(c)+", to "+d)}else if("list"===c.type)if(p=Qa(c),1===E(c)&&p===z.f){c=Ra(c.length);var t=0;for(f in c)b(a["a"+f],z.da(c[f]),{ctype:"list",value:F(c[f]).map(function(a){return d.value[t+a]})}),t+=c[f]}else for(f=0;f<c.length;f++)b(a["a"+f],c.i,{ctype:"list",value:d.value[f].value});else console.error("Don't know how to set uniform of type "+D(c)+", to"),console.log(d)}for(var c in a.s){var d=a.C.evaluateAndVal(a.s[c].W),f=a.s[c].type;if(!G(Sa(d),f)){console.log("Type of "+c+" changed ("+D(Sa(d))+
-" is no subtype of  "+D(f)+"); forcing rebuild.");Ma(a);n.useProgram(a.l.l);Pa(a);return}a.l.s[c]&&b(a.l.s[c],f,d)}[["rnd_",function(){return[Math.random()]}],["_lowerleft",function(){var b=va(a.C);return[b.x,b.y]}],["_lowerright",function(){var b=wa(a.C);return[b.x,b.y]}]].map(function(b){return a.l.s[b[0]]&&a.l.s[b[0]](b[1]())})}
-function Ta(a){var b=0,c;for(c in a.F)for(var d in a.F[c]){n.activeTexture(n.TEXTURE0+b);var f=a.F[c][d],g=f.name,h={aa:f.X.hasOwnProperty("interpolate")?f.C.evaluateAndVal(f.X.interpolate).value:!0,U:f.X.hasOwnProperty("mipmap")?f.C.evaluateAndVal(f.X.mipmap).value:!1,repeat:f.X.hasOwnProperty("repeat")?f.C.evaluateAndVal(f.X.repeat).value:!1},f=Ua(f,h);Ka(f);f.bindTexture();[["_sampler"+g,[b]],["_ratio"+g,[f.K/f.G]],["_cropfact"+g,[f.K/f.Y,f.G/f.L]],["_repeat"+g,[h.repeat]],["_mipmap"+g,[h.U]]].map(function(b){return a.l.s[b[0]]&&
-a.l.s[b[0]](b[1])});b++}};CindyJS.registerPlugin(1,"CindyGL",function(a){function b(b,d,f,g,h,l){if(!b.oa||b.na<na)b.oa=!0,b.na=na,b.qa=new La(a,b);b=b.qa;var q;a:{for(q in b.ia)if(b.C.getMyfunction(q).generation>b.ia[q]){console.log(q+" is outdated; forcing rebuild.");q=!1;break a}q=!0}q||Ma(b);var p=h/g;q=d.x+-(f.y-d.y)*p;p=d.y+(f.x-d.x)*p;ta(g,h);l?n.viewport(0,0,g,h):n.viewport(0,k.height-h,g,h);n.useProgram(b.l.l);Pa(b);d=[f.x-d.x,q-d.x,d.x,f.y-d.y,p-d.y,d.y,0,0,1];b.l.s.hasOwnProperty("transformMatrix")&&b.l.s.transformMatrix([d[0],
-d[3],d[6],d[1],d[4],d[7],d[2],d[5],d[8]]);Ta(b);l?(l.bindFramebuffer(),l.generation=++l.canvas.generation):n.bindFramebuffer(n.FRAMEBUFFER,null);n.drawArrays(n.TRIANGLE_STRIP,0,4);n.flush();l&&(l.generation=Math.max(l.generation,l.canvas.generation+1))}u=a.nada;a.defineFunction("compile",1,function(b){b=Na(new Oa(a),b[0]);console.log(b);return{ctype:"string",value:b}});a.defineFunction("forcerecompile",0,function(){na++;return u});a.defineFunction("colorplot",1,function(c){oa();var d=a.instance.canvas.clientWidth,
-f=a.instance.canvas.clientHeight,g=a.instance.canvas.width,h=a.instance.canvas.height;b(c[0],va(a),wa(a),g,h,null);a.instance.canvas.getContext("2d").drawImage(k,0,0,g,h,0,0,d,f);return u});a.defineFunction("colorplot",3,function(c){oa();var d=c[0],f=a.extractPoint(a.evaluateAndVal(c[1])),g=a.extractPoint(a.evaluateAndVal(c[2])),h={x:Math.min(f.x,g.x),y:Math.min(f.y,g.y)},l={x:Math.max(f.x,g.x),y:Math.min(f.y,g.y)};c=a.instance.canvas.clientWidth;var q=a.instance.canvas.clientHeight,p=a.instance.canvas.width,
-r=a.instance.canvas.height,t=ua(a,0,0),A=va(a),H=wa(a),H=Math.abs((f.x-g.x)/(A.x-H.x)),t=Math.abs((f.y-g.y)/(t.y-A.y));b(d,h,l,p*H,r*t,null);d=a.instance.canvas.getContext("2d");h=Math.min(f.x,g.x);f=Math.max(f.y,g.y);g=a.getInitialMatrix();d.drawImage(k,0,0,p*H,r*t,h*g.a-f*g.b+g.tx,h*g.c-f*g.d-g.ty,H*c,t*q);return u});a.defineFunction("colorplot",4,function(c){oa();var d=a.extractPoint(a.evaluateAndVal(c[0])),f=a.extractPoint(a.evaluateAndVal(c[1])),g=a.evaluateAndVal(c[2]);c=c[3];if(!d.ok||!f.ok||
-"string"!==g.ctype)return u;var g=a.getImage(g.value,!0),h=Ha(g);b(c,d,f,g.width,g.height,h);return u});a.defineFunction("colorplot",2,function(c){oa();var d=va(a),f=wa(a),g=a.evaluateAndVal(c[0]);c=c[1];if("string"!==g.ctype)return u;var g=a.getImage(g.value,!0),h=Ha(g);b(c,d,f,g.width,g.height,h);return u});a.defineFunction("setpixel",4,function(b){var d;var f=a.evaluateAndVal(b[0]),g;g=void 0===g?null:g;"string"===f.ctype?d=f.value:(console.log("argument is not a string"),d=g);f=Va(a.evaluateAndVal(b[1]));
-g=Va(a.evaluateAndVal(b[2]));b=Wa(a.evaluateAndVal(b[3]));if(!d)return u;var h=a.getImage(d,!0),h=Ha(h);isFinite(f)&&isFinite(g)&&d&&h&&b&&(h.bindTexture(),d=[b[0],b[1],b[2],1],n.texSubImage2D(n.TEXTURE_2D,0,f,g,1,1,n.RGBA,Ca(),Aa(d)),b=h.canvas.img.getContext("2d"),h=b.createImageData(1,1),h.data.d=d,b.putImageData(h,f,g));return u})});function I(a,b){return{type:"list",length:a,i:b}}function Sa(a){return{type:"constant",value:a}}function Xa(a){return Sa({ctype:"number",value:{real:a,imag:0}})}var z={B:1,w:2,f:3,h:4,V:5,color:6,M:7,T:8,J:9,image:10,N:I(2,3),O:I(3,3),ea:I(4,3),da:function(a){return I(a,3)},ha:function(a){return I(a,4)},sa:I(2,I(2,3)),ta:I(3,I(3,3)),ua:I(4,I(4,3))};Object.freeze(z);
-function D(a){return 1<=a&&10>=a?"bool int float complex voidt color point line coordinate2d image".split(" ")[a-1]:"list"===a.type?D(a.i)+"["+a.length+"]":"constant"===a.type?"const["+JSON.stringify(a.value.value)+"]":JSON.stringify(a)}function J(a){return"list"===a.type&&J(a.i)||G(a,z.f)}function K(a){return"list"===a.type&&K(a.i)||G(a,z.h)}function Ya(a){return"constant"===a.type&&G(a,z.w)}function L(a){return"constant"===a.type?y(a.value):a}function E(a){return"list"===a.type?E(a.i)+1:0}
-function Qa(a){return void 0!==a.i?Qa(a.i):a}function Za(a,b){return E(a)===E(b)&&(0===E(a)||a.length===b.length&&Za(a.i,b.i))}function M(a){return G(a,z.f)?z.f:G(a,z.h)?z.h:{type:"list",length:a.length,i:M(a.i)}}function $a(a){return G(a,z.h)?z.h:{type:"list",length:a.length,i:$a(a.i)}}function N(a){return a===z.B||a===z.w||a===z.f||a===z.h||"list"===a.type&&a.i===z.f&&1<=a.length&&4>=a.length||"list"===a.type&&"list"===a.i.type&&a.i.i===z.f&&a.length===a.i.length&&2<=a.length&&4>=a.length}
-function ab(a){return-1!==[z.B,z.w,z.f,z.h].indexOf(a)}function bb(a,b){return a===b||"constant"===a.type&&"constant"===b.type&&ra(a.value,b.value)||"list"===a.type&&"list"===b.type&&a.length===b.length&&bb(a.i,b.i)}
-function G(a,b){return bb(a,b)?!0:a?ab(a)&&ab(b)?a<=b:"constant"===b.type?!1:"constant"===a.type?G(y(a.value),b):b===z.J?G(a,z.h)||G(a,z.N)||G(a,z.M):b===z.M||b===z.T?G(a,z.O):b===z.color?G(a,z.f)||"list"===a.type&&(3===a.length||4===a.length)&&G(a.i,z.f):"list"===a.type&&"list"===b.type&&a.length===b.length?G(a.i,b.i):!1:!1}
-function B(a,b){if(!a)return b;if(!b||bb(a,b))return a;"constant"===a.type&&(a=y(a.value));"constant"===b.type&&(b=y(b.value));return ab(a)&&ab(b)?Math.max(a,b):"list"===a.type&&"list"===b.type&&a.length===b.length&&(b=B(a.i,b.i))?{type:"list",length:a.length,i:b}:!1}function O(a){return function(b){var c={},d;for(d in a){var f=a[d];c.ga=f[0];if(b.length==c.ga.length&&b.every(function(a){return function(b,c){return G(b,a.ga[c])}}(c)))return{u:c.ga,v:f[1],o:f[2]};c={ga:c.ga}}return!1}}
-function cb(a){switch(a){case z.w:return O([[[z.B],z.w,P("int")]]);case z.f:return O([[[z.B],z.f,P("float")],[[z.w],z.f,P("float")]]);case z.h:return O([[[z.f],z.h,function(a){return"vec2("+a+", 0.)"}]]);case z.color:return O([[[z.f],z.color,R("float2color")],[[z.O],z.color,function(a){return"vec4("+a+",1.0)"}],[[z.ea],z.color,db]]);case z.M:return O([[[z.N],z.M,function(a){return"vec3("+a+",1.0)"}],[[z.O],z.M,db]]);case z.T:return O([[[z.N],z.T,function(a){return"vec3("+a+",1.0)"}],[[z.O],z.T,db]]);
-case z.J:return O([[[z.h],z.J,db],[[z.N],z.J,db],[[z.M],z.J,R("dehomogenize")]]);default:if("list"===a.type)return function(b){var c=b[0],d=cb(a.i)([c.i]).o;return{u:b,v:a,o:function(b,g,h){return eb(a)(F(a.length).map(function(a){return d([S(c,a)([b],g,h)],g,h)}),g,h)}}}}console.log("no inclusionfunction ->"+D(a)+" implemented yet; using identity...");return function(b){return{u:b,v:a,o:db}}}
-function T(a){switch(a){case z.B:return"bool";case z.w:return"int";case z.f:return"float";case z.h:case z.J:return"vec2";case z.V:return"void";case z.color:return"vec4";case z.M:case z.T:return"vec3"}if("list"===a.type&&a.i===z.f)return 1==a.length?"float":"vec"+a.length;if("list"===a.type&&a.i===z.h)return"cvec"+a.length;if("list"===a.type&&"list"===a.i.type&&a.length===a.i.length&&a.i.i===z.f)switch(a.length){case 2:return"mat2";case 3:return"mat3";case 4:return"mat4"}if("list"===a.type)return"l"+
-a.length+"_"+T(a.i);console.error("No WebGL implementation for type "+D(a)+" found")}function fb(a,b){switch(b){case z.B:return T(b)+"("+a.value+")";case z.w:return""+(a.value.real|0);case z.f:return T(b)+"("+a.value.real+")";case z.h:return T(b)+"("+a.value.real+", "+a.value.imag+")";case z.color:return a=a.value.real,"vec4("+a+","+a+","+a+",1.)";default:console.error("Dont know how to paste values of Type "+D(b)+" yet.")}};var U={};function gb(a,b,c){if(!c.mark("includedfunctions",a)){for(var d in U[a])gb(U[a][d],b,c);c.add("includedfunctions",a,function(){return ja[a]})}}function R(a){return function(b,c,d){gb(a,c,d);return P(a)(b)}};function F(a){return Array.from(Array(a).keys())}function Ra(a){return 4>=a?[a]:5==a?[2,3]:Ra(a-4).concat([4])}function hb(a){var b=Qa(a),c=E(a);return 1==c&&b===z.f?Ra(a.length).map(function(a,b){return{type:z.da(a),name:"a"+b}}):1<=c?F(a.length).map(function(b){return{type:a.i,name:"a"+b}}):[]}function ib(a,b){if(!N(a)){var c=T(a);b.add("structs",c,function(){return"struct "+c+" { "+hb(a).map(function(a){return ib(a.type,b)||T(a.type)+" "+a.name+";"}).join("")+"};"})}}
-function jb(a,b,c){if(!N(a)){var d=a.length,f=a.i.length;c.add("functions","mult"+d+"_"+f,function(){return T(z.da(d))+" mult"+d+"_"+f+"("+T(a)+" a, "+T(z.da(f))+" b){return "+kb(d)(F(d).map(function(a){return lb(f)(["a.a"+a,"b"],b,c)}),b,c)+";}"})}}
-function mb(a,b,c){if(!N(a)){var d=a.length,f="sum"+T(a);c.add("functions",f,function(){return T(a.i)+" "+f+"("+T(a)+" a){"+(T(a.i)+" res = "+nb(a.i,0)([],b,c)+";\n      "+F(d).map(function(d){return"res = "+ob(a.i)(["res",S(a,d)(["a",d],b,c)],b,c)+";"}).join("\n")+"\n        return res;\n    }")})}}
-function pb(a,b,c){var d=a.length,f=a.i.length;c.add("functions","multc"+d+"_"+f,function(){return T(z.ha(d))+" multc"+d+"_"+f+"("+T(a)+" a, "+T(z.ha(f))+" b){\n        return cvec"+d+"("+F(d).map(function(a){return qb(f)(["a.a"+a,"b"],b,c)})+");\n    }\n    "})}function rb(a,b){2<=a&&4>=a||b.add("functions","dot"+a,function(){return"float dot"+a+"(vec"+a+" a, vec"+a+" b) {\n    return "+Ra(a).map(function(a,b){return"dot(a.a"+b+",b.a"+b+")"}).join("+")+"; }\n    "})}
-function sb(a,b){b.add("functions","cdot"+a,function(){return"vec2 cdot"+a+"(cvec"+a+" a, cvec"+a+" b) {\n      return "+F(a).map(function(a){return"vec2(dot(a.a"+a+",vec2(b.a"+a+".x,-b.a"+a+".y)), dot(a.a"+a+",b.a"+a+".yx))"}).join("+\n")+";\n    }\n    "})}
-function tb(a,b,c){var d="add"+T(a);c.add("functions",d,function(){return T(a)+" "+d+"("+T(a)+" a, "+T(a)+" b) {\n    return "+T(a)+"("+hb(a).map(function(a){return T(a.type)+"("+ob(a.type)(["a."+a.name,"b."+a.name],b,c)+")"}).join(",")+");\n      }"})}
-function ub(a,b,c){var d="sub"+T(a);c.add("functions",d,function(){return T(a)+" "+d+"("+T(a)+" a, "+T(a)+" b) {\n    return "+T(a)+"("+hb(a).map(function(a){return T(a.type)+"("+vb(a.type)(["a."+a.name,"b."+a.name],b,c)+")"}).join(",")+");\n    }"})}function wb(a,b,c){var d="scalarmult"+T(a);c.add("functions",d,function(){return T(a)+" "+d+"(float a, "+T(a)+" b) {\n    return "+T(a)+"("+hb(a).map(function(a){return T(a.type)+"("+xb(a.type)(["a","b."+a.name],b,c)+")"}).join(",")+");\n    }"})}
-function yb(a,b,c){gb("multc",b,c);var d="cscalarmult"+T(a);c.add("functions",d,function(){return T(a)+" "+d+"(vec2 a, "+T(a)+" b) {\n    return "+T(a)+"("+hb(a).map(function(a){return""+zb(a.type)(["a","b."+a.name],b,c)}).join(",")+");\n    }"})}
-function Ab(a){if(a===z.h)return R("multc");if(N(a))return function(a){return V("*")([a[1],a[0]])};var b=Qa(a);if(G(b,z.f))return function(b,d,f){return jb(a,d,f)||"mult"+a.length+"_"+a.i.length+"("+b.join(",")+")"};if(b===z.h)return function(b,d,f){return pb(a,d,f)||"multc"+a.length+"_"+a.i.length+"("+b.join(",")+")"}}function lb(a){return function(b,c,d){return rb(a,d)||"dot"+(2<=a&&4>=a?"":a)+"("+b.join(",")+")"}}
-function qb(a){return function(b,c,d){return sb(a,d)||"cdot"+a+"("+b.join(",")+")"}}function ob(a){return N(a)?V("+"):function(b,c,d){return tb(a,c,d)||"add"+T(a)+"("+b.join(",")+")"}}function vb(a){return N(a)?V("-"):function(b,c,d){return ub(a,c,d)||"sub"+T(a)+"("+b.join(",")+")"}}function Bb(a){return J(a)&&1==E(a)?function(b,c,d){return lb(a.length)([b[0],kb(a.length)(Array(a.length).fill("1."),c,d)],c,d)}:function(b,c,d){return mb(a,c,d)||"sum"+T(a)+"("+b.join(",")+")"}}
-function kb(a){if(2<=a&&4>=a)return function(b){return"vec"+a+"("+b.join(",")+")"};if(1==a)return function(a){return"float("+a.join(",")+")"};var b=0;return function(c,d,f){return ib(z.da(a),f)||"vec"+a+"("+Ra(a).map(function(a){return"vec"+a+"("+F(a).map(function(){return++b&&c[b-1]}).join(",")+")"}).join(",")+")"}}function eb(a){return N(a)?function(b){return T(a)+"("+b.join(",")+")"}:1==E(a)&&a.i===z.f?kb(a.length):function(b,c,d){return ib(a,d)||T(a)+"("+b.join(",")+")"}}
-function S(a,b){var c=Qa(a);return 1==E(a)&&c===z.f?Cb(a.length,b):N(a)?function(a){return"("+a[0]+")["+b+"]"}:function(a){return"("+a[0]+").a"+b}}function nb(a,b){return N(a)?function(){return T(a)+"(float("+b+"))"}:function(c,d,f){return eb(a)+"("+hb(a).map(function(a){return nb(a.type,b)(c,d,f)}).join(",")+")"}}
-function Cb(a,b){return function(c){if(1==a)return c[0];if(2<=a&&4>=a)return"("+c[0]+")["+b+"]";var d;a:{d=b;var f=Ra(a),g;for(g in f)if(f[g]<=d)d-=f[g];else{d={first:g,second:d};break a}console.error("Accessing index out of range");d=void 0}return"("+c[0]+").a"+d.first+"["+d.second+"]"}}function xb(a){return N(a)?V("*"):function(b,c,d){return wb(a,c,d)||"scalarmult"+T(a)+"("+b.join(",")+")"}}
-function zb(a){return a===z.h?R("multc"):function(b,c,d){return yb(a,c,d)||"cscalarmult"+T(a)+"("+b.join(",")+")"}}function Db(a,b,c){var d="reverse"+T(a);c.add("functions",d,function(){return T(a)+" "+d+"("+T(a)+" a){"+(T(a.i)+" m;\n")+F(Math.floor(a.length/2)).map(function(d){var g=S(a,d)(["a",d],b,c);d=S(a,a.length-1-d)(["a",a.length-1-d],b,c);return"m = "+g+"; "+g+" = "+d+"; "+d+" = m;"}).join("\n")+"return a;\n      }"})}
-function Eb(a){return function(b,c,d){return Db(a,c,d)||"reverse"+T(a)+"("+b.join(",")+")"}}function Fb(a,b,c){var d="max"+T(a);c.add("functions",d,function(){return T(a.i)+" "+d+"("+T(a)+" a){"+(T(a.i)+" m = "+S(a,a.length-1)(["a",a.length-1],b,c)+";\n")+F(a.length-1).map(function(d){return"m = max(m,"+S(a,d)(["a",d],b,c)+");"}).join("\n")+"return m;\n      }"})}function Gb(a){return function(b,c,d){return Fb(a,c,d)||"max"+T(a)+"("+b.join(",")+")"}}
-function Hb(a,b,c){var d="min"+T(a);c.add("functions",d,function(){return T(a.i)+" "+d+"("+T(a)+" a){"+(T(a.i)+" m = "+S(a,a.length-1)(["a",a.length-1],b,c)+";\n")+F(a.length-1).map(function(d){return"m = min(m,"+S(a,d)(["a",d],b,c)+");"}).join("\n")+"return m;\n      }"})}function Ib(a){return function(b,c,d){return Hb(a,c,d)||"min"+T(a)+"("+b.join(",")+")"}};function Jb(a){function b(a,d,h){if(1<d){var l=d/2|0;b(a,l,!h);b(a+l,d-l,h);c(a,d,h)}}function c(a,b,h){if(1<b){var l;for(l=1;l<b;)l<<=1;l>>=1;for(var q=a;q<a+b-l;q++){var p=q,r=q+l;h?d.push([p,r]):d.push([r,p])}c(a,l,h);c(a+l,b-l,h)}}var d=[];b(0,a,!0);return d}
-function Kb(a,b,c){var d="sort"+T(a);c.add("functions",d,function(){return T(a)+" "+d+"("+T(a)+" a){"+(T(a.i)+" m;\n")+Jb(a.length).map(function(d){var g=S(a,d[0])(["a",d[0]],b,c);d=S(a,d[1])(["a",d[1]],b,c);return"m = min("+g+","+d+"); "+d+" = max("+g+","+d+"); "+g+" = m;"}).join("\n")+"return a;\n      }"})}function Lb(a){return function(b,c,d){return Kb(a,c,d)||"sort"+T(a)+"("+b.join(",")+")"}};function P(a){return function(b){return x(a)+"("+b+")"}}function V(a){return function(b){return"("+b.join(a)+")"}}function db(a){return a}var W={};W.join=O([[z.M,z.M],z.T,P("cross")]);W.meet=O([[z.T,z.T],z.M,P("cross")]);
-W["if"]=function(a){if(!a.every(function(a){return a}))return!1;if(2===a.length)return{u:a,v:a[1],o:function(a){return"if("+a[0]+") {"+a[1]+";}"}};if(3===a.length){var b=B(a[1],a[2]);return b?{u:[z.B,b,b],v:b,o:function(a){return"("+a[0]+" ? "+a[1]+" : "+a[2]+")"}}:{u:a,v:z.V,o:function(a){return"if("+a[0]+") {"+a[1]+";} else {"+a[2]+";}"}}}return!1};W["="]=function(a){a=B(a[0],a[1]);return{u:a,v:a,o:function(a){return a[0]+" = "+a[1]+";"}}};
-W[";"]=function(a){return{u:a,v:a[1]!==z.V?a[1]:a[0],o:function(a){return a[0]+" ; "+a[1]+";"}}};W.repeat=function(a){return 2!=a.length&&3!=a.length||!Ya(a[0])?!1:{u:a,v:a[a.length-1],o:function(){return""}}};W.forall=function(a){return 2!=a.length&&3!=a.length||"list"!==L(a[0]).type?!1:{u:a,v:a[a.length-1],o:function(){return""}}};W.apply=function(a){return 2!=a.length&&3!=a.length||"list"!==L(a[0]).type?!1:{u:a,v:I(L(a[0]).length,a[a.length-1]),o:function(){return""}}};
-W.sum=function(a){return 1==a.length&&(J(a[0])||K(a[0]))?{u:a,v:a[0].i,o:Bb(a[0])}:!1};W.regional=function(a){return{u:a,v:z.V,o:function(){return""}}};W.sqrt=O([[[z.f],z.h,R("sqrtf")],[[z.h],z.h,R("sqrtc")]]);W.abs=O([[[z.f],z.f,P("abs")],[[z.h],z.f,P("length")],[[z.N],z.f,P("length")],[[z.O],z.f,P("length")],[[z.ea],z.f,P("length")]]);W.abs_infix=W.abs;
-W.dist=O([[[z.f,z.f],z.f,function(a){return P("abs")(V("-")(a))}],[[z.h,z.h],z.f,function(a){return P("length")(V("-")(a))}],[[z.N,z.N],z.f,function(a){return P("length")(V("-")(a))}],[[z.O,z.O],z.f,function(a){return P("length")(V("-")(a))}],[[z.ea,z.ea],z.f,function(a){return P("length")(V("-")(a))}]]);W.dist_infix=W.dist;W.sin=O([[[z.f],z.f,P("sin")],[[z.h],z.h,R("sinc")]]);W.cos=O([[[z.f],z.f,P("cos")],[[z.h],z.h,R("cosc")]]);W.tan=O([[[z.f],z.f,P("tan")],[[z.h],z.h,R("tanc")]]);
-W.exp=O([[[z.f],z.f,P("exp")],[[z.h],z.h,R("expc")]]);W.arctan=O([[[z.f],z.f,P("atan")],[[z.h],z.h,R("arctanc")]]);W.log=O([[[z.f],z.h,R("logr")],[[z.h],z.h,R("logc")]]);var Mb=[2,3,4].map(function(a){return I(a,z.f)}).concat([2,3,4].map(function(a){return I(a,I(a,z.f))})),Nb=[z.w,z.f,z.h].concat(Mb);W.add=function(a){var b=O(Nb.map(function(a){return[[a,a],a,V("+")]}))(a);if(b)return b;b=a[0];a=a[1];if([b,a].every(function(a){return J(a)||K(a)})&&Za(b,a))return a=B(M(b),M(a)),{u:[a,a],v:a,o:ob(a)}};
-W.sub=function(a){var b=O(Nb.map(function(a){return[[a,a],a,V("-")]}).concat(Nb.map(function(a){return[[z.V,a],a,V("-")]})))(a);if(b)return b;b=a[0];a=a[1];if([b,a].every(function(a){return J(a)||K(a)})&&Za(b,a))return a=B(M(b),M(a)),{u:[a,a],v:a,o:vb(a)}};W["+"]=W.add;W["-"]=W.sub;
-W._=function(a){var b=L(a[0]);if("list"===b.type&&Ya(a[1])){var c=Number(a[1].value.value.real);return 1<=Math.abs(c)&&Math.abs(c)<=b.length?(0<c&&--c,0>c&&(c=b.length+c),{u:a,v:b.i,o:S(b,c)}):{u:a,v:b.i,o:function(){return console.error("try to access "+c+"-th Element of "+b.length+"-list "+JSON.stringify(a[0]))}}}return!1};
-W.mult=function(a){var b=O([[[z.w,z.w],z.w,V("*")],[[z.f,z.f],z.f,V("*")],[[z.h,z.f],z.h,V("*")],[[z.f,z.h],z.h,V("*")],[[z.h,z.h],z.h,R("multc")]])(a);if(b)return b;if(2!==a.length)return!1;var b=a[0],c=a[1];if([b,c].every(function(a){return"list"===a.type&&G(a.i,z.f)})&&b.length===c.length)return a=M(b),N(a)?{u:[a,a],v:z.f,o:P("dot")}:{u:[a,a],v:z.f,o:lb(b.length)};if([b,c].every(function(a){return"list"===a.type&&G(a.i,z.h)})&&b.length===c.length)return a=$a(b),{u:[a,a],v:z.h,o:qb(b.length)};if(J(b)&&
-2===E(b)&&J(c)&&1===E(c)&&b.i.length===c.length)return{u:[M(b),M(c)],v:z.da(b.length),o:Ab(M(b))};if(K(b)&&2===E(b)&&K(c)&&1===E(c)&&b.i.length===c.length)return{u:[$a(b),$a(c)],v:z.ha(b.length),o:Ab($a(b))};for(b={H:0};2>b.H;b={Z:b.Z,H:b.H,fa:b.fa},b.H++){if(G(a[0^b.H],z.f)&&(J(a[1^b.H])||K(a[1^b.H])))return b.Z=M(a[1^b.H]),{u:b.H?[b.Z,z.f]:[z.f,b.Z],v:b.Z,o:function(a){return function(b,c,h){return xb(a.Z)([b[0^a.H],b[1^a.H]],c,h)}}(b)};if(G(a[0^b.H],z.h)&&K(a[1^b.H]))return b.fa=$a(a[1^b.H]),{u:b.H?
-[b.fa,z.h]:[z.h,b.fa],v:b.fa,o:function(a){return function(b,c,h){return zb(a.fa)([b[0^a.H],b[1^a.H]],c,h)}}(b)}}};W["*"]=W.mult;W.div=function(a){var b=O([[[z.f,z.f],z.f,V("/")],[[z.f,z.h],z.h,R("divfc")],[[z.h,z.f],z.h,V("/")],[[z.h,z.h],z.h,R("divc")]])(a);return b?b:G(a[1],z.f)&&K(a[0])&&(a=M(a[0]),N(a))?{u:[a,z.f],v:a,o:V("/")}:!1};W["/"]=W.div;W.re=O([[[z.h],z.f,R("realc")]]);W.im=O([[[z.h],z.f,R("imagc")]]);W.floor=O([[[z.f],z.w,function(a){return"int(floor("+a+"))"}],[[z.h],z.h,P("floor")]]);
-W.round=O([[[z.f],z.w,function(a){return"int(floor("+a+"+.5))"}],[[z.h],z.h,function(a){return"floor("+a+"+vec2(.5))"}]]);W.ceil=O([[[z.f],z.w,function(a){return"int(ceil("+a+"))"}],[[z.h],z.h,P("ceil")]]);W.mod=O([[[z.w,z.w],z.w,function(a,b){return"int("+P("mod")("float("+a[0]+"), float("+a[1]+")",b)+")"}],[[z.f,z.f],z.f,P("mod")],[[z.h,z.h],z.h,R("mod")]]);
-W.random=O([[[],z.f,R("random")],[[z.f],z.f,function(a,b){return R("random")([],b)+"*"+a[0]}],[[z.h],z.h,function(a,b){return"vec2("+R("random")([],b)+","+R("random")([],b)+")*"+a[0]}]]);W.arctan2=O([[[z.f,z.f],z.f,function(a){return"atan("+a[1]+", "+a[0]+")"}],[[z.h,z.h],z.h,R("arctan2c")],[[z.h],z.f,R("arctan2vec2")],[[z.N],z.f,R("arctan2vec2")],[[z.ha(2)],z.h,R("arctan2cvec2")]]);["red","green","blue","gray","hue"].forEach(function(a){W[a]=O([[[z.f],z.O,R(a)]])});W.grey=W.gray;
-W.min=function(a){var b=O([[[z.f,z.f],z.f,P("min")]])(a);if(b)return b;if(1===a.length&&1===E(a[0])&&J(a[0]))return{u:a,v:a[0].i,o:Ib(a[0])}};W.max=function(a){var b=O([[[z.w,z.w],z.w,P("max")],[[z.f,z.f],z.f,P("max")]])(a);if(b)return b;if(1===a.length&&1===E(a[0])&&J(a[0]))return{u:a,v:a[0].i,o:Gb(a[0])}};W.complex=O([[[z.N],z.h,db]]);
-function Ob(a,b){if(!(1>=a))if(2==a)b.add("functions","raise2",function(){return"float raise2(float a) { return a*a; }"});else{Ob(2,b);var c=function(a,b){return 1==b?a:b&1?c(a,b-1)+"*a":"raise2("+c(a,b/2)+")"},d="raise"+a;b.add("functions",d,function(){return"float "+d+"(float a) { return "+c("a",a)+";}"})}}function Pb(a){return function(b,c,d){return 0==a?"1.":1==a?b[0]:Ob(a,d)||"raise"+a+"("+b[0]+")"}}
-W.pow=function(a){if(Ya(a[1])&&G(a[0],z.f)){var b=Number(a[1].value.value.real);if(0<=b)return{u:[z.f,a[1]],v:z.f,o:Pb(b)}}return O([[[z.f,z.w],z.f,R("powi")],[[z.h,z.h],z.h,R("powc")]])(a)};W["^"]=W.pow;W.re=O([[[z.h],z.f,function(a){return"("+a+").x"}]]);W.conjugate=O([[[z.h],z.h,R("conjugate")]]);W.im=O([[[z.h],z.f,function(a){return"("+a+").y"}]]);W.genList=function(a){var b=a.length;if(0<b){var c=!1,d;for(d in a)c=B(c,a[d]);if(c)return a=I(b,c),{u:Array(b).fill(c),v:a,o:eb(a)}}return!1};
-W["&"]=O([[[z.B,z.B],z.B,V("&&")]]);W["%"]=O([[[z.B,z.B],z.B,V("||")]]);"> < >= <= == !=".split(" ").forEach(function(a){W[a]=O([[[z.w,z.w],z.B,V(a)],[[z.f,z.f],z.B,V(a)]])});W["!"]=O([[[z.B],z.B,P("!")],[[z.V,z.B],z.B,function(a){return P("!")([a[1]])}]]);W.not=W["!"];W.imagergb=O([[[z.image,z.J],z.O,Qb],[[z.J,z.J,z.image,z.J],z.O,Rb]]);W.imagergba=O([[[z.image,z.J],z.ea,Sb],[[z.J,z.J,z.image,z.J],z.ea,Tb]]);W.reverse=function(a){return 1===a.length&&"list"===a[0].type?{u:a,v:a[0],o:Eb(a[0])}:!1};
-W.sort=function(a){return 1===a.length&&1===E(a[0])&&J(a[0])?{u:a,v:a[0],o:Lb(a[0])}:!1};Object.freeze(W);U.powc=["expc","multc","logc"];U.sqrtc=["expc","multc","logc"];U.arccosc=["multc","negc","sqrtc","addc","logc"];U.arcsinc=["multc","negc","sqrtc","addc","logc"];U.tanc=["sinc","cosc","divc"];U.arctanc=["logc","addc","multc","subc"];U.arctan2c=["logc","divc","sqrtc","multc"];U.arctan2vec2c=["arctan2c"];U.hue=["hsv2rgb"];Object.freeze(U);function Oa(a){this.j={};this.D={};this.l={};this.P=0;this.s={};this.C=a;this.F={}}Oa.prototype.add=function(a,b,c){this.mark(a,b);this.l[a].ka[b]||(this.l[a].ka[b]=c(),this.l[a].ja[b]=!0,this.l[a].order.push(b))};Oa.prototype.mark=function(a,b){this.l[a]||(this.l[a]={order:[],ja:{},ka:{}});var c=this.l[a].ja[b]||!1;this.l[a].ja[b]=!0;return c};function Ub(a,b){return a.l[b]?a.l[b].order.map(function(c){return a.l[b].ka[c]}).join("\n"):"\n"}
-function Vb(a,b,c,d){if(bb(c,d))return b;if(G(c,d)){if("constant"===c.type)return fb(c.value,d);var f=cb(d)([c]);if(!f)return console.error("cannot find an implementation for "+D(c)+" -> "+D(d)+", using identity"),b;d=f.o;return d(Vb(a,b,c,f.u[0]),{},a)}console.error(D(c)+" is no subtype of "+D(d)+" (trying to cast the term "+b+")");return b}function X(a,b,c){a.j[b]||(a.j[b]={});a.j[b].R||(a.j[b].R=[]);a.j[b].A||(a.j[b].A=!1);a.hasOwnProperty("global")||(a.j[b].global=c)}
-function Wb(a,b){var c=b.I;if(b.isuniform)return a.D[b.uvariable].type;if("variable"===b.ctype)return b=b.name,b=c[b]||b,a.j[b].A;if("function"===b.ctype&&a.s.hasOwnProperty(b.oper))return a.j[c[b.oper]].A;if("number"===b.ctype)return Sa(b);if("void"===b.ctype)return z.V;if("field"===b.ctype){a=L(Y(a,b.obj));if("list"===a.type)return a.i;if(!a)return!1}else{if("string"===b.ctype)return z.image;if("function"===b.ctype||"infix"===b.ctype){for(var c=Array(b.args.length),d=!0,f=0;f<b.args.length;f++)c[f]=
-Y(a,b.args[f]),d&="constant"===c[f].type;if(d&&b.impl)return b={ctype:b.ctype,oper:b.oper,impl:b.impl,args:c.map(function(a){return a.value})},b=a.C.evaluateAndVal(b),Sa(b);a=x(b.oper);d=W[a]?W[a](c):!1;if(!d&&c.every(function(a){return Qa(a)}))throw console.error("Could not find an implementation for "+a+" with args ("+c.map(D).join(", ")+")"),console.log(b),"error";return d?d.v:!1}}console.error("Don't know how to compute type of");console.log(b);return!1}
-function Y(a,b){if(!b.la||!b.P||a.P>b.P)b.la=Wb(a,b),b.P=a.P;return b.la}
-function Xb(a,b){function c(a,b,c){var d={},g;for(g in a)d[g]=a[g];a=C();X(h,a,!1);f[a].A=c;f[a].pa=!0;d[b]=a;return d}function d(a,b,p,r){a.I=b;for(var t in a.args){var A=r||"repeat$2"===a.oper&&0==t||"repeat$3"===a.oper&&0==t||"_"===a.oper&&1==t,H=b;-1!=["repeat","forall","apply"].indexOf(x(a.oper))&&(1==t?H="repeat$2"===a.oper?c(b,"#",z.w):"repeat$3"===a.oper?c(b,a.args[1].name,z.w):"forall$2"===a.oper||"apply$2"===a.oper?c(b,"#",!1):"forall$3"===a.oper||"apply$3"===a.oper?c(b,a.args[1].name,!1):
-b:2==t&&(H=a.args[1].I));d(a.args[t],H,p,A)}"field"===a.ctype&&d(a.obj,b,p,r);"variable"===a.ctype&&(t=a.name,t=b[t]||t,r&&h.j[t]&&(h.j[t].$=!0));if("="===a.oper)r=a.args[0].name,r=b[r]||r,X(h,r,!0),f[r].R.push(a.args[1]);else if(a.oper&&"regional"===x(a.oper)&&"global"!=p)for(var Q in a.args){r=a.args[Q].name;var la=C();b[r]=la;g[p].j||(g[p].j=[]);g[p].j.push(la);X(h,la,!1)}else if("forall$2"===a.oper||"apply$2"===a.oper||"forall$3"===a.oper||"apply$3"===a.oper)f[2===a.args.length?a.args[1].I["#"]:
-a.args[2].I[a.args[1].name]].R.push({ctype:"infix",oper:"_",args:[a.args[0],{ctype:"number",value:{real:1,imag:0}}],I:a.args[0].I});else if("function"===a.ctype&&g.hasOwnProperty(a.oper)){p=a.oper;Q=p.replace("$","_");X(h,Q,!1);b[p]=Q;b={};for(la in g[p].arglist)t=g[p].arglist[la].name,A=Q+"_"+t,b[t]=A,X(h,A,!1),f[A].R.push(a.args[la]);g[p].ra||(g[p].ra=!0,d(g[p].body,b,p,r),f[Q].R.push(g[p].body))}}var f=a.j,g=a.s,h=a;d(b,{"#":"cgl_pixel"},"global",!1)}
-function Yb(a,b){function c(a){if(a.hasOwnProperty("dependsOnPixel"))return a.dependsOnPixel;if("variable"===a.ctype){var b=a.name,b=a.I[b]||b;return h[b]?a.dependsOnPixel=!0:a.dependsOnPixel=!1}b=["random","verbatimglsl"];if("function"===a.ctype&&-1!=b.indexOf(x(a.oper)))return a.dependsOnPixel=!0;if("repeat$2"===a.oper||"forall$2"===a.oper||"apply$2"===a.oper)return c(a.args[1])?(h[a.args[1].I["#"]]=!0,a.dependsOnPixel=!0):a.dependsOnPixel=!1;if("repeat$3"===a.oper||"forall$3"===a.oper||"apply$3"===
-a.oper)return c(a.args[2])?(h[a.args[2].I[a.args[1].name]]=!0,a.args[1].dependsOnPixel=!0,a.dependsOnPixel=!0):a.dependsOnPixel=!1;for(var d in a.args)if(c(a.args[d]))return a.dependsOnPixel=!0;return"function"===a.ctype&&g.hasOwnProperty(a.oper)&&c(g[a.oper].body)?a.dependsOnPixel=!0:"field"===a.ctype?a.dependsOnPixel=c(a.obj):a.dependsOnPixel=!1}function d(a,b){if(c(a)){for(var f in a.args)d(a.args[f],b||"repeat$2"===a.oper&&0==f||"repeat$3"===a.oper&&0==f||"_"===a.oper&&1==f);"field"===a.ctype&&
-d(a.obj,b);"function"===a.ctype&&g.hasOwnProperty(a.oper)&&(a=a.oper,q.hasOwnProperty(a)||(q[a]=!0,d(g[a].body,b)))}else if("boolean"!==a.ctype&&"number"!==a.ctype&&"void"!==a.ctype){".."===a.oper&&(b=!0);f=!1;var h,l;for(l in p)!f&&ra(a,p[l].W)&&(f=!0,h=l);f||(h=C(),p[h]={W:a,type:!1,$:b});p[h].$=p[h].$||b;a.isuniform=!0;a.uvariable=h}}var f=a.j,g=a.s,h={cgl_pixel:!0},l;for(l in f)if(1<=f[l].R.length||f[l].pa)h[l]=!0;c(b);var q={"":!0},p=a.D;d(b,!1)}
-function Zb(a,b){if("function"===b.ctype&&!a.s.hasOwnProperty(b.oper)&&null!==a.C.getMyfunction(b.oper)){var c=b.oper;a.s[c]=qa(a.C.getMyfunction(c));Zb(a,a.s[c].body)}for(var d in b.args)Zb(a,b.args[d])}
-function Z(a,b,c){var d=Y(a,b);if(b.isuniform)return b=b.uvariable,c?{code:"",m:"constant"===d.type?fb(d.value,L(d)):b}:{code:""};if(";"===b.oper){for(var d={m:""},f="",g=b.args.length-1,h=g;0<=h;h--)"void"===b.args[h].ctype&&(g=h-1);for(h=0;h<=g;h++)d=Z(a,b.args[h],c&&h===g),f+=d.code;return c?{code:f,m:d.m}:{code:f}}if("constant"===d.type)return c?{m:fb(d.value,L(d)),code:""}:{code:""};if("="===b.oper)return d=Z(a,b.args[1],!0),b=Z(a,b.args[0],!0).m+" = "+Vb(a,d.m,Y(a,b.args[1]),Y(a,b.args[0])),
-c?{code:d.code,m:b}:{code:d.code+b+";\n"};if("repeat$2"===b.oper||"repeat$3"===b.oper){f=Z(a,b.args[0],!0);if("constant"!==Y(a,b.args[0]).type)return console.error("repeat possible only for fixed constant number in GLSL"),!1;d="repeat$2"===b.oper?b.args[1].I["#"]:b.args[2].I[b.args[1].name];f=Number(f.m);g="";if("constant"===a.j[d].A.type)for(h=1;h<=f;h++){a.j[d].A=Xa(h);a.P++;var l=Z(a,b.args["repeat$2"===b.oper?1:2],h===f&&c),g=g+l.code;if(h===f&&c)return{code:g,m:l.m}}else if(h="",l=Z(a,b.args["repeat$2"===
-b.oper?1:2],c),b=Y(a,b.args["repeat$2"===b.oper?1:2]),c&&(h=C(),a.j[h]||(X(a,h,!0),a.j[h].A=b)),g=g+("for(int "+d+"=1; "+d+" <= "+f+"; "+d+"++) {\n")+l.code,c&&(g+=h+" = "+l.m+";\n"),g+="}\n",c)return{code:g,m:h};return{code:g}}if("forall$2"===b.oper||"forall$3"===b.oper||"apply$2"===b.oper||"apply$3"===b.oper){var q=Y(a,b.args[0]);if("list"!==q.type&&("constant"!==q.type||"list"!==q.value.ctype))return console.error(b.oper+" only possible for lists"),!1;var f=q.length||q.value.value.length,h=2===
-b.args.length?b.args[1].I["#"]:b.args[2].I[b.args[1].name],p=a.j[h].A,r=l="";c&&(r=C(),l+=T(d)+" "+r+";\n");"list"===d.type&&ib(d,a);if("constant"===a.j[h].A.type||"constant"===q.type)for(q=a.C.evaluateAndVal(b.args[0]),p=0;p<f;p++)a.j[h].A=Sa(q.value[p]),a.P++,g=Z(a,b.args[2===b.args.length?1:2],c),l+=g.code,"forall$2"===b.oper||"forall$3"===b.oper?p+1===f&&c&&(l+=r+" = "+g.m+";\n"):c&&(l+=S(d,p)([r],[],a)+" = "+g.m+";\n");else{var g=Z(a,b.args[2===b.args.length?1:2],c),t=Z(a,b.args[0],!0),l=l+t.code,
-A=t.m;!a.j[A]&&!a.D[A]&&2<=q.length&&(A=C(),l+=T(q)+" "+A+" = "+t.m+";\n");a.j[h].global=!0;for(t=0;t<f;t++)l+=h+" = "+S(q,t)([A],[],a)+";\n",l+=g.code,c&&("forall$2"===b.oper||"forall$3"===b.oper?t===f-1&&(l+=r+" = "+g.m+";\n"):l+=S(d,t)([r],[],a)+" = "+g.m+";\n");"list"===p.type&&ib(p,a)}return c?{code:l,m:r}:{code:l}}if("if$2"===b.oper||"if$3"===b.oper){l=Z(a,b.args[0],!0);f=Y(a,b.args[0]);h=g="";r=Z(a,b.args[1],c);c&&(h=C(),a.j[h]||(X(a,h,!0),a.j[h].A=d));"constant"!=f.type&&(g+=l.code,g+="if("+
-l.m+") {\n");if("constant"!=f.type||"constant"==f.type&&f.value.value)g+=r.code,c&&(g+=h+" = "+Vb(a,r.m,Y(a,b.args[1]),d)+";\n");"if$3"===b.oper&&(l=Z(a,b.args[2],c),"constant"!=f.type&&(g+="} else {\n"),"constant"!=f.type||"constant"==f.type&&!f.value.value)&&(g+=l.code,c&&(g+=h+" = "+Vb(a,l.m,Y(a,b.args[2]),d)+";\n"));"constant"!=f.type&&(g+="}\n");return c?{code:g,m:h}:{code:g}}if("function"===b.ctype||"infix"===b.ctype){l=b.oper;if("verbatimglsl"===x(l))return b=a.C.evaluateAndVal(b.args[0]).value,
-c?{m:b,code:""}:{code:b};d=b.args.map(function(b){return Z(a,b,!0)});f=b.args.map(function(b){return Y(a,b)});if(a.s.hasOwnProperty(l))for(h=$b(a,l),g=Array(d.length),r=0;r<d.length;r++)g[r]=a.j[a.s[l].body.I[a.s[l].arglist[r].name]].A;else{l=x(l);if("regional"===l)return c?{m:"",code:""}:{code:""};h=W[l](f);if(!h)return console.error("Could not find an implementation for "+l+"("+f.map(D).join(", ")+").\nReturning empty code"),c?{m:"",code:""}:{code:""};g=h.u;h=h.o}l="";r=Array(d.length);for(q=0;q<
-d.length;q++)l+=d[q].code,r[q]=Vb(a,d[q].m,f[q],g[q]);b=h(r,b.modifs,a);return c?{m:b,code:l}:{code:l+b+";\n"}}if("variable"===b.ctype)return d=b.name,d=b.I[d]||d,c?{m:d,code:""}:{code:d+";\n"};if("void"===b.ctype)return c?{m:"",code:""}:{code:""};if("field"===b.ctype&&(d={x:0,y:1,z:2,r:0,g:1,b:2,a:3}[b.key],void 0!=d))return b=S(Y(a,b.obj),d)([Z(a,b.obj,!0).m],null,a),c?{m:b,code:""}:{code:b+";\n"};console.error("dont know how to this.compile "+JSON.stringify(b))}
-function $b(a,b){ac(a,b,a.s[b].arglist.length);return P(b.replace("$","_"))}
-function ac(a,b,c){if(!a.mark("compiledfunctions",b)){for(var d=a.s[b],f=b.replace("$","_"),g=d.body.I,h=Array(c),l=0;l<c;l++)h[l]=d.arglist[l].name;c=a.j[f].A===z.V;var q=T(a.j[f].A)+" "+f+"("+h.map(function(b){return T(a.j[g[b]].A)+" "+g[b]}).join(", ")+"){\n",p;for(p in d.j)h=d.j[p],q+=T(a.j[h].A)+" "+h+";\n";p=Z(a,d.body,!c);d=Y(a,d.body);q+=p.code;c||(q+="return "+Vb(a,p.m,d,a.j[f].A)+";\n");q+="}\n";a.add("compiledfunctions",b,function(){return q})}}
-function Na(a,b){sa=0;b=qa(b);X(a,"cgl_pixel",!1);a.j.cgl_pixel.A=z.N;var c=b;Zb(a,c);Xb(a,c);Yb(a,c);for(var d in a.D){c=a.C.evaluateAndVal(a.D[d].W);if(!c.ctype||"undefined"===c.ctype){console.error("can not evaluate:");console.log(a.D[d].W);break}a.D[d].type=a.D[d].$?Sa(c):y(c)}d=!0;for(var f in a.j)a.j[f].A=a.j[f].A||!1,a.j[f].$&&(a.j[f].A=Xa(1),a.P++);for(;d;){d=!1;for(var g in a.j)if(!a.j[g].$)for(var h in a.j[g].R){f=L(Y(a,a.j[g].R[h]));var l=c=a.j[g].A||!1;f&&(c?G(f,c)?l=c:l=B(c,f):l=f,l&&
-l!==c&&(a.j[g].A=l,a.P++,d=!0))}}for(var q in a.D)"list"===a.D[q].type.type&&ib(a.D[q].type,a);for(var p in a.j)"list"===a.j[p].A.type&&ib(a.j[p].A,a);g=Z(a,b,!0);h=Y(a,b);b=Vb(a,g.m,h,z.color);G(h,z.color)||console.error("expression does not generate a color");h=Ub(a,"structs");h+=Ub(a,"uniforms");q=[];for(var r in a.D)"constant"!=a.D[r].type.type&&a.D[r].type!=z.image&&q.push("uniform "+T(a.D[r].type)+" "+r+";");h+=q.join("\n");r="";for(var t in a.F)for(var A in a.F[t])r+=a.F[t][A].code+"\n";h=
-h+r+Ub(a,"includedfunctions");h+=Ub(a,"functions");for(var H in a.j)a.j[H].A&&a.j[H].global&&(h+=T(a.j[H].A)+" "+H+";\n");h+=Ub(a,"compiledfunctions");h+="void main(void) {\n"+g.code+"gl_FragColor = "+b+";\n}\n";console.log(h);t={};if(a.l.compiledfunctions)for(var Q in a.l.compiledfunctions.ja)t[Q]=a.C.getMyfunction(Q).generation;return{code:h,D:a.D,F:a.F,ia:t}};function bc(a,b,c,d){this.W=b;this.C=d;this.X=c;this.name=a;this.code="uniform sampler2D _sampler"+a+";\nuniform float _ratio"+a+";\nuniform vec2 _cropfact"+a+";\nuniform bool _repeat"+a+";\nuniform bool _mipmap"+a+";\nvec4 _imagergba"+a+" (vec2 A, vec2 B, vec2 p) {\n  p -= A; B -= A;\n  float b = dot(B,B);\n  p = vec2(dot(p,B),_ratio"+a+"*dot(p,vec2(-B.y,B.x)))/b;\n  if(_repeat"+a+") p = mod(p, vec2(1.));\n  if(_repeat"+a+" && _mipmap"+a+") {\n    vec4 color = vec4(0.);\n    float totalWeight = 0.;\n    for(int dx=0; dx<2; dx++) for(int dy=0; dy<2; dy++) {\n      vec2 delta = .5*vec2(dx, dy);\n      vec2 center = delta+vec2(.5);\n      vec2 tc = fract(p-delta)+delta;\n      float dst = dot(abs(tc-center),vec2(1.));\n      float w = max(.5-dst,0.);\n      w=w*w;\n      color += w * texture2D(_sampler"+
-a+", tc*_cropfact"+a+");\n      totalWeight += w;\n    }\n    return color/totalWeight;\n  }\n  if(0. <= p.x && p.x <= 1. && 0. <= p.y && p.y <= 1.)\n    return texture2D(_sampler"+a+", p*_cropfact"+a+");\n  else\n    return vec4(0.);\n  }"}function Ua(a,b){var c=a.C.evaluateAndVal(a.W).value;a="string"===typeof c?a.C.getImage(c,!0):c;return null==a?(console.error("Could not find image "+c+"."),u):Fa(a,b)}
-function cc(a,b,c){c.F.hasOwnProperty(a)||(c.F[a]=[]);var d=c.F[a].length,f;for(f in c.F[a])if(d==c.F[a].length){var g=c.F[a][f].X,h=!0,l;for(l in["interpolation","mipmap","repeat"])h&&(ra(g,b)||(h=!1));h&&(d=f)}f=a+"_"+d;d==c.F[a].length&&c.F[a].push(new bc(f,c.D[a].W,b,c.C));return f}function Tb(a,b,c){return["_imagergba",cc(a[2],b,c),"(",a[0],",",a[1],",",a[3],")"].join("")}function Rb(a,b,c){return["(_imagergba",cc(a[2],b,c),"(",a[0],",",a[1],",",a[3],").rgb)"].join("")}
-function Sb(a,b,c){c.add("uniforms","corners",function(){return"uniform vec2 _lowerleft, _lowerright;"});return["_imagergba",cc(a[0],b,c),"(_lowerleft, _lowerright, ",a[1],")"].join("")}function Qb(a,b,c){c.add("uniforms","corners",function(){return"uniform vec2 _lowerleft, _lowerright;"});return["(_imagergba",cc(a[0],b,c),"(_lowerleft, _lowerright, ",a[1],").rgb)"].join("")};function dc(a){var b;b=b?b:null;return"list"!==a.ctype?(console.log("argument is not a list"),b):a.value}function Wa(a){var b;b=b?b:[.5,.5,.5];if("number"===a.ctype){var c=ec(a);if(!isNaN(c))return[c,c,c]}a=dc(a);return a?3!=a.length?(console.log("Not an RGB color vector"),b):a.map(function(a){return ec(a)}):b}
-function Va(a){var b;b=void 0===b?Number.NaN:b;if("number"!==a.ctype)return console.log("argument is not a number"),b;b=a.value;a=b.real;b=b.imag;0!==b&&console.log("complex number is not real");b=Math.round(a);b!==a&&console.log("number is not an integer");return b}
-function ec(a){var b;b=void 0===b?Number.NaN:b;b=void 0===b?Number.NaN:b;"number"!==a.ctype?(console.log("argument is not a number"),a=b):(a=a.value,b=a.real,0!==a.imag&&console.log("complex number is not real"),a=b);return 0>a?0:1<a?1:a};function pa(a){this.l=a}pa.prototype.toString=function(){return this.l};
-function Ja(a,b){var c=n;this.l=c.createProgram();this.Z=fc(this,c,c.VERTEX_SHADER,a);fc(this,c,c.FRAGMENT_SHADER,b);a=this.l;c.linkProgram(a);if(!c.getProgramParameter(a,c.LINK_STATUS))throw new pa("Error linking shader:\n"+c.getProgramInfoLog(a));c.validateProgram(a);if(!c.getProgramParameter(a,c.VALIDATE_STATUS))throw new pa("Error validating shader:\n"+c.getProgramInfoLog(a));var d=this.l,f,g,h,l={},q,p,r,t;b=c.getProgramParameter(d,c.ACTIVE_UNIFORMS);for(a=0;a<b;++a)if(f=c.getActiveUniform(d,
-a))if(g=f.name.replace(/\]/g,"")){for(q=l;h=/[.\[]/.exec(g);)p=g.substr(0,h.index),q.hasOwnProperty(p)?q=q[p]:"."===h[0]?q=q[p]={}:q=q[p]=[],g=g.substr(h.index+1);if(1<f.size){h=f.size;t=Array(h);for(p=0;p<h;++p)r=f.name+"["+p+"]",r=gc(this,c,r,f),t[p]=r;q[g]=t}else r=gc(this,c,f.name,f),q[g]=r}this.s=l}
-function fc(a,b,c,d){c=b.createShader(c);b.shaderSource(c,d);b.compileShader(c);if(!b.getShaderParameter(c,b.COMPILE_STATUS))throw console.warn(d.split("\n")),new pa("Error compiling shader:\n"+b.getShaderInfoLog(c));b.attachShader(a.l,c);return c}
-function gc(a,b,c,d){a=b.getUniformLocation(a.l,c);switch(d.type){case b.FLOAT:return b.uniform1fv.bind(b,a);case b.FLOAT_VEC2:return b.uniform2fv.bind(b,a);case b.FLOAT_VEC3:return b.uniform3fv.bind(b,a);case b.FLOAT_VEC4:return b.uniform4fv.bind(b,a);case b.BOOL:case b.INT:case b.SAMPLER_2D:case b.SAMPLER_CUBE:return b.uniform1iv.bind(b,a);case b.BOOL_VEC2:case b.INT_VEC2:return b.uniform2iv.bind(b,a);case b.BOOL_VEC3:case b.INT_VEC3:return b.uniform3iv.bind(b,a);case b.BOOL_VEC4:case b.INT_VEC4:return b.uniform4iv.bind(b,
-a);case b.FLOAT_MAT2:return b.uniformMatrix2fv.bind(b,a,!1);case b.FLOAT_MAT3:return b.uniformMatrix3fv.bind(b,a,!1);case b.FLOAT_MAT4:return b.uniformMatrix4fv.bind(b,a,!1);default:throw new pa("Unknown data type for uniform "+c);}};
+'use strict';var cgl_resources = {"addc":"vec2 addc(vec2 a,vec2 b){\nreturn a+b;\n}\n", "arccosc":"vec2 arccosc(vec2 a){\nvec2 t2=multc(a,negc(a));\nvec2 tmp=sqrtc(addc(vec2(1.0,0.0),t2));\nvec2 tmp1=addc(multc(a,vec2(0.0,1.0)),tmp);\nvec2 erg=addc(multc(logc(tmp1),vec2(0.0,1.0)),vec2(pi*0.5,0.0));\nreturn erg;\n}\n", "arcsinc":"vec2 arcsinc(vec2 a){\nvec2 t2=multc(a,negc(a));\nvec2 tmp=sqrtc(addc(vec2(1.0,0.0),t2));\nvec2 tmp1=addc(multc(a,vec2(0.0,1.0)),tmp);\nvec2 erg=multc(logc(tmp1),vec2(0.0,-1.0));\nreturn erg;\n}\n", 
+"arctan2c":"\n\n\n\nvec2 arctan2c(vec2 x,vec2 y){\nvec2 r=logc(divc(x+vec2(-y.y,y.x),sqrtc(multc(x,x)+multc(y,y))));\nreturn vec2(r.y, -r.x);\n}\n", "arctan2cvec2":"vec2 arctan2cvec2(cvec2 v){\nreturn arctan2c(v.real,v.imag);\n}\n", "arctan2vec2":"float arctan2vec2(vec2 v){\nreturn atan(v.y,v.x);\n}\n", "arctanc":"vec2 arctanc(vec2 a){\nvec2 t1=logc(addc(multc(a,vec2(0.0,-1.0)),vec2(1.0,0.0)));\nvec2 t2=logc(addc(multc(a,vec2(0.0,1.0)),vec2(1.0,0.0)));\nvec2 erg=multc(subc(t1,t2),vec2(0.0,0.5));\nreturn erg;\n}\n", 
+"blue":"vec3 blue(float f)\n{\nreturn vec3(0.,0.,clamp(f,0.,1.));\n}\n", "cimag":"float imagc(vec2 a){\nreturn a.y;\n}\n", "conjugate":"vec2 conjugate(vec2 a){\nreturn vec2(a.x, -a.y);\n}\n", "copytexture_f":"#ifdef GL_ES\nprecision highp float;\n#endif\n\nuniform sampler2D sampler;\nvarying vec2 cgl_pixel;\n\nvoid main(void){\ngl_FragColor=texture2D(sampler,cgl_pixel);\n}\n", "copytexture_v":"attribute vec3 aPos;\nattribute vec2 aTexCoord;\nvarying vec2 cgl_pixel;\n\nvoid main(void){\ngl_Position=vec4(aPos,1.);\ncgl_pixel=aTexCoord;\n}\n", 
+"cosc":"vec2 cosc(vec2 a){\n\nfloat n=exp(a.y);\nfloat imag1=n*sin(-a.x);\nfloat real1=n*cos(-a.x);\nn=exp(-a.y);\nfloat imag2=n*sin(a.x);\nfloat real2=n*cos(a.x);\nfloat i= (imag1+imag2) /2.0;\nfloat r= (real1+real2) /2.0;\n\nreturn vec2(r,i);\n}\n", "creal":"float realc(vec2 a){\nreturn a.x;\n}\n", "dehomogenize":"vec2 dehomogenize(vec3 z){\nreturn vec2(z.x,z.y)/z.z;\n}\n", "divc":"vec2 divc(vec2 a,vec2 b){\nreturn vec2(dot(a,b),dot(a,vec2(-b.y,b.x)))/dot(b,b);\n}\n", "divfc":"vec2 divfc(float a,vec2 b){\nreturn a*vec2(b.x,-b.y)/dot(b,b);\n}\n", 
+"expc":"vec2 expc(vec2 a){\nfloat n=exp(a.x);\nfloat r=n*cos(a.y);\nfloat i=n*sin(a.y);\nreturn vec2(r,i);\n}\n", "float2color":"vec4 float2color(float f)\n{\nreturn vec4(f,f,f,1.);\n}\n", "gray":"vec3 gray(float f)\n{\nf=clamp(f,0.,1.);\nreturn vec3(f,f,f);\n}\n", "green":"vec3 green(float f)\n{\nreturn vec3(0.,clamp(f,0.,1.),0.);\n}\n", "hsv2rgb":"vec3 hsv2rgb(vec3 c)\n{\nvec4 K=vec4(1.0,2.0/3.0,1.0/3.0,3.0);\nvec3 p=abs(fract(c.xxx+K.xyz) *6.0-K.www);\nreturn c.z*mix(K.xxx,clamp(p-K.xxx,0.0,1.0),c.y);\n}\n", 
+"hue":"vec3 hue(float a){\nreturn hsv2rgb(vec3(a,1.,1.));\n}\n", "imagc":"float imagc(vec2 a){\nreturn a.y;\n}\n", "invc":"vec2 invc(vec2 a){\nfloat n=a.x*a.x+a.y*a.y;\nreturn vec2(a.x/n,-a.y/n);\n}\n", "logc":"vec2 logc(vec2 a){\nfloat re=a.x;\nfloat im=a.y;\nfloat s=sqrt(re*re+im*im);\nfloat i=im;\nfloat imag=atan(im,re);\nif(i<0.0){\nimag+= (2.0*pi);\n}\nif(i==0.0&&re<0.0){\nimag=pi;\n}\nif(imag>pi){\nimag-= (2.0*pi);\n};\nfloat real=log(s);\n\nreturn vec2(real,imag);\n}\n", "logr":"vec2 logr(float a){\nif(a>=0.)return vec2(log(a),0);\nelse return vec2(log(-a),pi);\n}\n", 
+"mat2complex":"mat4 mat2complex(mat2 a)\n{\nreturn mat4(\nvec4(a[0][0],0,a[0][1],0),\nvec4(0,a[0][0],0,a[0][1]),\nvec4(a[1][0],0,a[1][1],0),\nvec4(0,a[1][0],0,a[1][1])\n);\n}\n", "multc":"vec2 multc(vec2 a,vec2 b){\nreturn vec2(dot(a,vec2(b.x,-b.y)),dot(a,b.yx));\n}\n", "negc":"vec2 negc(vec2 a){\nreturn vec2(-a.x,-a.y);\n}\n", "powc":"vec2 powc(vec2 a,vec2 b){\nreturn expc(multc(logc(a),b));\n}\n", "powi":"float powi(float a,int b){\nif(mod(float(b),2.) < .5)\nreturn pow(abs(a),float(b));\nelse\nreturn sign(a)*pow(abs(a),float(b));\n}\n", 
+"random":"uniform float rnd_;\n\nfloat last_rnd= .1231;\nfloat random(){\nfloat a=mod(rnd_*plain_pixel.x*32.23,1.21);\nfloat b=mod(last_rnd*plain_pixel.y*54.21,1.32);\nlast_rnd=mod(a+b+12232.2213*(1.+rnd_)*dot(plain_pixel,plain_pixel)+a+sin(b)+b*sin(dot(plain_pixel,vec2(232.121+rnd_,2232.11))+last_rnd*121.11)*129.12+rnd_,1.);\nreturn last_rnd;\n\n\n}\n", "realc":"float realc(vec2 a){\nreturn a.x;\n}\n", "red":"vec3 red(float f)\n{\nreturn vec3(clamp(f,0.,1.),0.,0.);\n}\n", "rgb2hsv":"vec3 rgb2hsv(vec3 c)\n{\nvec4 K=vec4(0.0, -1.0/3.0,2.0/3.0, -1.0);\nvec4 p=mix(vec4(c.bg,K.wz),vec4(c.gb,K.xy),step(c.b,c.g));\nvec4 q=mix(vec4(p.xyw,c.r),vec4(c.r,p.yzx),step(p.x,c.r));\n\nfloat d=q.x-min(q.w,q.y);\nfloat e=1.0e-10;\nreturn vec3(abs(q.z+ (q.w-q.y) / (6.0*d+e)),d/ (q.x+e),q.x);\n}\n", 
+"sinc":"\n\nvec2 sinc(vec2 a){\n\nfloat n=exp(a.y);\nfloat imag1=n*sin(-a.x);\nfloat real1=n*cos(-a.x);\nn=exp(-a.y);\nfloat imag2=n*sin(a.x);\nfloat real2=n*cos(a.x);\nfloat r= -(imag1-imag2) /2.0;\nfloat i= (real1-real2) /2.0;\n\nreturn vec2(r,i);\n}\n", "sqrtc":"vec2 sqrtc(vec2 a){\nreturn expc(multc(logc(a),vec2(0.5,0.0)));\n}\n", "sqrtf":"vec2 sqrtf(float a){\nif(a>=0.)return vec2(sqrt(a),0.);\nelse return vec2(0.,sqrt(-a));\n}\n", "standardFragmentHeader":"#ifdef GL_ES\nprecision highp float;\nprecision highp int;\n#endif\n\n#define pi 3.141592653589793\n\nvarying vec2 cgl_pixel;\nvarying vec2 plain_pixel;\n", 
+"subc":"vec2 subc(vec2 a,vec2 b){\nreturn a-b;\n}\n", "tanc":"vec2 tanc(vec2 a){\nvec2 s=sinc(a);\nvec2 c=cosc(a);\nreturn divc(s,c);\n}\n", "vec2complex":"vec4 vec2complex(vec2 a)\n{\nreturn vec4(a.x,0.,a.y,0);\n}\n", "vshader":"attribute vec3 aPos;\nattribute vec2 aTexCoord;\nvarying vec2 cgl_pixel;\nvarying vec2 plain_pixel;\nuniform mat3 transformMatrix;\nvoid main(void){\ngl_Position=vec4(aPos,1.);\nplain_pixel=aTexCoord;\nvec3 r=transformMatrix*vec3(plain_pixel,1);\ncgl_pixel=r.xy/r.z;\n}\n"};
+var isinitialized = false;
+var glcanvas;
+var tmpcanvas;
+var gl;
+var nada;
+var can_use_texture_half_float = false;
+var halfFloat;
+var can_use_texture_float = false;
+var oo = 1 << 30;
+var requiredcompiletime = 1;
+var subtypegen = {};
+var subtype = [];
+var next = [];
+function initGLIfRequired() {
+  if (isinitialized) {
+    return;
+  }
+  glcanvas = (document.createElement("canvas"));
+  glcanvas.id = "glcanvas";
+  glcanvas.style.display = "none";
+  glcanvas.width = glcanvas.height = 0;
+  document.body.appendChild(glcanvas);
+  tmpcanvas = (document.createElement("canvas"));
+  tmpcanvas.id = "tmpcanvas";
+  tmpcanvas.style.display = "none";
+  tmpcanvas.width = tmpcanvas.height = 0;
+  document.body.appendChild(tmpcanvas);
+  var errorInfo = "Unknown";
+  function onContextCreationError(e) {
+    glcanvas.removeEventListener("webglcontextcreationerror", onContextCreationError, false);
+    if (e.statusMessage) {
+      errorInfo = e.statusMessage;
+    }
+  }
+  glcanvas.addEventListener("webglcontextcreationerror", onContextCreationError, false);
+  gl = (glcanvas.getContext("webgl"));
+  if (!gl) {
+    gl = (glcanvas.getContext("experimental-webgl"));
+  }
+  if (!gl) {
+    throw new GlError("Could not obtain a WebGL context.\nReason: " + errorInfo);
+  }
+  glcanvas.removeEventListener("webglcontextcreationerror", onContextCreationError, false);
+  can_use_texture_float = gl.getExtension("OES_texture_float") && gl.getExtension("OES_texture_float_linear");
+  if (!can_use_texture_float) {
+    console.error("Your browser does not suppert OES_texture_float, trying OES_texture_half_float...");
+    halfFloat = gl.getExtension("OES_texture_half_float");
+    can_use_texture_half_float = halfFloat && gl.getExtension("OES_texture_half_float_linear");
+    if (!can_use_texture_half_float) {
+      console.error("Your browser does not suppert OES_texture_half_float, will use 8-bit textures.");
+    }
+  }
+  if (navigator.userAgent.match(/(iPad|iPhone)/i)) {
+    console.log("You are  using an iPhone/iPad.");
+    can_use_texture_float = can_use_texture_half_float = false;
+    if (gl.getExtension("OES_texture_half_float") && gl.getExtension("OES_texture_half_float_linear") && gl.getExtension("EXT_color_buffer_half_float")) {
+      can_use_texture_half_float = true;
+    } else {
+      console.error("Your browser does not suppert writing to half_float textures, we will use 8-bit textures.");
+    }
+  }
+  isinitialized = true;
+}
+;function cloneExpression(obj) {
+  var copy;
+  if (null == obj || "object" != typeof obj) {
+    return obj;
+  }
+  if (obj instanceof Array) {
+    copy = [];
+    for (var i = 0, len = obj.length;i < len;i++) {
+      copy[i] = cloneExpression(obj[i]);
+    }
+    return copy;
+  }
+  if (obj instanceof Object) {
+    copy = {};
+    for (var attr in obj) {
+      if (obj.hasOwnProperty(attr)) {
+        if (["oper", "impl", "args", "ctype", "stack", "name", "arglist", "value", "real", "imag", "key", "obj", "body"].indexOf(attr) >= 0) {
+          copy[attr] = cloneExpression(obj[attr]);
+        }
+        if (obj["modifs"]) {
+          copy["modifs"] = obj["modifs"];
+        }
+      }
+    }
+    return copy;
+  }
+}
+function expressionsAreEqual(a, b) {
+  if (null == a || "object" != typeof a) {
+    return a === b;
+  }
+  if (a instanceof Array && b instanceof Array) {
+    if (a.length != b.length) {
+      return false;
+    }
+    for (var i = 0, len = a.length;i < len;i++) {
+      if (!expressionsAreEqual(a[i], b[i])) {
+        return false;
+      }
+    }
+    return true;
+  } else {
+    if (a instanceof Object && b instanceof Object) {
+      var l = ["oper", "impl", "args", "ctype", "stack", "name", "modifs", "arglist", "value", "real", "imag", "key", "obj", "body"];
+      for (var i$0 = 0;i$0 < l.length;i$0++) {
+        var attr = l[i$0];
+        if (!expressionsAreEqual(a[attr], b[attr])) {
+          return false;
+        }
+      }
+      return true;
+    }
+  }
+  return false;
+}
+function signaturesAreEqual(a, b) {
+  if (a === b) {
+    return true;
+  }
+  if (isprimitive(a) || isprimitive(b)) {
+    return a === b;
+  }
+  for (var key in a) {
+    if (a.hasOwnProperty(key)) {
+      if (!b.hasOwnProperty(key)) {
+        return false;
+      }
+      if (!signaturesAreEqual(a[key], b[key])) {
+        return false;
+      }
+    }
+  }
+  for (var key$1 in b) {
+    if (b.hasOwnProperty(key$1)) {
+      if (!a.hasOwnProperty(key$1)) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+function getPlainName(oper) {
+  if (oper.indexOf("$") === -1) {
+    return oper;
+  } else {
+    return oper.substr(0, oper.indexOf("$"));
+  }
+}
+function guessTypeOfValue(tval) {
+  if (tval["ctype"] === "boolean") {
+    return type.bool;
+  } else {
+    if (tval["ctype"] === "number") {
+      var z = tval["value"];
+      if (Math.abs(z["imag"]) < 1E-5) {
+        if ((z["real"] | 0) === z["real"]) {
+          return type.int;
+        } else {
+          return type.float;
+        }
+      } else {
+        return type.complex;
+      }
+    } else {
+      if (tval["ctype"] === "list") {
+        var l = tval["value"];
+        if (l.length > 0) {
+          var ctype = guessTypeOfValue(l[0]);
+          for (var i = 1;i < l.length;i++) {
+            ctype = lca(ctype, guessTypeOfValue(l[i]));
+          }
+          if (ctype) {
+            return {type:"list", length:l.length, parameters:ctype};
+          }
+        }
+      } else {
+        if (tval["ctype"] === "string" || tval["ctype"] === "image") {
+          return type.image;
+        }
+      }
+    }
+  }
+  console.error("Cannot guess type of the following type:");
+  console.log(tval);
+  return false;
+}
+var helpercnt = 0;
+function generateUniqueHelperString() {
+  helpercnt++;
+  return "_h" + helpercnt;
+}
+function enlargeCanvasIfRequired(sizeX, sizeY) {
+  if (sizeX > glcanvas.width || sizeY > glcanvas.height) {
+    glcanvas.width = Math.ceil(sizeX);
+    glcanvas.height = Math.ceil(sizeY);
+  }
+}
+function transf(api, px, py) {
+  var m = api.getInitialMatrix();
+  var xx = px - m.tx;
+  var yy = py + m.ty;
+  var x = (xx * m.d - yy * m.b) / m.det;
+  var y = -(-xx * m.c + yy * m.a) / m.det;
+  return {x:x, y:y};
+}
+function computeLowerLeftCorner(api) {
+  var ch = api.instance["canvas"]["clientHeight"];
+  return transf(api, 0, ch);
+}
+function computeLowerRightCorner(api) {
+  var cw = api.instance["canvas"]["clientWidth"];
+  var ch = api.instance["canvas"]["clientHeight"];
+  return transf(api, cw, ch);
+}
+function computeUpperLeftCorner(api) {
+  return transf(api, 0, 0);
+}
+var floatView = new Float32Array(1);
+var int32View = new Int32Array(floatView.buffer);
+function toHalf(fval) {
+  floatView[0] = fval;
+  var fbits = int32View[0];
+  var sign = fbits >> 16 & 32768;
+  var val = (fbits & 2147483647) + 4096;
+  if (val >= 1199570944) {
+    if ((fbits & 2147483647) >= 1199570944) {
+      if (val < 2139095040) {
+        return sign | 31744;
+      }
+      return sign | 31744 | (fbits & 8388607) >> 13;
+    }
+    return sign | 31743;
+  }
+  if (val >= 947912704) {
+    return sign | val - 939524096 >> 13;
+  }
+  if (val < 855638016) {
+    return sign;
+  }
+  val = (fbits & 2147483647) >> 23;
+  return sign | (fbits & 8388607 | 8388608) + (8388608 >>> val - 102) >> 126 - val;
+}
+function decodeFloat16(binary) {
+  var exponent = (binary & 31744) >> 10;
+  var fraction = binary & 1023;
+  return (binary >> 15 ? -1 : 1) * (exponent ? exponent === 31 ? fraction ? NaN : Infinity : Math.pow(2, exponent - 15) * (1 + fraction / 1024) : 6.103515625E-5 * (fraction / 1024));
+}
+var toByte = function(f) {
+  return f * 255;
+};
+function createPixelArrayFromFloat(samples) {
+  if (can_use_texture_float) {
+    return new Float32Array(samples);
+  }
+  if (can_use_texture_half_float) {
+    var newsamples = new Uint16Array(samples.length);
+    for (var i = 0;i < samples.length;i++) {
+      newsamples[i] = toHalf(samples[i]);
+    }
+    return newsamples;
+  } else {
+    var newsamples$2 = new Uint8Array(samples.length);
+    for (var i$3 = 0;i$3 < samples.length;i$3++) {
+      newsamples$2[i$3] = toByte(samples[i$3]);
+    }
+    return newsamples$2;
+  }
+}
+function createPixelArrayFromUint8(samples) {
+  if (can_use_texture_float) {
+    var newsamples = new Float32Array(samples.length);
+    for (var i = 0;i < samples.length;i++) {
+      newsamples[i] = samples[i] / 255;
+    }
+    return newsamples;
+  }
+  if (can_use_texture_half_float) {
+    var newsamples$4 = new Uint16Array(samples.length);
+    for (var i$5 = 0;i$5 < samples.length;i$5++) {
+      newsamples$4[i$5] = toHalf(samples[i$5] / 255);
+    }
+    return newsamples$4;
+  } else {
+    return new Uint8Array(samples);
+  }
+}
+function createPixelArray(size) {
+  if (can_use_texture_float) {
+    return new Float32Array(size);
+  }
+  if (can_use_texture_half_float) {
+    return new Uint16Array(size);
+  } else {
+    return new Uint8Array(size);
+  }
+}
+function getPixelType() {
+  if (can_use_texture_float) {
+    return gl.FLOAT;
+  }
+  if (can_use_texture_half_float) {
+    return halfFloat.HALF_FLOAT_OES;
+  } else {
+    return gl.UNSIGNED_BYTE;
+  }
+}
+function toFloat(samples) {
+  var res = [];
+  for (var i = 0;i < samples.length;i++) {
+    if (can_use_texture_float) {
+      res.push(samples[i]);
+    } else {
+      if (can_use_texture_half_float) {
+        res.push(decodeFloat16(samples[i]));
+      } else {
+        res.push(samples[i] / 255);
+      }
+    }
+  }
+  return res;
+}
+function smallestPowerOfTwoGreaterOrEqual(a) {
+  var ans = 1;
+  while (ans < a) {
+    ans <<= 1;
+  }
+  return ans;
+}
+;function generateReadCanvasWrapperIfRequired(imageobject, api, properties) {
+  if (!imageobject.hasOwnProperty("readcanvaswrappers")) {
+    imageobject["readcanvaswrappers"] = Array(4);
+  }
+  var idx = properties.mipmap * 2 + properties.interpolate;
+  if (!imageobject["readcanvaswrappers"].hasOwnProperty(idx)) {
+    if (imageobject["writecanvaswrapper"] && imageobject["writecanvaswrapper"].generation > imageobject.generation) {
+      imageobject["writecanvaswrapper"].copyTextureToCanvas();
+    }
+    imageobject["readcanvaswrappers"][idx] = new CanvasWrapper(imageobject, properties);
+    if (!imageobject.ready) {
+      console.error("Image not ready. Creating onload event.");
+      imageobject.whenReady(function() {
+        imageobject.generation = Math.max(imageobject.generation, imageobject["readcanvaswrappers"][idx].generation + 1);
+      });
+    }
+  }
+  if (imageobject["writecanvaswrapper"]) {
+    imageobject["writecanvaswrapper"] = imageobject["readcanvaswrappers"][idx];
+  }
+  return imageobject["readcanvaswrappers"][idx];
+}
+function generateWriteCanvasWrapperIfRequired(imageobject, api) {
+  if (!imageobject.hasOwnProperty("writecanvaswrapper")) {
+    var idx = -1;
+    if (imageobject["readcanvaswrappers"]) {
+      for (var i = 3;i >= 0;i--) {
+        if (imageobject["readcanvaswrappers"].hasOwnProperty(idx)) {
+          idx = i;
+        }
+      }
+    } else {
+      imageobject["readcanvaswrappers"] = Array(4);
+    }
+    if (idx == -1) {
+      var properties = {interpolate:true, mipmap:false, repeat:false};
+      idx = properties.mipmap * 2 + properties.interpolate;
+      imageobject["readcanvaswrappers"][idx] = new CanvasWrapper(imageobject, properties);
+    }
+    imageobject["writecanvaswrapper"] = imageobject["readcanvaswrappers"][idx];
+  }
+  imageobject["readPixels"] = imageobject["writecanvaswrapper"].readPixels.bind(imageobject["writecanvaswrapper"]);
+  return imageobject["writecanvaswrapper"];
+}
+function CanvasWrapper(canvas, properties) {
+  this.canvas = canvas;
+  this.properties = properties;
+  this.sizeX = canvas.width;
+  this.sizeY = canvas.height;
+  this.updateInternalTextureMeasures();
+  this.ratio = canvas.height / canvas.width;
+  this.it = 0;
+  this.textures = [];
+  this.framebuffers = [];
+  this.generation = -1;
+  this.bindTexture();
+  canvas["drawTo"] = this.drawTo.bind(this);
+  canvas["readPixels"] = this.readPixels.bind(this);
+  canvas["cdyUpdate"] = this.copyTextureToCanvas.bind(this);
+  var rawData = createPixelArray(this.sizeXP * this.sizeYP * 4);
+  for (var j = 0;j < 2;j++) {
+    this.textures[j] = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, this.textures[j]);
+    gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, this.sizeXP, this.sizeYP, 0, gl.RGBA, getPixelType(), rawData);
+    if (properties.mipmap) {
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, properties.interpolate ? gl.LINEAR_MIPMAP_LINEAR : gl.NEAREST_MIPMAP_LINEAR);
+    } else {
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, properties.interpolate ? gl.LINEAR : gl.NEAREST);
+    }
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, properties.interpolate ? gl.LINEAR : gl.NEAREST);
+    this.framebuffers[j] = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffers[j]);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.textures[j], 0);
+  }
+  this.shaderProgram = new ShaderProgram(gl, cgl_resources["copytexture_v"], cgl_resources["copytexture_f"]);
+  var posBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
+  var vertices = new Float32Array([-1, -1, 0, 1, -1, 0, -1, 1, 0, 1, 1, 0]);
+  var aPosLoc = gl.getAttribLocation(this.shaderProgram.handle, "aPos");
+  gl.enableVertexAttribArray(aPosLoc);
+  var aTexLoc = gl.getAttribLocation(this.shaderProgram.handle, "aTexCoord");
+  gl.enableVertexAttribArray(aTexLoc);
+  var texCoords = new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]);
+  var texCoordOffset = vertices.byteLength;
+  gl.bufferData(gl.ARRAY_BUFFER, texCoordOffset + texCoords.byteLength, gl.STATIC_DRAW);
+  gl.bufferSubData(gl.ARRAY_BUFFER, 0, vertices);
+  gl.bufferSubData(gl.ARRAY_BUFFER, texCoordOffset, texCoords);
+  gl.vertexAttribPointer(aPosLoc, 3, gl.FLOAT, false, 0, 0);
+  gl.vertexAttribPointer(aTexLoc, 2, gl.FLOAT, false, 0, texCoordOffset);
+}
+CanvasWrapper.prototype.textures;
+CanvasWrapper.prototype.framebuffers;
+CanvasWrapper.prototype.sizeX;
+CanvasWrapper.prototype.sizeY;
+CanvasWrapper.prototype.ratio;
+CanvasWrapper.prototype.canvas;
+CanvasWrapper.prototype.generation;
+CanvasWrapper.prototype.it;
+CanvasWrapper.prototype.shaderProgram;
+CanvasWrapper.prototype.updateInternalTextureMeasures = function() {
+  this.sizeXP = smallestPowerOfTwoGreaterOrEqual(this.sizeX + this.sizeX / 2 * (this.properties.mipmap && this.properties.repeat));
+  this.sizeYP = smallestPowerOfTwoGreaterOrEqual(this.sizeY + this.sizeY / 2 * (this.properties.mipmap && this.properties.repeat));
+};
+CanvasWrapper.prototype.bindTexture = function() {
+  gl.bindTexture(gl.TEXTURE_2D, this.textures[this.it]);
+};
+CanvasWrapper.prototype.bindFramebuffer = function() {
+  gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffers[this.it ^ 1]);
+  this.it ^= 1;
+};
+CanvasWrapper.prototype.copyTextureToCanvas = function() {
+  var context = null;
+  if (this.canvas.img.hasOwnProperty("getContext")) {
+    context = this.canvas.img.getContext("2d");
+  } else {
+    this.canvas.img = (document.createElement("canvas"));
+    this.canvas.img.style.display = "none";
+    this.canvas.img.width = this.sizeX;
+    this.canvas.img.height = this.sizeY;
+    context = this.canvas.img.getContext("2d");
+  }
+  context.clearRect(0, 0, this.sizeX, this.sizeY);
+  this.drawTo(context, 0, 0);
+  this.canvas.img.generation++;
+};
+CanvasWrapper.prototype.reloadIfRequired = function() {
+  if (!this.canvas.live && (!this.canvas.ready || this.generation >= this.canvas.generation)) {
+    return;
+  }
+  if (this.sizeX != this.canvas.width || this.sizeY != this.canvas.height) {
+    this.sizeX = this.canvas.width;
+    this.sizeY = this.canvas.height;
+    this.updateInternalTextureMeasures();
+    var rawData = createPixelArray(this.sizeXP * this.sizeYP * 4);
+    for (var j = 0;j < 2;j++) {
+      gl.bindTexture(gl.TEXTURE_2D, this.textures[j]);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, this.sizeXP, this.sizeYP, 0, gl.RGBA, getPixelType(), rawData);
+    }
+  }
+  this.bindTexture();
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
+  if (!this.properties.repeat) {
+    gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, gl.RGBA, getPixelType(), this.canvas.img);
+  } else {
+    tmpcanvas.width = this.sizeXP;
+    tmpcanvas.height = this.sizeYP;
+    var ctx = tmpcanvas.getContext("2d");
+    ctx.drawImage(this.canvas.img, 0, this.sizeYP - this.sizeY);
+    ctx.drawImage(this.canvas.img, this.sizeX, this.sizeYP - this.sizeY);
+    ctx.drawImage(this.canvas.img, 0, this.sizeYP - 2 * this.sizeY);
+    ctx.drawImage(this.canvas.img, this.sizeX, this.sizeYP - 2 * this.sizeY);
+    gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, gl.RGBA, getPixelType(), tmpcanvas);
+  }
+  if (this.properties.mipmap) {
+    gl.generateMipmap(gl.TEXTURE_2D);
+  }
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 0);
+  this.generation = this.canvas.generation;
+  console.log("Image has been loaded to GPU");
+};
+CanvasWrapper.prototype.drawTo = function(context, x, y) {
+  enlargeCanvasIfRequired(this.sizeX, this.sizeY);
+  gl.viewport(0, 0, this.sizeXP, this.sizeYP);
+  this.shaderProgram.use(gl);
+  gl.activeTexture(gl.TEXTURE0);
+  gl.bindTexture(gl.TEXTURE_2D, this.textures[this.it]);
+  this.shaderProgram.uniform["sampler"]([0]);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  gl.flush();
+  context.drawImage(glcanvas, 0, glcanvas.height - this.sizeY, this.sizeX, this.sizeY, x, y, this.sizeX, this.sizeY);
+};
+CanvasWrapper.prototype.readPixels = function(x, y, width, height) {
+  gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffers[this.it]);
+  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.textures[this.it], 0);
+  var pixels = createPixelArray(width * height * 4);
+  gl.readPixels(x, this.sizeY - y - height, width, height, gl.RGBA, getPixelType(), pixels);
+  var res = [];
+  for (var i = height - 1;i >= 0;i--) {
+    res = res.concat(toFloat(pixels.slice(i * width * 4, (i + 1) * width * 4)));
+  }
+  return res;
+};
+CanvasWrapper.prototype.setPixel = function(x, y, color) {
+  this.bindTexture();
+  var colordata = [color[0], color[1], color[2], 1];
+  gl.texSubImage2D(gl.TEXTURE_2D, 0, x, y, 1, 1, gl.RGBA, getPixelType(), createPixelArrayFromFloat(colordata));
+  var context = this.canvas.img.getContext("2d");
+  var id = context.createImageData(1, 1);
+  id.data.d = colordata;
+  context.putImageData(id, x, y);
+};
+function Renderer(api, expression) {
+  this.api = api;
+  this.expression = expression;
+  this.rebuild();
+}
+Renderer.prototype.cpguniforms;
+Renderer.prototype.vertexShaderCode;
+Renderer.prototype.fragmentShaderCode;
+Renderer.prototype.shaderProgram;
+Renderer.prototype.api;
+Renderer.prototype.expression;
+Renderer.prototype.canvaswrapper;
+Renderer.prototype.texturereaders;
+Renderer.prototype.generations;
+Renderer.prototype.rebuild = function() {
+  var cb = new CodeBuilder(this.api);
+  var cpg = cb.generateColorPlotProgram(this.expression);
+  this.cpguniforms = cpg.uniforms;
+  this.texturereaders = cpg.texturereaders;
+  this.generations = cpg.generations;
+  this.fragmentShaderCode = cgl_resources["standardFragmentHeader"] + cpg.code;
+  this.vertexShaderCode = cgl_resources["vshader"];
+  this.shaderProgram = new ShaderProgram(gl, this.vertexShaderCode, this.fragmentShaderCode);
+  var posBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
+  var vertices = new Float32Array([-1, -1, 0, 1, -1, 0, -1, 1, 0, 1, 1, 0]);
+  var aPosLoc = gl.getAttribLocation(this.shaderProgram.handle, "aPos");
+  gl.enableVertexAttribArray(aPosLoc);
+  var aTexLoc = gl.getAttribLocation(this.shaderProgram.handle, "aTexCoord");
+  gl.enableVertexAttribArray(aTexLoc);
+  var texCoords = new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]);
+  var texCoordOffset = vertices.byteLength;
+  gl.bufferData(gl.ARRAY_BUFFER, texCoordOffset + texCoords.byteLength, gl.STATIC_DRAW);
+  gl.bufferSubData(gl.ARRAY_BUFFER, 0, vertices);
+  gl.bufferSubData(gl.ARRAY_BUFFER, texCoordOffset, texCoords);
+  gl.vertexAttribPointer(aPosLoc, 3, gl.FLOAT, false, 0, 0);
+  gl.vertexAttribPointer(aTexLoc, 2, gl.FLOAT, false, 0, texCoordOffset);
+};
+function transpose3(m) {
+  return [m[0], m[3], m[6], m[1], m[4], m[7], m[2], m[5], m[8]];
+}
+Renderer.prototype.setTransformMatrix = function(a, b, c) {
+  var m = [b.x - a.x, c.x - a.x, a.x, b.y - a.y, c.y - a.y, a.y, 0, 0, 1];
+  if (this.shaderProgram.uniform.hasOwnProperty("transformMatrix")) {
+    this.shaderProgram.uniform["transformMatrix"](transpose3(m));
+  }
+};
+Renderer.prototype.setUniforms = function() {
+  var $jscomp$this = this;
+  function setUniform(setter, t, val) {
+    if (!setter) {
+      return;
+    }
+    if (typeof setter === "function") {
+      switch(t) {
+        case type.complex:
+          setter([val["value"]["real"], val["value"]["imag"]]);
+          break;
+        case type.bool:
+          if (val["value"]) {
+            setter([1]);
+          } else {
+            setter([0]);
+          }
+          break;
+        case type.int:
+        ;
+        case type.float:
+          setter([val["value"]["real"]]);
+          break;
+        default:
+          if (t.type === "list" && t.parameters === type.float) {
+            setter(val["value"].map(function(x) {
+              return x["value"]["real"];
+            }));
+            break;
+          } else {
+            if (t.type === "list" && t.parameters.type === "list" && t.parameters.parameters === type.float) {
+              var m = [];
+              for (var j = 0;j < t.length;j++) {
+                for (var i = 0;i < t.parameters.length;i++) {
+                  m.push(val["value"][j]["value"][i]["value"]["real"]);
+                }
+              }
+              setter(m);
+              break;
+            }
+          }
+          console.error("Don't know how to set uniform of type " + typeToString(t) + ", to " + val);
+          break;
+      }
+    } else {
+      if (t.type === "list") {
+        var d = depth(t);
+        var fp = finalparameter(t);
+        if (d === 1 && fp === type.float) {
+          var n = t.length;
+          var s = sizes(n);
+          var cum = 0;
+          for (var k in s) {
+            setUniform(setter["a" + k], type.vec(s[k]), {"ctype":"list", "value":range(s[k]).map(function(l) {
+              return val["value"][cum + l];
+            })});
+            cum += s[k];
+          }
+          return;
+        }
+        for (var k$6 = 0;k$6 < t.length;k$6++) {
+          setUniform(setter["a" + k$6], t.parameters, {"ctype":"list", "value":val["value"][k$6]["value"]});
+        }
+        return;
+      } else {
+        console.error("Don't know how to set uniform of type " + typeToString(t) + ", to");
+        console.log(val);
+      }
+    }
+  }
+  for (var uname in this.cpguniforms) {
+    var val = this.api.evaluateAndVal(this.cpguniforms[uname].expr);
+    var t = this.cpguniforms[uname].type;
+    if (!issubtypeof(constant(val), t)) {
+      console.log("Type of " + uname + " changed (" + typeToString(constant(val)) + " is no subtype of  " + typeToString(t) + "); forcing rebuild.");
+      this.rebuild();
+      this.shaderProgram.use(gl);
+      this.setUniforms();
+      return;
+    }
+    if (this.shaderProgram.uniform[uname]) {
+      var setter = this.shaderProgram.uniform[uname];
+      setUniform(setter, t, val);
+    }
+  }
+  [["rnd_", function() {
+    return [Math.random()];
+  }], ["_lowerleft", function() {
+    var pt = computeLowerLeftCorner($jscomp$this.api);
+    return [pt.x, pt.y];
+  }], ["_lowerright", function() {
+    var pt = computeLowerRightCorner($jscomp$this.api);
+    return [pt.x, pt.y];
+  }]].map(function(a) {
+    return $jscomp$this.shaderProgram.uniform[a[0]] && $jscomp$this.shaderProgram.uniform[a[0]](a[1]());
+  });
+};
+Renderer.prototype.loadTextures = function() {
+  var $jscomp$this = this;
+  var cnt = 0;
+  for (var t in this.texturereaders) {
+    for (var i in this.texturereaders[t]) {
+      gl.activeTexture(gl.TEXTURE0 + cnt);
+      var tr = this.texturereaders[t][i];
+      var tname = tr.name;
+      var properties = {interpolate:tr.modifs.hasOwnProperty("interpolate") ? tr.api.evaluateAndVal(tr.modifs["interpolate"])["value"] : true, mipmap:tr.modifs.hasOwnProperty("mipmap") ? tr.api.evaluateAndVal(tr.modifs["mipmap"])["value"] : false, repeat:tr.modifs.hasOwnProperty("repeat") ? tr.api.evaluateAndVal(tr.modifs["repeat"])["value"] : false};
+      var cw = tr.returnCanvaswrapper(properties);
+      cw.reloadIfRequired();
+      cw.bindTexture();
+      [["_sampler" + tname, [cnt]], ["_ratio" + tname, [cw.sizeX / cw.sizeY]], ["_cropfact" + tname, [cw.sizeX / cw.sizeXP, cw.sizeY / cw.sizeYP]], ["_repeat" + tname, [properties.repeat]], ["_mipmap" + tname, [properties.mipmap]]].map(function(a) {
+        return $jscomp$this.shaderProgram.uniform[a[0]] && $jscomp$this.shaderProgram.uniform[a[0]](a[1]);
+      });
+      cnt++;
+    }
+  }
+};
+Renderer.prototype.functionGenerationsOk = function() {
+  for (var fname in this.generations) {
+    if (this.api.getMyfunction(fname).generation > this.generations[fname]) {
+      console.log(fname + " is outdated; forcing rebuild.");
+      return false;
+    }
+  }
+  return true;
+};
+Renderer.prototype.render = function(a, b, sizeX, sizeY, canvaswrapper) {
+  if (!this.functionGenerationsOk()) {
+    this.rebuild();
+  }
+  var alpha = sizeY / sizeX;
+  var n = {x:-(b.y - a.y) * alpha, y:(b.x - a.x) * alpha};
+  var c = {x:a.x + n.x, y:a.y + n.y};
+  enlargeCanvasIfRequired(sizeX, sizeY);
+  if (canvaswrapper) {
+    gl.viewport(0, 0, sizeX, sizeY);
+  } else {
+    gl.viewport(0, glcanvas.height - sizeY, sizeX, sizeY);
+  }
+  this.shaderProgram.use(gl);
+  this.setUniforms();
+  this.setTransformMatrix(a, b, c);
+  this.loadTextures();
+  if (canvaswrapper) {
+    canvaswrapper.bindFramebuffer();
+    canvaswrapper.generation = ++canvaswrapper.canvas.generation;
+  } else {
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  }
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  gl.flush();
+};
+CindyJS.registerPlugin(1, "CindyGL", function(api) {
+  nada = api.nada;
+  api.defineFunction("compile", 1, function(args, modifs) {
+    var expr = args[0];
+    var cb = new CodeBuilder(api);
+    var code = cb.generateColorPlotProgram(expr);
+    console.log(code);
+    return {ctype:"string", value:code};
+  });
+  function compileAndRender(prog, a, b, width, height, canvaswrapper) {
+    if (!prog.iscompiled || prog.compiletime < requiredcompiletime) {
+      prog.iscompiled = true;
+      prog.compiletime = requiredcompiletime;
+      prog.renderer = new Renderer(api, prog);
+    }
+    prog.renderer.render(a, b, width, height, canvaswrapper);
+    if (canvaswrapper) {
+      canvaswrapper.generation = Math.max(canvaswrapper.generation, canvaswrapper.canvas.generation + 1);
+    }
+  }
+  api.defineFunction("forcerecompile", 0, function(args, modifs) {
+    requiredcompiletime++;
+    return nada;
+  });
+  api.defineFunction("colorplot", 1, function(args, modifs) {
+    initGLIfRequired();
+    var prog = args[0];
+    var cw = api.instance["canvas"]["clientWidth"];
+    var ch = api.instance["canvas"]["clientHeight"];
+    var iw = api.instance["canvas"]["width"];
+    var ih = api.instance["canvas"]["height"];
+    compileAndRender(prog, computeLowerLeftCorner(api), computeLowerRightCorner(api), iw, ih, null);
+    var csctx = api.instance["canvas"].getContext("2d");
+    csctx.drawImage(glcanvas, 0, 0, iw, ih, 0, 0, cw, ch);
+    return nada;
+  });
+  api.defineFunction("colorplot", 3, function(args, modifs) {
+    initGLIfRequired();
+    var prog = args[0];
+    var a = api.extractPoint(api.evaluateAndVal(args[1]));
+    var b = api.extractPoint(api.evaluateAndVal(args[2]));
+    var ll = {x:Math.min(a.x, b.x), y:Math.min(a.y, b.y)};
+    var lr = {x:Math.max(a.x, b.x), y:Math.min(a.y, b.y)};
+    var cw = api.instance["canvas"]["clientWidth"];
+    var ch = api.instance["canvas"]["clientHeight"];
+    var iw = api.instance["canvas"]["width"];
+    var ih = api.instance["canvas"]["height"];
+    var cul = computeUpperLeftCorner(api);
+    var cll = computeLowerLeftCorner(api);
+    var clr = computeLowerRightCorner(api);
+    var fx = Math.abs((a.x - b.x) / (cll.x - clr.x));
+    var fy = Math.abs((a.y - b.y) / (cul.y - cll.y));
+    compileAndRender(prog, ll, lr, iw * fx, ih * fy, null);
+    var csctx = api.instance["canvas"].getContext("2d");
+    var pt = {x:Math.min(a.x, b.x), y:Math.max(a.y, b.y)};
+    var m = api.getInitialMatrix();
+    var xx = pt.x * m.a - pt.y * m.b + m.tx;
+    var yy = pt.x * m.c - pt.y * m.d - m.ty;
+    csctx.drawImage(glcanvas, 0, 0, iw * fx, ih * fy, xx, yy, fx * cw, fy * ch);
+    return nada;
+  });
+  api.defineFunction("colorplot", 4, function(args, modifs) {
+    initGLIfRequired();
+    var a = api.extractPoint(api.evaluateAndVal(args[0]));
+    var b = api.extractPoint(api.evaluateAndVal(args[1]));
+    var name = api.evaluateAndVal(args[2]);
+    var prog = args[3];
+    if (!a.ok || !b.ok || name.ctype !== "string") {
+      return nada;
+    }
+    var imageobject = api.getImage(name.value, true);
+    var canvaswrapper = generateWriteCanvasWrapperIfRequired(imageobject, api);
+    var cw = imageobject.width;
+    var ch = imageobject.height;
+    compileAndRender(prog, a, b, cw, ch, canvaswrapper);
+    return nada;
+  });
+  api.defineFunction("colorplot", 2, function(args, modifs) {
+    initGLIfRequired();
+    var a = computeLowerLeftCorner(api);
+    var b = computeLowerRightCorner(api);
+    var name = api.evaluateAndVal(args[0]);
+    var prog = args[1];
+    if (name.ctype !== "string") {
+      return nada;
+    }
+    var imageobject = api.getImage(name.value, true);
+    var canvaswrapper = generateWriteCanvasWrapperIfRequired(imageobject, api);
+    var cw = imageobject.width;
+    var ch = imageobject.height;
+    compileAndRender(prog, a, b, cw, ch, canvaswrapper);
+    return nada;
+  });
+  api.defineFunction("setpixel", 4, function(args, modifs) {
+    var name = coerce.toString(api.evaluateAndVal(args[0]));
+    var x = coerce.toInt(api.evaluateAndVal(args[1]));
+    var y = coerce.toInt(api.evaluateAndVal(args[2]));
+    var color = coerce.toColor(api.evaluateAndVal(args[3]));
+    if (!name) {
+      return nada;
+    }
+    var imageobject = api.getImage(name, true);
+    var canvaswrapper = generateWriteCanvasWrapperIfRequired(imageobject, api);
+    if (isFinite(x) && isFinite(y) && name && canvaswrapper && color) {
+      canvaswrapper.setPixel(x, y, color);
+    }
+    return nada;
+  });
+});
+var list = function(n, type) {
+  return {type:"list", length:n, parameters:type};
+};
+var constant = function(value) {
+  return {type:"constant", value:value};
+};
+var constint = function(n) {
+  return constant({"ctype":"number", "value":{"real":n, "imag":0}});
+};
+var type = {bool:1, int:2, float:3, complex:4, voidt:5, color:6, point:7, line:8, coordinate2d:9, image:10, vec2:list(2, 3), vec3:list(3, 3), vec4:list(4, 3), vec:function(n) {
+  return list(n, 3);
+}, cvec:function(n) {
+  return list(n, 4);
+}, mat2:list(2, list(2, 3)), mat3:list(3, list(3, 3)), mat4:list(4, list(4, 3))};
+Object.freeze(type);
+function typeToString(t) {
+  if (1 <= t && t <= 10) {
+    var l = ["bool", "int", "float", "complex", "voidt", "color", "point", "line", "coordinate2d", "image"];
+    return l[t - 1];
+  } else {
+    if (t.type === "list") {
+      return typeToString(t.parameters) + "[" + t.length + "]";
+    }
+    if (t.type === "constant") {
+      return "const[" + JSON.stringify(t.value["value"]) + "]";
+    }
+    return JSON.stringify(t);
+  }
+}
+var isrvectorspace = function(t) {
+  return t.type === "list" && isrvectorspace(t.parameters) || issubtypeof(t, type.float);
+};
+var iscvectorspace = function(t) {
+  return t.type === "list" && iscvectorspace(t.parameters) || issubtypeof(t, type.complex);
+};
+var isconstantint = function(t) {
+  return t.type === "constant" && issubtypeof(t, type.int);
+};
+var generalize = function(t) {
+  return t.type === "constant" ? guessTypeOfValue(t.value) : t;
+};
+var depth = function(t) {
+  return t.type === "list" ? depth(t.parameters) + 1 : 0;
+};
+var finalparameter = function(t) {
+  return t.parameters !== undefined ? finalparameter(t.parameters) : t;
+};
+var dimensionsmatch = function(a, b) {
+  return depth(a) === depth(b) && (depth(a) === 0 || a.length === b.length && dimensionsmatch(a.parameters, b.parameters));
+};
+var getrvectorspace = function(t) {
+  return issubtypeof(t, type.float) ? type.float : issubtypeof(t, type.complex) ? type.complex : {type:"list", length:t.length, parameters:getrvectorspace(t.parameters)};
+};
+var getcvectorspace = function(t) {
+  return issubtypeof(t, type.complex) ? type.complex : {type:"list", length:t.length, parameters:getcvectorspace(t.parameters)};
+};
+var replaceCbyR = function(t) {
+  return t === type.complex ? type.float : {type:"list", length:t.length, parameters:replaceCbyR(t.parameters)};
+};
+var isnativeglsl = function(t) {
+  return t === type.bool || t === type.int || t === type.float || t === type.complex || t.type === "list" && t.parameters === type.float && 1 <= t.length && t.length <= 4 || t.type === "list" && t.parameters.type === "list" && t.parameters.parameters === type.float && t.length === t.parameters.length && 2 <= t.length && t.length <= 4;
+};
+var isprimitive = function(a) {
+  return [type.bool, type.int, type.float, type.complex].indexOf(a) !== -1;
+};
+var typesareequal = function(a, b) {
+  return a === b || a.type === "constant" && b.type === "constant" && expressionsAreEqual(a.value, b.value) || a.type === "list" && b.type === "list" && a.length === b.length && typesareequal(a.parameters, b.parameters);
+};
+function issubtypeof(a, b) {
+  if (typesareequal(a, b)) {
+    return true;
+  }
+  if (!a) {
+    return false;
+  }
+  if (isprimitive(a) && isprimitive(b)) {
+    return a <= b;
+  }
+  if (b.type === "constant") {
+    return false;
+  }
+  if (a.type === "constant") {
+    return issubtypeof(guessTypeOfValue(a.value), b);
+  }
+  if (b === type.coordinate2d) {
+    return issubtypeof(a, type.complex) || issubtypeof(a, type.vec2) || issubtypeof(a, type.point);
+  }
+  if (b === type.point) {
+    return issubtypeof(a, type.vec3);
+  }
+  if (b === type.line) {
+    return issubtypeof(a, type.vec3);
+  }
+  if (b === type.color) {
+    return issubtypeof(a, type.float) || a.type === "list" && (a.length === 3 || a.length === 4) && issubtypeof(a.parameters, type.float);
+  }
+  if (a.type === "list" && b.type === "list" && a.length === b.length) {
+    return issubtypeof(a.parameters, b.parameters);
+  }
+  return false;
+}
+function lca(a, b) {
+  if (!a) {
+    return b;
+  }
+  if (!b) {
+    return a;
+  }
+  if (typesareequal(a, b)) {
+    return a;
+  }
+  if (a.type === "constant") {
+    a = guessTypeOfValue(a.value);
+  }
+  if (b.type === "constant") {
+    b = guessTypeOfValue(b.value);
+  }
+  if (isprimitive(a) && isprimitive(b)) {
+    return Math.max(a, b);
+  }
+  if (a.type === "list" && b.type === "list" && a.length === b.length) {
+    var st = lca(a.parameters, b.parameters);
+    if (!st) {
+      return false;
+    } else {
+      return {type:"list", length:a.length, parameters:st};
+    }
+  }
+  return false;
+}
+function first(signatures) {
+  return function(args) {
+    var $jscomp$loop$34 = {};
+    for (var i in signatures) {
+      var cur = signatures[i];
+      $jscomp$loop$34.reqargs = cur[0];
+      if (args.length == $jscomp$loop$34.reqargs.length && args.every(function($jscomp$loop$34) {
+        return function(elem, index) {
+          return issubtypeof(elem, $jscomp$loop$34.reqargs[index]);
+        };
+      }($jscomp$loop$34))) {
+        return {args:$jscomp$loop$34.reqargs, res:cur[1], generator:cur[2]};
+      }
+      $jscomp$loop$34 = {reqargs:$jscomp$loop$34.reqargs};
+    }
+    return false;
+  };
+}
+function inclusionfunction(toType) {
+  switch(toType) {
+    case type.int:
+      return first([[[type.bool], type.int, usefunction("int")]]);
+    case type.float:
+      return first([[[type.bool], type.float, usefunction("float")], [[type.int], type.float, usefunction("float")]]);
+    case type.complex:
+      return first([[[type.float], type.complex, function(f) {
+        return "vec2(" + f + ", 0.)";
+      }]]);
+    case type.color:
+      return first([[[type.float], type.color, useincludefunction("float2color")], [[type.vec3], type.color, function(v) {
+        return "vec4(" + v + ",1.0)";
+      }], [[type.vec4], type.color, identity]]);
+    case type.point:
+      return first([[[type.vec2], type.point, function(v) {
+        return "vec3(" + v + ",1.0)";
+      }], [[type.vec3], type.point, identity]]);
+    case type.line:
+      return first([[[type.vec2], type.line, function(v) {
+        return "vec3(" + v + ",1.0)";
+      }], [[type.vec3], type.line, identity]]);
+    case type.coordinate2d:
+      return first([[[type.complex], type.coordinate2d, identity], [[type.vec2], type.coordinate2d, identity], [[type.point], type.coordinate2d, useincludefunction("dehomogenize")]]);
+    default:
+      if (toType.type === "list") {
+        var fp = finalparameter(toType);
+        return function(args) {
+          var fromType = args[0];
+          var rec = inclusionfunction(toType.parameters)([fromType.parameters]).generator;
+          return {args:args, res:toType, generator:function(list, modifs, codebuilder) {
+            return uselist(toType)(range(toType.length).map(function(k) {
+              return rec([accesslist(fromType, k)([list], modifs, codebuilder)], modifs, codebuilder);
+            }), modifs, codebuilder);
+          }};
+        };
+      }
+    ;
+  }
+  console.log("no inclusionfunction ->" + typeToString(toType) + " implemented yet; using identity...");
+  return function(args) {
+    return {args:args, res:toType, generator:identity};
+  };
+}
+function webgltype(ctype) {
+  switch(ctype) {
+    case type.bool:
+      return "bool";
+    case type.int:
+      return "int";
+    case type.float:
+      return "float";
+    case type.complex:
+    ;
+    case type.coordinate2d:
+      return "vec2";
+    case type.voidt:
+      return "void";
+    case type.color:
+      return "vec4";
+    case type.point:
+    ;
+    case type.line:
+      return "vec3";
+  }
+  if (ctype.type === "list" && ctype.parameters === type.float) {
+    if (ctype.length == 1) {
+      return "float";
+    } else {
+      return "vec" + ctype.length;
+    }
+  } else {
+    if (ctype.type === "list" && ctype.parameters === type.complex) {
+      return "cvec" + ctype.length;
+    } else {
+      if (ctype.type === "list" && ctype.parameters.type === "list" && ctype.length === ctype.parameters.length && ctype.parameters.parameters === type.float) {
+        switch(ctype.length) {
+          case 2:
+            return "mat2";
+          case 3:
+            return "mat3";
+          case 4:
+            return "mat4";
+        }
+      }
+    }
+  }
+  if (ctype.type === "list") {
+    return "l" + ctype.length + "_" + webgltype(ctype.parameters);
+  }
+  console.error("No WebGL implementation for type " + typeToString(ctype) + " found");
+}
+function pastevalue(val, toType) {
+  switch(toType) {
+    case type.bool:
+      return webgltype(toType) + "(" + val["value"] + ")";
+    case type.int:
+      return "" + (val["value"]["real"] | 0);
+    case type.float:
+      return webgltype(toType) + "(" + val["value"]["real"] + ")";
+    case type.complex:
+      return webgltype(toType) + "(" + val["value"]["real"] + ", " + val["value"]["imag"] + ")";
+    case type.color:
+      var f = val["value"]["real"];
+      return "vec4(" + f + "," + f + "," + f + ",1.)";
+    default:
+      console.error("Dont know how to paste values of Type " + typeToString(toType) + " yet.");
+  }
+}
+;var requires = {};
+function includefunction(name, modifs, codebuilder) {
+  if (codebuilder.mark("includedfunctions", name)) {
+    return;
+  }
+  for (var i in requires[name]) {
+    var f = requires[name][i];
+    includefunction(f, modifs, codebuilder);
+  }
+  codebuilder.add("includedfunctions", name, function() {
+    return cgl_resources[name];
+  });
+}
+function useincludefunction(name) {
+  return function(args, modifs, codebuilder) {
+    includefunction(name, modifs, codebuilder);
+    return usefunction(name)(args);
+  };
+}
+;var range = function(n) {
+  return Array.from(Array(n).keys());
+};
+var sizes = function(n) {
+  return n <= 4 ? [n] : n == 5 ? [2, 3] : sizes(n - 4).concat([4]);
+};
+var computeidx = function(k, n) {
+  var s = sizes(n);
+  for (var i in s) {
+    if (s[i] <= k) {
+      k -= s[i];
+    } else {
+      return {first:i, second:k};
+    }
+  }
+  console.error("Accessing index out of range");
+};
+function genchilds(t) {
+  var fp = finalparameter(t);
+  var d = depth(t);
+  if (d == 1 && fp === type.float) {
+    return sizes(t.length).map(function(k, i) {
+      return {type:type.vec(k), name:"a" + i};
+    });
+  } else {
+    if (d >= 1) {
+      return range(t.length).map(function(i) {
+        return {type:t.parameters, name:"a" + i};
+      });
+    }
+  }
+  return [];
+}
+function createstruct(t, codebuilder) {
+  if (isnativeglsl(t)) {
+    return;
+  }
+  var name = webgltype(t);
+  codebuilder.add("structs", name, function() {
+    return "struct " + name + " { " + genchilds(t).map(function(ch) {
+      return createstruct(ch.type, codebuilder) || webgltype(ch.type) + " " + ch.name + ";";
+    }).join("") + "};";
+  });
+}
+function generatematmult(t, modifs, codebuilder) {
+  if (isnativeglsl(t)) {
+    return;
+  }
+  var n = t.length;
+  var m = t.parameters.length;
+  var name = "mult" + n + "_" + m;
+  codebuilder.add("functions", name, function() {
+    return webgltype(type.vec(n)) + " mult" + n + "_" + m + "(" + webgltype(t) + " a, " + webgltype(type.vec(m)) + " b){" + "return " + usevec(n)(range(n).map(function(k) {
+      return usedot(m)(["a.a" + k, "b"], modifs, codebuilder);
+    }), modifs, codebuilder) + ";" + "}";
+  });
+}
+function generatesum(t, modifs, codebuilder) {
+  if (isnativeglsl(t)) {
+    return;
+  }
+  var n = t.length;
+  var name = "sum" + webgltype(t);
+  codebuilder.add("functions", name, function() {
+    return webgltype(t.parameters) + " " + name + "(" + webgltype(t) + " a){" + (webgltype(t.parameters) + " res = " + constantreallist(t.parameters, 0)([], modifs, codebuilder) + ";\n      " + range(n).map(function(k) {
+      return "res = " + useadd(t.parameters)(["res", accesslist(t, k)(["a", k], modifs, codebuilder)], modifs, codebuilder) + ";";
+    }).join("\n") + "\n        return res;\n    }");
+  });
+}
+function generatecmatmult(t, modifs, codebuilder) {
+  var n = t.length;
+  var m = t.parameters.length;
+  var name = "multc" + n + "_" + m;
+  codebuilder.add("functions", name, function() {
+    return webgltype(type.cvec(n)) + " multc" + n + "_" + m + "(" + webgltype(t) + " a, " + webgltype(type.cvec(m)) + " b){\n        return cvec" + n + "(" + range(n).map(function(k) {
+      return usecdot(m)(["a.a" + k, "b"], modifs, codebuilder);
+    }) + ");\n    }\n    ";
+  });
+}
+function generatedot(n, codebuilder) {
+  if (2 <= n && n <= 4) {
+    return;
+  }
+  var name = "dot" + n;
+  codebuilder.add("functions", name, function() {
+    return "float dot" + n + "(vec" + n + " a, vec" + n + " b) {\n    return " + sizes(n).map(function(size, k) {
+      return "dot(a.a" + k + ",b.a" + k + ")";
+    }).join("+") + "; }\n    ";
+  });
+}
+function generatecdot(n, modifs, codebuilder) {
+  var name = "cdot" + n;
+  codebuilder.add("functions", name, function() {
+    return "vec2 cdot" + n + "(cvec" + n + " a, cvec" + n + " b) {\n      return " + range(n).map(function(k) {
+      return "vec2(dot(a.a" + k + ",vec2(b.a" + k + ".x,-b.a" + k + ".y)), dot(a.a" + k + ",b.a" + k + ".yx))";
+    }).join("+\n") + ";\n    }\n    ";
+  });
+}
+function generateadd(t, modifs, codebuilder) {
+  var name = "add" + webgltype(t);
+  codebuilder.add("functions", name, function() {
+    return webgltype(t) + " " + name + "(" + webgltype(t) + " a, " + webgltype(t) + " b) {\n    return " + webgltype(t) + "(" + genchilds(t).map(function(ch) {
+      return webgltype(ch.type) + "(" + useadd(ch.type)(["a." + ch.name, "b." + ch.name], modifs, codebuilder) + ")";
+    }).join(",") + ");\n      }";
+  });
+}
+function generatesub(t, modifs, codebuilder) {
+  var name = "sub" + webgltype(t);
+  codebuilder.add("functions", name, function() {
+    return webgltype(t) + " " + name + "(" + webgltype(t) + " a, " + webgltype(t) + " b) {\n    return " + webgltype(t) + "(" + genchilds(t).map(function(ch) {
+      return webgltype(ch.type) + "(" + usesub(ch.type)(["a." + ch.name, "b." + ch.name], modifs, codebuilder) + ")";
+    }).join(",") + ");\n    }";
+  });
+}
+function generatescalarmult(t, modifs, codebuilder) {
+  var name = "scalarmult" + webgltype(t);
+  codebuilder.add("functions", name, function() {
+    return webgltype(t) + " " + name + "(float a, " + webgltype(t) + " b) {\n    return " + webgltype(t) + "(" + genchilds(t).map(function(ch) {
+      return webgltype(ch.type) + "(" + usescalarmult(ch.type)(["a", "b." + ch.name], modifs, codebuilder) + ")";
+    }).join(",") + ");\n    }";
+  });
+}
+function generatecscalarmult(t, modifs, codebuilder) {
+  includefunction("multc", modifs, codebuilder);
+  var name = "cscalarmult" + webgltype(t);
+  codebuilder.add("functions", name, function() {
+    return webgltype(t) + " " + name + "(vec2 a, " + webgltype(t) + " b) {\n    return " + webgltype(t) + "(" + genchilds(t).map(function(ch) {
+      return "" + usecscalarmult(ch.type)(["a", "b." + ch.name], modifs, codebuilder);
+    }).join(",") + ");\n    }";
+  });
+}
+function usemult(t) {
+  if (t === type.complex) {
+    return useincludefunction("multc");
+  }
+  if (isnativeglsl(t)) {
+    return function(args, modifs, codebuilder) {
+      return useinfix("*")([args[1], args[0]]);
+    };
+  }
+  var fp = finalparameter(t);
+  if (issubtypeof(fp, type.float)) {
+    return function(args, modifs, codebuilder) {
+      return generatematmult(t, modifs, codebuilder) || "mult" + t.length + "_" + t.parameters.length + "(" + args.join(",") + ")";
+    };
+  } else {
+    if (fp === type.complex) {
+      return function(args, modifs, codebuilder) {
+        return generatecmatmult(t, modifs, codebuilder) || "multc" + t.length + "_" + t.parameters.length + "(" + args.join(",") + ")";
+      };
+    }
+  }
+}
+function usedot(n) {
+  return function(args, modifs, codebuilder) {
+    return generatedot(n, codebuilder) || "dot" + (2 <= n && n <= 4 ? "" : n) + "(" + args.join(",") + ")";
+  };
+}
+function usecdot(n) {
+  return function(args, modifs, codebuilder) {
+    return generatecdot(n, modifs, codebuilder) || "cdot" + n + "(" + args.join(",") + ")";
+  };
+}
+function useadd(t) {
+  if (isnativeglsl(t)) {
+    return useinfix("+");
+  } else {
+    return function(args, modifs, codebuilder) {
+      return generateadd(t, modifs, codebuilder) || "add" + webgltype(t) + "(" + args.join(",") + ")";
+    };
+  }
+}
+function usesub(t) {
+  if (isnativeglsl(t)) {
+    return useinfix("-");
+  } else {
+    return function(args, modifs, codebuilder) {
+      return generatesub(t, modifs, codebuilder) || "sub" + webgltype(t) + "(" + args.join(",") + ")";
+    };
+  }
+}
+function usesum(t) {
+  if (isrvectorspace(t) && depth(t) == 1) {
+    return function(args, modifs, codebuilder) {
+      return usedot(t.length)([args[0], usevec(t.length)(Array(t.length).fill("1."), modifs, codebuilder)], modifs, codebuilder);
+    };
+  } else {
+    return function(args, modifs, codebuilder) {
+      return generatesum(t, modifs, codebuilder) || "sum" + webgltype(t) + "(" + args.join(",") + ")";
+    };
+  }
+}
+function usevec(n) {
+  if (2 <= n && n <= 4) {
+    return function(args) {
+      return "vec" + n + "(" + args.join(",") + ")";
+    };
+  }
+  if (n == 1) {
+    return function(args) {
+      return "float(" + args.join(",") + ")";
+    };
+  }
+  var cum = 0;
+  return function(args, modifs, codebuilder) {
+    return createstruct(type.vec(n), codebuilder) || "vec" + n + "(" + sizes(n).map(function(s) {
+      return "vec" + s + "(" + range(s).map(function(l) {
+        return ++cum && args[cum - 1];
+      }).join(",") + ")";
+    }).join(",") + ")";
+  };
+}
+function uselist(t) {
+  var d = depth(t);
+  if (isnativeglsl(t)) {
+    return function(args, modifs, codebuilder) {
+      return webgltype(t) + "(" + args.join(",") + ")";
+    };
+  }
+  if (d == 1 && t.parameters === type.float) {
+    return usevec(t.length);
+  }
+  return function(args, modifs, codebuilder) {
+    return createstruct(t, codebuilder) || webgltype(t) + "(" + args.join(",") + ")";
+  };
+}
+function accesslist(t, k) {
+  var d = depth(t);
+  var fp = finalparameter(t);
+  if (d == 1 && fp === type.float) {
+    return accessvecbyshifted(t.length, k);
+  } else {
+    if (isnativeglsl(t)) {
+      return function(args, modifs, codebuilder) {
+        return "(" + args[0] + ")[" + k + "]";
+      };
+    }
+  }
+  return function(args, modifs, codebuilder) {
+    return "(" + args[0] + ").a" + k;
+  };
+}
+function constantreallist(t, val) {
+  if (isnativeglsl(t)) {
+    return function(args, modifs, codebuilder) {
+      return webgltype(t) + "(float(" + val + "))";
+    };
+  } else {
+    return function(args, modifs, codebuilder) {
+      return uselist(t) + "(" + genchilds(t).map(function(ch) {
+        return constantreallist(ch.type, val)(args, modifs, codebuilder);
+      }).join(",") + ")";
+    };
+  }
+}
+function accessvecbyshifted(n, k) {
+  return function(args, modifs, codebuilder) {
+    if (n == 1) {
+      return args[0];
+    }
+    if (2 <= n && n <= 4) {
+      return "(" + args[0] + ")[" + k + "]";
+    }
+    var idx = computeidx(k, n);
+    return "(" + args[0] + ").a" + idx.first + "[" + idx.second + "]";
+  };
+}
+function usescalarmult(t) {
+  if (isnativeglsl(t)) {
+    return useinfix("*");
+  }
+  return function(args, modifs, codebuilder) {
+    return generatescalarmult(t, modifs, codebuilder) || "scalarmult" + webgltype(t) + "(" + args.join(",") + ")";
+  };
+}
+function usecscalarmult(t) {
+  if (t === type.complex) {
+    return useincludefunction("multc");
+  }
+  return function(args, modifs, codebuilder) {
+    return generatecscalarmult(t, modifs, codebuilder) || "cscalarmult" + webgltype(t) + "(" + args.join(",") + ")";
+  };
+}
+function generatereverse(t, modifs, codebuilder) {
+  var name = "reverse" + webgltype(t);
+  codebuilder.add("functions", name, function() {
+    return webgltype(t) + " " + name + "(" + webgltype(t) + " a){" + (webgltype(t.parameters) + " m;\n") + range(Math.floor(t.length / 2)).map(function(i) {
+      var a = accesslist(t, i)(["a", i], modifs, codebuilder);
+      var b = accesslist(t, t.length - 1 - i)(["a", t.length - 1 - i], modifs, codebuilder);
+      return "m = " + a + "; " + a + " = " + b + "; " + b + " = m;";
+    }).join("\n") + "return a;\n      }";
+  });
+}
+function usereverse(t) {
+  return function(args, modifs, codebuilder) {
+    return generatereverse(t, modifs, codebuilder) || "reverse" + webgltype(t) + "(" + args.join(",") + ")";
+  };
+}
+function generatemax(t, modifs, codebuilder) {
+  var name = "max" + webgltype(t);
+  codebuilder.add("functions", name, function() {
+    return webgltype(t.parameters) + " " + name + "(" + webgltype(t) + " a){" + (webgltype(t.parameters) + " m = " + accesslist(t, t.length - 1)(["a", t.length - 1], modifs, codebuilder) + ";\n") + range(t.length - 1).map(function(i) {
+      var a = accesslist(t, i)(["a", i], modifs, codebuilder);
+      return "m = max(m," + a + ");";
+    }).join("\n") + "return m;\n      }";
+  });
+}
+function usemax(t) {
+  return function(args, modifs, codebuilder) {
+    return generatemax(t, modifs, codebuilder) || "max" + webgltype(t) + "(" + args.join(",") + ")";
+  };
+}
+function generatemin(t, modifs, codebuilder) {
+  var name = "min" + webgltype(t);
+  codebuilder.add("functions", name, function() {
+    return webgltype(t.parameters) + " " + name + "(" + webgltype(t) + " a){" + (webgltype(t.parameters) + " m = " + accesslist(t, t.length - 1)(["a", t.length - 1], modifs, codebuilder) + ";\n") + range(t.length - 1).map(function(i) {
+      var a = accesslist(t, i)(["a", i], modifs, codebuilder);
+      return "m = min(m," + a + ");";
+    }).join("\n") + "return m;\n      }";
+  });
+}
+function usemin(t) {
+  return function(args, modifs, codebuilder) {
+    return generatemin(t, modifs, codebuilder) || "min" + webgltype(t) + "(" + args.join(",") + ")";
+  };
+}
+;function generatePairs(n) {
+  var ans = [];
+  function bitonicSort(lo, n, dir) {
+    if (n > 1) {
+      var m = n / 2 | 0;
+      bitonicSort(lo, m, !dir);
+      bitonicSort(lo + m, n - m, dir);
+      bitonicMerge(lo, n, dir);
+    }
+  }
+  function bitonicMerge(lo, n, dir) {
+    if (n > 1) {
+      var m = greatestPowerOfTwoLessThan(n);
+      for (var i = lo;i < lo + n - m;i++) {
+        compare(i, i + m, dir);
+      }
+      bitonicMerge(lo, m, dir);
+      bitonicMerge(lo + m, n - m, dir);
+    }
+  }
+  function compare(i, j, dir) {
+    if (dir) {
+      ans.push([i, j]);
+    } else {
+      ans.push([j, i]);
+    }
+  }
+  function greatestPowerOfTwoLessThan(n) {
+    var k = 1;
+    while (k < n) {
+      k = k << 1;
+    }
+    return k >> 1;
+  }
+  bitonicSort(0, n, true);
+  return ans;
+}
+function generatesort(t, modifs, codebuilder) {
+  var name = "sort" + webgltype(t);
+  codebuilder.add("functions", name, function() {
+    return webgltype(t) + " " + name + "(" + webgltype(t) + " a){" + (webgltype(t.parameters) + " m;\n") + generatePairs(t.length).map(function(p) {
+      var a = accesslist(t, p[0])(["a", p[0]], modifs, codebuilder);
+      var b = accesslist(t, p[1])(["a", p[1]], modifs, codebuilder);
+      return "m = min(" + a + "," + b + "); " + b + " = max(" + a + "," + b + "); " + a + " = m;";
+    }).join("\n") + "return a;\n      }";
+  });
+}
+function usesort(t) {
+  return function(args, modifs, codebuilder) {
+    return generatesort(t, modifs, codebuilder) || "sort" + webgltype(t) + "(" + args.join(",") + ")";
+  };
+}
+;function usefunction(name) {
+  return function(args) {
+    if (typeof "args" === "string") {
+      return getPlainName(name) + "(" + args + ")";
+    } else {
+      return getPlainName(name) + "(" + args.join(", ") + ")";
+    }
+  };
+}
+function useinfix(inf) {
+  return function(args) {
+    return "(" + args.join(inf) + ")";
+  };
+}
+var identity = function(x) {
+  return x;
+};
+var getReal = function(c) {
+  return "(" + c + ").x";
+};
+var getImag = function(c) {
+  return "(" + c + ").y";
+};
+var webgl = {};
+webgl["join"] = first([[type.point, type.point], type.line, usefunction("cross")]);
+webgl["meet"] = first([[type.line, type.line], type.point, usefunction("cross")]);
+webgl["if"] = function(argtypes) {
+  if (!argtypes.every(function(a) {
+    return a;
+  })) {
+    return false;
+  }
+  if (argtypes.length === 2) {
+    return {args:argtypes, res:argtypes[1], generator:function(args) {
+      return "if(" + args[0] + ") {" + args[1] + ";}";
+    }};
+  } else {
+    if (argtypes.length === 3) {
+      var template = lca(argtypes[1], argtypes[2]);
+      if (template) {
+        return {args:[type.bool, template, template], res:template, generator:function(args) {
+          return "(" + args[0] + " ? " + args[1] + " : " + args[2] + ")";
+        }};
+      } else {
+        return {args:argtypes, res:type.voidt, generator:function(args) {
+          return "if(" + args[0] + ") {" + args[1] + ";} else {" + args[2] + ";}";
+        }};
+      }
+    }
+  }
+  return false;
+};
+webgl["="] = function(argtypes) {
+  var match = lca(argtypes[0], argtypes[1]);
+  return {args:match, res:match, generator:function(args) {
+    return args[0] + " = " + args[1] + ";";
+  }};
+};
+webgl[";"] = function(argtypes) {
+  return {args:argtypes, res:argtypes[1] !== type.voidt ? argtypes[1] : argtypes[0], generator:function(args) {
+    return args[0] + " ; " + args[1] + ";";
+  }};
+};
+webgl["repeat"] = function(argtypes) {
+  return (argtypes.length == 2 || argtypes.length == 3) && isconstantint(argtypes[0]) ? {args:argtypes, res:argtypes[argtypes.length - 1], generator:function(args) {
+    return "";
+  }} : false;
+};
+webgl["forall"] = function(argtypes) {
+  return (argtypes.length == 2 || argtypes.length == 3) && generalize(argtypes[0]).type === "list" ? {args:argtypes, res:argtypes[argtypes.length - 1], generator:function(args) {
+    return "";
+  }} : false;
+};
+webgl["apply"] = function(argtypes) {
+  return (argtypes.length == 2 || argtypes.length == 3) && generalize(argtypes[0]).type === "list" ? {args:argtypes, res:list(generalize(argtypes[0]).length, argtypes[argtypes.length - 1]), generator:function(args) {
+    return "";
+  }} : false;
+};
+webgl["sum"] = function(argtypes) {
+  return argtypes.length == 1 && (isrvectorspace(argtypes[0]) || iscvectorspace(argtypes[0])) ? {args:argtypes, res:argtypes[0].parameters, generator:usesum(argtypes[0])} : false;
+};
+webgl["regional"] = function(argtypes) {
+  return {args:argtypes, res:type.voidt, generator:function(args) {
+    return "";
+  }};
+};
+webgl["sqrt"] = first([[[type.float], type.complex, useincludefunction("sqrtf")], [[type.complex], type.complex, useincludefunction("sqrtc")]]);
+webgl["abs"] = first([[[type.float], type.float, usefunction("abs")], [[type.complex], type.float, usefunction("length")], [[type.vec2], type.float, usefunction("length")], [[type.vec3], type.float, usefunction("length")], [[type.vec4], type.float, usefunction("length")]]);
+webgl["abs_infix"] = webgl["abs"];
+webgl["dist"] = first([[[type.float, type.float], type.float, function(x) {
+  return usefunction("abs")(useinfix("-")(x));
+}], [[type.complex, type.complex], type.float, function(x) {
+  return usefunction("length")(useinfix("-")(x));
+}], [[type.vec2, type.vec2], type.float, function(x) {
+  return usefunction("length")(useinfix("-")(x));
+}], [[type.vec3, type.vec3], type.float, function(x) {
+  return usefunction("length")(useinfix("-")(x));
+}], [[type.vec4, type.vec4], type.float, function(x) {
+  return usefunction("length")(useinfix("-")(x));
+}]]);
+webgl["dist_infix"] = webgl["dist"];
+webgl["sin"] = first([[[type.float], type.float, usefunction("sin")], [[type.complex], type.complex, useincludefunction("sinc")]]);
+webgl["cos"] = first([[[type.float], type.float, usefunction("cos")], [[type.complex], type.complex, useincludefunction("cosc")]]);
+webgl["tan"] = first([[[type.float], type.float, usefunction("tan")], [[type.complex], type.complex, useincludefunction("tanc")]]);
+webgl["exp"] = first([[[type.float], type.float, usefunction("exp")], [[type.complex], type.complex, useincludefunction("expc")]]);
+webgl["arctan"] = first([[[type.float], type.float, usefunction("atan")], [[type.complex], type.complex, useincludefunction("arctanc")]]);
+webgl["log"] = first([[[type.float], type.complex, useincludefunction("logr")], [[type.complex], type.complex, useincludefunction("logc")]]);
+var glslstructures = [2, 3, 4].map(function(n) {
+  return list(n, type.float);
+}).concat([2, 3, 4].map(function(n) {
+  return list(n, list(n, type.float));
+}));
+var glslsupportop = [type.int, type.float, type.complex].concat(glslstructures);
+webgl["add"] = function(args) {
+  var match = first(glslsupportop.map(function(t) {
+    return [[t, t], t, useinfix("+")];
+  }))(args);
+  if (match) {
+    return match;
+  }
+  var a = args[0];
+  var b = args[1];
+  if ([a, b].every(function(a) {
+    return isrvectorspace(a) || iscvectorspace(a);
+  }) && dimensionsmatch(a, b)) {
+    var vectorspace = lca(getrvectorspace(a), getrvectorspace(b));
+    return {args:[vectorspace, vectorspace], res:vectorspace, generator:useadd(vectorspace)};
+  }
+};
+webgl["sub"] = function(args) {
+  var match = first(glslsupportop.map(function(t) {
+    return [[t, t], t, useinfix("-")];
+  }).concat(glslsupportop.map(function(t) {
+    return [[type.voidt, t], t, useinfix("-")];
+  })))(args);
+  if (match) {
+    return match;
+  }
+  var a = args[0];
+  var b = args[1];
+  if ([a, b].every(function(a) {
+    return isrvectorspace(a) || iscvectorspace(a);
+  }) && dimensionsmatch(a, b)) {
+    var vectorspace = lca(getrvectorspace(a), getrvectorspace(b));
+    return {args:[vectorspace, vectorspace], res:vectorspace, generator:usesub(vectorspace)};
+  }
+};
+webgl["+"] = webgl["add"];
+webgl["-"] = webgl["sub"];
+var rings = [type.int, type.float, type.complex, type.vec2, type.vec3, type.vec4];
+webgl["_"] = function(args) {
+  var t = generalize(args[0]);
+  if (t.type === "list" && isconstantint(args[1])) {
+    var k = Number(args[1].value["value"]["real"]);
+    if (1 <= Math.abs(k) && Math.abs(k) <= t.length) {
+      if (k > 0) {
+        k = k - 1;
+      }
+      if (k < 0) {
+        k = t.length + k;
+      }
+      return {args:args, res:t.parameters, generator:accesslist(t, k)};
+    } else {
+      return {args:args, res:t.parameters, generator:function(x) {
+        return console.error("try to access " + k + "-th Element of " + t.length + "-list " + JSON.stringify(args[0]));
+      }};
+    }
+  }
+  return false;
+};
+webgl["mult"] = function(args) {
+  var match = first([[[type.int, type.int], type.int, useinfix("*")], [[type.float, type.float], type.float, useinfix("*")], [[type.complex, type.float], type.complex, useinfix("*")], [[type.float, type.complex], type.complex, useinfix("*")], [[type.complex, type.complex], type.complex, useincludefunction("multc")]])(args);
+  if (match) {
+    return match;
+  }
+  if (args.length !== 2) {
+    return false;
+  }
+  var a = args[0];
+  var b = args[1];
+  if ([a, b].every(function(a) {
+    return a.type === "list" && issubtypeof(a.parameters, type.float);
+  }) && a.length === b.length) {
+    var vectorspace = getrvectorspace(a);
+    if (isnativeglsl(vectorspace)) {
+      return {args:[vectorspace, vectorspace], res:type.float, generator:usefunction("dot")};
+    } else {
+      return {args:[vectorspace, vectorspace], res:type.float, generator:usedot(a.length)};
+    }
+  }
+  if ([a, b].every(function(a) {
+    return a.type === "list" && issubtypeof(a.parameters, type.complex);
+  }) && a.length === b.length) {
+    var vectorspace$7 = getcvectorspace(a);
+    return {args:[vectorspace$7, vectorspace$7], res:type.complex, generator:usecdot(a.length)};
+  }
+  if (isrvectorspace(a) && depth(a) === 2 && isrvectorspace(b) && depth(b) === 1 && a.parameters.length === b.length) {
+    return {args:[getrvectorspace(a), getrvectorspace(b)], res:type.vec(a.length), generator:usemult(getrvectorspace(a))};
+  }
+  if (iscvectorspace(a) && depth(a) === 2 && iscvectorspace(b) && depth(b) === 1 && a.parameters.length === b.length) {
+    return {args:[getcvectorspace(a), getcvectorspace(b)], res:type.cvec(a.length), generator:usemult(getcvectorspace(a))};
+  }
+  var $jscomp$loop$35 = {};
+  $jscomp$loop$35.swap = 0;
+  for (;$jscomp$loop$35.swap < 2;$jscomp$loop$35 = {vs:$jscomp$loop$35.vs, swap:$jscomp$loop$35.swap, vs$8:$jscomp$loop$35.vs$8}, $jscomp$loop$35.swap++) {
+    if (issubtypeof(args[0 ^ $jscomp$loop$35.swap], type.float) && (isrvectorspace(args[1 ^ $jscomp$loop$35.swap]) || iscvectorspace(args[1 ^ $jscomp$loop$35.swap]))) {
+      $jscomp$loop$35.vs = getrvectorspace(args[1 ^ $jscomp$loop$35.swap]);
+      return {args:$jscomp$loop$35.swap ? [$jscomp$loop$35.vs, type.float] : [type.float, $jscomp$loop$35.vs], res:$jscomp$loop$35.vs, generator:function($jscomp$loop$35) {
+        return function(a, modifs, codebuilder) {
+          return usescalarmult($jscomp$loop$35.vs)([a[0 ^ $jscomp$loop$35.swap], a[1 ^ $jscomp$loop$35.swap]], modifs, codebuilder);
+        };
+      }($jscomp$loop$35)};
+    } else {
+      if (issubtypeof(args[0 ^ $jscomp$loop$35.swap], type.complex) && iscvectorspace(args[1 ^ $jscomp$loop$35.swap])) {
+        $jscomp$loop$35.vs$8 = getcvectorspace(args[1 ^ $jscomp$loop$35.swap]);
+        return {args:$jscomp$loop$35.swap ? [$jscomp$loop$35.vs$8, type.complex] : [type.complex, $jscomp$loop$35.vs$8], res:$jscomp$loop$35.vs$8, generator:function($jscomp$loop$35) {
+          return function(a, modifs, codebuilder) {
+            return usecscalarmult($jscomp$loop$35.vs$8)([a[0 ^ $jscomp$loop$35.swap], a[1 ^ $jscomp$loop$35.swap]], modifs, codebuilder);
+          };
+        }($jscomp$loop$35)};
+      }
+    }
+  }
+};
+webgl["*"] = webgl["mult"];
+webgl["div"] = function(args) {
+  var match = first([[[type.float, type.float], type.float, useinfix("/")], [[type.float, type.complex], type.complex, useincludefunction("divfc")], [[type.complex, type.float], type.complex, useinfix("/")], [[type.complex, type.complex], type.complex, useincludefunction("divc")]])(args);
+  if (match) {
+    return match;
+  }
+  if (issubtypeof(args[1], type.float) && iscvectorspace(args[0])) {
+    var vectorspace = getrvectorspace(args[0]);
+    if (isnativeglsl(vectorspace)) {
+      return {args:[vectorspace, type.float], res:vectorspace, generator:useinfix("/")};
+    }
+  }
+  return false;
+};
+webgl["/"] = webgl["div"];
+webgl["re"] = first([[[type.complex], type.float, useincludefunction("realc")]]);
+webgl["im"] = first([[[type.complex], type.float, useincludefunction("imagc")]]);
+webgl["floor"] = first([[[type.float], type.int, function(a) {
+  return "int(floor(" + a + "))";
+}], [[type.complex], type.complex, usefunction("floor")]]);
+webgl["round"] = first([[[type.float], type.int, function(a) {
+  return "int(floor(" + a + "+.5))";
+}], [[type.complex], type.complex, function(a) {
+  return "floor(" + a + "+vec2(.5))";
+}]]);
+webgl["ceil"] = first([[[type.float], type.int, function(a) {
+  return "int(ceil(" + a + "))";
+}], [[type.complex], type.complex, usefunction("ceil")]]);
+webgl["mod"] = first([[[type.int, type.int], type.int, function(a, cb) {
+  return "int(" + usefunction("mod")("float(" + a[0] + "), float(" + a[1] + ")", cb) + ")";
+}], [[type.float, type.float], type.float, usefunction("mod")], [[type.complex, type.complex], type.complex, useincludefunction("mod")]]);
+webgl["random"] = first([[[], type.float, useincludefunction("random")], [[type.float], type.float, function(a, cb) {
+  return useincludefunction("random")([], cb) + "*" + a[0];
+}], [[type.complex], type.complex, function(a, cb) {
+  return "vec2(" + useincludefunction("random")([], cb) + "," + useincludefunction("random")([], cb) + ")*" + a[0];
+}]]);
+webgl["arctan2"] = first([[[type.float, type.float], type.float, function(args) {
+  return "atan(" + args[1] + ", " + args[0] + ")";
+}], [[type.complex, type.complex], type.complex, useincludefunction("arctan2c")], [[type.complex], type.float, useincludefunction("arctan2vec2")], [[type.vec2], type.float, useincludefunction("arctan2vec2")], [[type.cvec(2)], type.complex, useincludefunction("arctan2cvec2")]]);
+["red", "green", "blue", "gray", "hue"].forEach(function(oper) {
+  webgl[oper] = first([[[type.float], type.vec3, useincludefunction(oper)]]);
+});
+webgl["grey"] = webgl["gray"];
+webgl["min"] = function(args) {
+  var match = first([[[type.float, type.float], type.float, usefunction("min")]])(args);
+  if (match) {
+    return match;
+  }
+  if (args.length === 1 && depth(args[0]) === 1 && isrvectorspace(args[0])) {
+    return {args:args, res:args[0].parameters, generator:usemin(args[0])};
+  }
+};
+webgl["max"] = function(args) {
+  var match = first([[[type.int, type.int], type.int, usefunction("max")], [[type.float, type.float], type.float, usefunction("max")]])(args);
+  if (match) {
+    return match;
+  }
+  if (args.length === 1 && depth(args[0]) === 1 && isrvectorspace(args[0])) {
+    return {args:args, res:args[0].parameters, generator:usemax(args[0])};
+  }
+};
+webgl["complex"] = first([[[type.vec2], type.complex, identity]]);
+var createraise = function(k, codebuilder) {
+  if (k <= 1) {
+    return;
+  } else {
+    if (k == 2) {
+      codebuilder.add("functions", "raise2", function() {
+        return "float raise2(float a) { return a*a; }";
+      });
+    } else {
+      createraise(2, codebuilder);
+      var raise = function(a, k) {
+        return k == 1 ? a : k & 1 ? raise(a, k - 1) + "*a" : "raise2(" + raise(a, k / 2) + ")";
+      };
+      var name = "raise" + k;
+      codebuilder.add("functions", name, function() {
+        return "float " + name + "(float a) { return " + raise("a", k) + ";}";
+      });
+    }
+  }
+};
+var useraise = function(k) {
+  return function(args, modifs, codebuilder) {
+    return k == 0 ? "1." : k == 1 ? args[0] : createraise(k, codebuilder) || "raise" + k + "(" + args[0] + ")";
+  };
+};
+webgl["pow"] = function(args) {
+  if (isconstantint(args[1]) && issubtypeof(args[0], type.float)) {
+    var k = Number(args[1].value["value"]["real"]);
+    if (k >= 0) {
+      return {args:[type.float, args[1]], res:type.float, generator:useraise(k)};
+    }
+  }
+  return first([[[type.float, type.int], type.float, useincludefunction("powi")], [[type.complex, type.complex], type.complex, useincludefunction("powc")]])(args);
+};
+webgl["^"] = webgl["pow"];
+webgl["re"] = first([[[type.complex], type.float, getReal]]);
+webgl["conjugate"] = first([[[type.complex], type.complex, useincludefunction("conjugate")]]);
+webgl["im"] = first([[[type.complex], type.float, getImag]]);
+webgl["genList"] = function(args) {
+  var n = args.length;
+  if (n > 0) {
+    var l = false;
+    for (var i in args) {
+      l = lca(l, args[i]);
+    }
+    if (l) {
+      var t = list(n, l);
+      return {args:Array(n).fill(l), res:t, generator:uselist(t)};
+    }
+  }
+  return false;
+};
+webgl["&"] = first([[[type.bool, type.bool], type.bool, useinfix("&&")]]);
+webgl["%"] = first([[[type.bool, type.bool], type.bool, useinfix("||")]]);
+[">", "<", ">=", "<=", "==", "!="].forEach(function(oper) {
+  webgl[oper] = first([[[type.int, type.int], type.bool, useinfix(oper)], [[type.float, type.float], type.bool, useinfix(oper)]]);
+});
+webgl["!"] = first([[[type.bool], type.bool, usefunction("!")], [[type.voidt, type.bool], type.bool, function(args) {
+  return usefunction("!")([args[1]]);
+}]]);
+webgl["not"] = webgl["!"];
+webgl["imagergb"] = first([[[type.image, type.coordinate2d], type.vec3, useimagergb2], [[type.coordinate2d, type.coordinate2d, type.image, type.coordinate2d], type.vec3, useimagergb4]]);
+webgl["imagergba"] = first([[[type.image, type.coordinate2d], type.vec4, useimagergba2], [[type.coordinate2d, type.coordinate2d, type.image, type.coordinate2d], type.vec4, useimagergba4]]);
+webgl["reverse"] = function(args) {
+  return args.length === 1 && args[0].type === "list" ? {args:args, res:args[0], generator:usereverse(args[0])} : false;
+};
+webgl["sort"] = function(args) {
+  return args.length === 1 && depth(args[0]) === 1 && isrvectorspace(args[0]) ? {args:args, res:args[0], generator:usesort(args[0])} : false;
+};
+Object.freeze(webgl);
+requires["powc"] = ["expc", "multc", "logc"];
+requires["sqrtc"] = ["expc", "multc", "logc"];
+requires["arccosc"] = ["multc", "negc", "sqrtc", "addc", "logc"];
+requires["arcsinc"] = ["multc", "negc", "sqrtc", "addc", "logc"];
+requires["tanc"] = ["sinc", "cosc", "divc"];
+requires["arctanc"] = ["logc", "addc", "multc", "subc"];
+requires["arctan2c"] = ["logc", "divc", "sqrtc", "multc"];
+requires["arctan2vec2c"] = ["arctan2c"];
+requires["hue"] = ["hsv2rgb"];
+Object.freeze(requires);
+function CodeBuilder(api) {
+  this.variables = {};
+  this.uniforms = {};
+  this.scopes = {};
+  this.sections = {};
+  this.typetime = 0;
+  this.myfunctions = {};
+  this.api = api;
+  this.texturereaders = {};
+}
+CodeBuilder.prototype.sections;
+CodeBuilder.prototype.add = function(section, name, codegen) {
+  this.mark(section, name);
+  if (!this.sections[section].codes[name]) {
+    this.sections[section].codes[name] = codegen();
+    this.sections[section].marked[name] = true;
+    this.sections[section].order.push(name);
+  }
+};
+CodeBuilder.prototype.mark = function(section, name) {
+  if (!this.sections[section]) {
+    this.sections[section] = {order:[], marked:{}, codes:{}};
+  }
+  var r = this.sections[section].marked[name] || false;
+  this.sections[section].marked[name] = true;
+  return r;
+};
+CodeBuilder.prototype.generateSection = function(section) {
+  var $jscomp$this = this;
+  return this.sections[section] ? this.sections[section].order.map(function(name) {
+    return $jscomp$this.sections[section].codes[name];
+  }).join("\n") : "\n";
+};
+CodeBuilder.prototype.myfunctions;
+CodeBuilder.prototype.typetime;
+CodeBuilder.prototype.variables;
+CodeBuilder.prototype.uniforms;
+CodeBuilder.prototype.api;
+CodeBuilder.prototype.texturereaders;
+CodeBuilder.prototype.castType = function(term, fromType, toType) {
+  if (typesareequal(fromType, toType)) {
+    return term;
+  }
+  if (!issubtypeof(fromType, toType)) {
+    console.error(typeToString(fromType) + " is no subtype of " + typeToString(toType) + " (trying to cast the term " + term + ")");
+    return term;
+  } else {
+    if (fromType.type === "constant") {
+      return pastevalue(fromType.value, toType);
+    } else {
+      var implementation = inclusionfunction(toType)([fromType]);
+      if (!implementation) {
+        console.error("cannot find an implementation for " + typeToString(fromType) + " -> " + typeToString(toType) + ", using identity");
+        return term;
+      }
+      var generator = implementation.generator;
+      return generator(this.castType(term, fromType, implementation.args[0]), {}, this);
+    }
+  }
+};
+CodeBuilder.prototype.initvariable = function(vname, declareglobal) {
+  if (!this.variables[vname]) {
+    this.variables[vname] = {};
+  }
+  if (!this.variables[vname].assigments) {
+    this.variables[vname].assigments = [];
+  }
+  if (!this.variables[vname].T) {
+    this.variables[vname].T = false;
+  }
+  if (!this.hasOwnProperty("global")) {
+    this.variables[vname]["global"] = declareglobal;
+  }
+};
+CodeBuilder.prototype.computeType = function(expr) {
+  var bindings = expr.bindings;
+  if (expr["isuniform"]) {
+    return this.uniforms[expr["uvariable"]].type;
+  } else {
+    if (expr["ctype"] === "variable") {
+      var name = expr["name"];
+      name = bindings[name] || name;
+      return this.variables[name].T;
+    } else {
+      if (expr["ctype"] === "function" && this.myfunctions.hasOwnProperty(expr["oper"])) {
+        return this.variables[bindings[expr["oper"]]].T;
+      } else {
+        if (expr["ctype"] === "number") {
+          return constant(expr);
+        } else {
+          if (expr["ctype"] === "void") {
+            return type.voidt;
+          } else {
+            if (expr["ctype"] === "field") {
+              var t = generalize(this.getType(expr["obj"]));
+              if (t.type === "list") {
+                return t.parameters;
+              }
+              if (!t) {
+                return false;
+              }
+            } else {
+              if (expr["ctype"] === "string") {
+                return type.image;
+              } else {
+                if (expr["ctype"] === "function" || expr["ctype"] === "infix") {
+                  var argtypes = new Array(expr["args"].length);
+                  var allconstant = true;
+                  for (var i = 0;i < expr["args"].length;i++) {
+                    argtypes[i] = this.getType(expr["args"][i]);
+                    allconstant &= argtypes[i].type === "constant";
+                  }
+                  if (allconstant && expr["impl"]) {
+                    var constantexpression = {"ctype":expr["ctype"], "oper":expr["oper"], "impl":expr["impl"], "args":argtypes.map(function(a) {
+                      return a.value;
+                    })};
+                    var val = this.api.evaluateAndVal(constantexpression);
+                    return constant(val);
+                  } else {
+                    var f = getPlainName(expr["oper"]);
+                    var implementation = webgl[f] ? webgl[f](argtypes) : false;
+                    if (!implementation && argtypes.every(function(a) {
+                      return finalparameter(a);
+                    })) {
+                      console.error("Could not find an implementation for " + f + " with args (" + argtypes.map(typeToString).join(", ") + ")");
+                      console.log(expr);
+                      throw "error";
+                    }
+                    return implementation ? implementation.res : false;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  console.error("Don't know how to compute type of");
+  console.log(expr);
+  return false;
+};
+CodeBuilder.prototype.getType = function(expr) {
+  if (!expr.computedType || !expr.typetime || this.typetime > expr.typetime) {
+    expr.computedType = this.computeType(expr);
+    expr.typetime = this.typetime;
+  }
+  return expr.computedType;
+};
+CodeBuilder.prototype.determineVariables = function(expr, bindings) {
+  var variables = this.variables;
+  var myfunctions = this.myfunctions;
+  var self = this;
+  rec(expr, bindings, "global", false);
+  function addvar(bindings, varname, type) {
+    var ans = {};
+    for (var i in bindings) {
+      ans[i] = bindings[i];
+    }
+    var ivar = generateUniqueHelperString();
+    self.initvariable(ivar, false);
+    variables[ivar].T = type;
+    variables[ivar].iterationvariable = true;
+    ans[varname] = ivar;
+    return ans;
+  }
+  function rec(expr, bindings, scope, forceconstant) {
+    expr.bindings = bindings;
+    for (var i in expr["args"]) {
+      var needtobeconstant = forceconstant || expr["oper"] === "repeat$2" && i == 0 || expr["oper"] === "repeat$3" && i == 0 || expr["oper"] === "_" && i == 1;
+      var nbindings = bindings;
+      if (["repeat", "forall", "apply"].indexOf(getPlainName(expr["oper"])) != -1) {
+        if (i == 1) {
+          nbindings = expr["oper"] === "repeat$2" ? addvar(bindings, "#", type.int) : expr["oper"] === "repeat$3" ? addvar(bindings, expr["args"][1]["name"], type.int) : expr["oper"] === "forall$2" || expr["oper"] === "apply$2" ? addvar(bindings, "#", false) : expr["oper"] === "forall$3" || expr["oper"] === "apply$3" ? addvar(bindings, expr["args"][1]["name"], false) : bindings;
+        } else {
+          if (i == 2) {
+            nbindings = expr["args"][1].bindings;
+          }
+        }
+      }
+      rec(expr["args"][i], nbindings, scope, needtobeconstant);
+    }
+    if (expr["ctype"] === "field") {
+      rec(expr["obj"], bindings, scope, forceconstant);
+    }
+    if (expr["ctype"] === "variable") {
+      var vname = expr["name"];
+      vname = bindings[vname] || vname;
+      if (forceconstant && self.variables[vname]) {
+        self.variables[vname].forceconstant = true;
+      }
+    }
+    if (expr["oper"] === "=") {
+      var vname$9 = expr["args"][0]["name"];
+      vname$9 = bindings[vname$9] || vname$9;
+      self.initvariable(vname$9, true);
+      variables[vname$9].assigments.push(expr["args"][1]);
+    } else {
+      if (expr["oper"] && getPlainName(expr["oper"]) === "regional" && scope != "global") {
+        for (var i$10 in expr["args"]) {
+          var vname$11 = expr["args"][i$10]["name"];
+          var iname = generateUniqueHelperString();
+          bindings[vname$11] = iname;
+          if (!myfunctions[scope].variables) {
+            myfunctions[scope].variables = [];
+          }
+          myfunctions[scope].variables.push(iname);
+          self.initvariable(iname, false);
+        }
+      } else {
+        if (expr["oper"] === "forall$2" || expr["oper"] === "apply$2" || expr["oper"] === "forall$3" || expr["oper"] === "apply$3") {
+          var it = expr["args"].length === 2 ? expr["args"][1].bindings["#"] : expr["args"][2].bindings[expr["args"][1]["name"]];
+          variables[it].assigments.push({"ctype":"infix", "oper":"_", "args":[expr["args"][0], {"ctype":"number", "value":{"real":1, "imag":0}}], bindings:expr["args"][0].bindings});
+        } else {
+          if (expr["ctype"] === "function" && myfunctions.hasOwnProperty(expr["oper"])) {
+            var rfun = expr["oper"];
+            var pname = rfun.replace("$", "_");
+            self.initvariable(pname, false);
+            bindings[rfun] = pname;
+            var localbindungs = {};
+            for (var i$12 in myfunctions[rfun]["arglist"]) {
+              var localname = myfunctions[rfun]["arglist"][i$12]["name"];
+              var a = pname + "_" + localname;
+              localbindungs[localname] = a;
+              self.initvariable(a, false);
+              variables[a].assigments.push(expr["args"][i$12]);
+            }
+            if (!myfunctions[rfun].visited) {
+              myfunctions[rfun].visited = true;
+              rec(myfunctions[rfun]["body"], localbindungs, rfun, forceconstant);
+              variables[pname].assigments.push(myfunctions[rfun]["body"]);
+            }
+          }
+        }
+      }
+    }
+  }
+};
+CodeBuilder.prototype.determineTypes = function() {
+  var changed = true;
+  for (var v in this.variables) {
+    this.variables[v].T = this.variables[v].T || false;
+    if (this.variables[v].forceconstant) {
+      this.variables[v].T = constint(1);
+      this.typetime++;
+    }
+  }
+  while (changed) {
+    changed = false;
+    for (var v$13 in this.variables) {
+      if (!this.variables[v$13].forceconstant) {
+        for (var i in this.variables[v$13].assigments) {
+          var e = this.variables[v$13].assigments[i];
+          var othertype = generalize(this.getType(e));
+          var oldtype = this.variables[v$13].T || false;
+          var newtype = oldtype;
+          if (othertype) {
+            if (!oldtype) {
+              newtype = othertype;
+            } else {
+              if (issubtypeof(othertype, oldtype)) {
+                newtype = oldtype;
+              } else {
+                newtype = lca(oldtype, othertype);
+              }
+            }
+            if (newtype && newtype !== oldtype) {
+              this.variables[v$13].T = newtype;
+              this.typetime++;
+              changed = true;
+            }
+          }
+        }
+      }
+    }
+  }
+};
+CodeBuilder.prototype.determineUniforms = function(expr) {
+  var variables = this.variables;
+  var myfunctions = this.myfunctions;
+  var variableDependendsOnPixel = {"cgl_pixel":true};
+  for (var v in variables) {
+    if (variables[v].assigments.length >= 1 || variables[v].iterationvariable) {
+      variableDependendsOnPixel[v] = true;
+    }
+  }
+  dependsOnPixel(expr);
+  var visitedFunctions = {"":true};
+  var uniforms = this.uniforms;
+  computeUniforms(expr, false);
+  function dependsOnPixel(expr) {
+    if (expr.hasOwnProperty("dependsOnPixel")) {
+      return expr["dependsOnPixel"];
+    }
+    if (expr["ctype"] === "variable") {
+      var vname = expr["name"];
+      vname = expr.bindings[vname] || vname;
+      if (variableDependendsOnPixel[vname]) {
+        return expr["dependsOnPixel"] = true;
+      }
+      return expr["dependsOnPixel"] = false;
+    }
+    var alwaysPixelDependent = ["random", "verbatimglsl"];
+    if (expr["ctype"] === "function" && alwaysPixelDependent.indexOf(getPlainName(expr["oper"])) != -1) {
+      return expr["dependsOnPixel"] = true;
+    }
+    if (expr["oper"] === "repeat$2" || expr["oper"] === "forall$2" || expr["oper"] === "apply$2") {
+      if (dependsOnPixel(expr["args"][1])) {
+        variableDependendsOnPixel[expr["args"][1].bindings["#"]] = true;
+        return expr["dependsOnPixel"] = true;
+      } else {
+        return expr["dependsOnPixel"] = false;
+      }
+    } else {
+      if (expr["oper"] === "repeat$3" || expr["oper"] === "forall$3" || expr["oper"] === "apply$3") {
+        if (dependsOnPixel(expr["args"][2])) {
+          variableDependendsOnPixel[expr["args"][2].bindings[expr["args"][1]["name"]]] = true;
+          expr["args"][1]["dependsOnPixel"] = true;
+          return expr["dependsOnPixel"] = true;
+        } else {
+          return expr["dependsOnPixel"] = false;
+        }
+      }
+    }
+    for (var i in expr["args"]) {
+      if (dependsOnPixel(expr["args"][i])) {
+        return expr["dependsOnPixel"] = true;
+      }
+    }
+    if (expr["ctype"] === "function" && myfunctions.hasOwnProperty(expr["oper"])) {
+      var rfun = expr["oper"];
+      if (dependsOnPixel(myfunctions[rfun].body)) {
+        return expr["dependsOnPixel"] = true;
+      }
+    }
+    if (expr["ctype"] === "field") {
+      return expr["dependsOnPixel"] = dependsOnPixel(expr["obj"]);
+    }
+    return expr["dependsOnPixel"] = false;
+  }
+  function computeUniforms(expr, forceconstant) {
+    if (dependsOnPixel(expr)) {
+      for (var i in expr["args"]) {
+        var needtobeconstant = forceconstant || expr["oper"] === "repeat$2" && i == 0 || expr["oper"] === "repeat$3" && i == 0 || expr["oper"] === "_" && i == 1;
+        computeUniforms(expr["args"][i], needtobeconstant);
+      }
+      if (expr["ctype"] === "field") {
+        computeUniforms(expr["obj"], forceconstant);
+      }
+      if (expr["ctype"] === "function" && myfunctions.hasOwnProperty(expr["oper"])) {
+        var rfun = expr["oper"];
+        if (!visitedFunctions.hasOwnProperty(rfun)) {
+          visitedFunctions[rfun] = true;
+          computeUniforms(myfunctions[rfun].body, forceconstant);
+        }
+      }
+    } else {
+      if (expr["ctype"] === "boolean") {
+        return;
+      }
+      if (expr["ctype"] === "number") {
+        return;
+      }
+      if (expr["ctype"] === "void") {
+        return;
+      }
+      if (expr["oper"] === "..") {
+        forceconstant = true;
+      }
+      var found = false;
+      var uname;
+      for (var otheruname in uniforms) {
+        if (!found) {
+          if (expressionsAreEqual(expr, uniforms[otheruname].expr)) {
+            found = true;
+            uname = otheruname;
+          }
+        }
+      }
+      if (!found) {
+        uname = generateUniqueHelperString();
+        uniforms[uname] = {expr:expr, type:false, forceconstant:forceconstant};
+      }
+      uniforms[uname].forceconstant = uniforms[uname].forceconstant || forceconstant;
+      expr["isuniform"] = true;
+      expr["uvariable"] = uname;
+    }
+  }
+};
+CodeBuilder.prototype.determineUniformTypes = function() {
+  for (var uname in this.uniforms) {
+    var tval = this.api.evaluateAndVal(this.uniforms[uname].expr);
+    if (!tval["ctype"] || tval["ctype"] === "undefined") {
+      console.error("can not evaluate:");
+      console.log(this.uniforms[uname].expr);
+      return false;
+    }
+    this.uniforms[uname].type = this.uniforms[uname].forceconstant ? constant(tval) : guessTypeOfValue(tval);
+  }
+};
+CodeBuilder.prototype.copyRequiredFunctions = function(expr) {
+  if (expr["ctype"] === "function" && !this.myfunctions.hasOwnProperty(expr["oper"]) && this.api.getMyfunction(expr["oper"]) !== null) {
+    var fun = expr["oper"];
+    this.myfunctions[fun] = cloneExpression(this.api.getMyfunction(fun));
+    this.copyRequiredFunctions(this.myfunctions[fun].body);
+  }
+  for (var i in expr["args"]) {
+    this.copyRequiredFunctions(expr["args"][i]);
+  }
+};
+CodeBuilder.prototype.precompile = function(expr, bindings) {
+  this.copyRequiredFunctions(expr);
+  this.determineVariables(expr, bindings);
+  this.determineUniforms(expr);
+  this.determineUniformTypes();
+  this.determineTypes();
+  for (var u in this.uniforms) {
+    if (this.uniforms[u].type.type === "list") {
+      createstruct(this.uniforms[u].type, this);
+    }
+  }
+  for (var v in this.variables) {
+    if (this.variables[v].T.type === "list") {
+      createstruct(this.variables[v].T, this);
+    }
+  }
+};
+CodeBuilder.prototype.compile = function(expr, generateTerm) {
+  var self = this;
+  var ctype = this.getType(expr);
+  if (expr["isuniform"]) {
+    var uname = expr["uvariable"];
+    var uniforms = this.uniforms;
+    return generateTerm ? {code:"", term:ctype.type === "constant" ? pastevalue(ctype.value, generalize(ctype)) : uname} : {code:""};
+  } else {
+    if (expr["oper"] === ";") {
+      var r = {term:""};
+      var code = "";
+      var lastindex = expr["args"].length - 1;
+      for (var i = lastindex;i >= 0;i--) {
+        if (expr["args"][i]["ctype"] === "void") {
+          lastindex = i - 1;
+        }
+      }
+      for (var i$14 = 0;i$14 <= lastindex;i$14++) {
+        r = this.compile(expr["args"][i$14], generateTerm && i$14 === lastindex);
+        code += r.code;
+      }
+      return generateTerm ? {code:code, term:r.term} : {code:code};
+    }
+  }
+  if (ctype.type === "constant") {
+    return generateTerm ? {term:pastevalue(ctype.value, generalize(ctype)), code:""} : {code:""};
+  } else {
+    if (expr["oper"] === "=") {
+      var r$15 = this.compile(expr["args"][1], true);
+      var varexpr = this.compile(expr["args"][0], true).term;
+      var t = varexpr + " = " + this.castType(r$15.term, this.getType(expr["args"][1]), this.getType(expr["args"][0]));
+      if (generateTerm) {
+        return {code:r$15.code, term:t};
+      } else {
+        return {code:r$15.code + t + ";\n"};
+      }
+    } else {
+      if (expr["oper"] === "repeat$2" || expr["oper"] === "repeat$3") {
+        var number = this.compile(expr["args"][0], true);
+        var ntype = this.getType(expr["args"][0]);
+        if (ntype.type !== "constant") {
+          console.error("repeat possible only for fixed constant number in GLSL");
+          return false;
+        }
+        var it = expr["oper"] === "repeat$2" ? expr["args"][1].bindings["#"] : expr["args"][2].bindings[expr["args"][1]["name"]];
+        var n = Number(number.term);
+        var code$16 = "";
+        if (this.variables[it].T.type === "constant") {
+          for (var k = 1;k <= n;k++) {
+            this.variables[it].T = constint(k);
+            this.typetime++;
+            var r$17 = this.compile(expr["args"][expr["oper"] === "repeat$2" ? 1 : 2], k === n && generateTerm);
+            code$16 += r$17.code;
+            if (k === n && generateTerm) {
+              return {code:code$16, term:r$17.term};
+            }
+          }
+        } else {
+          var ansvar = "";
+          var r$18 = this.compile(expr["args"][expr["oper"] === "repeat$2" ? 1 : 2], generateTerm);
+          var rtype = this.getType(expr["args"][expr["oper"] === "repeat$2" ? 1 : 2]);
+          if (generateTerm) {
+            ansvar = generateUniqueHelperString();
+            if (!this.variables[ansvar]) {
+              this.initvariable(ansvar, true);
+              this.variables[ansvar].T = rtype;
+            }
+          }
+          code$16 += "for(int " + it + "=1; " + it + " <= " + n + "; " + it + "++) {\n";
+          code$16 += r$18.code;
+          if (generateTerm) {
+            code$16 += ansvar + " = " + r$18.term + ";\n";
+          }
+          code$16 += "}\n";
+          if (generateTerm) {
+            return {code:code$16, term:ansvar};
+          }
+        }
+        return {code:code$16};
+      } else {
+        if (expr["oper"] === "forall$2" || expr["oper"] === "forall$3" || expr["oper"] === "apply$2" || expr["oper"] === "apply$3") {
+          var arraytype = this.getType(expr["args"][0]);
+          if (!(arraytype.type === "list" || arraytype.type === "constant" && arraytype.value["ctype"] === "list")) {
+            console.error(expr["oper"] + " only possible for lists");
+            return false;
+          }
+          var n$19 = arraytype.length || arraytype.value["value"].length;
+          var r$20;
+          var it$21 = expr["args"].length === 2 ? expr["args"][1].bindings["#"] : expr["args"][2].bindings[expr["args"][1]["name"]];
+          var ittype = this.variables[it$21].T;
+          var code$22 = "";
+          var ans = "";
+          if (generateTerm) {
+            ans = generateUniqueHelperString();
+            code$22 += webgltype(ctype) + " " + ans + ";\n";
+          }
+          if (ctype.type === "list") {
+            createstruct(ctype, this);
+          }
+          if (this.variables[it$21].T.type === "constant" || arraytype.type === "constant") {
+            var arrayval = this.api.evaluateAndVal(expr["args"][0]);
+            for (var i$23 = 0;i$23 < n$19;i$23++) {
+              this.variables[it$21].T = constant(arrayval["value"][i$23]);
+              this.typetime++;
+              r$20 = this.compile(expr["args"][expr["args"].length === 2 ? 1 : 2], generateTerm);
+              code$22 += r$20.code;
+              if (expr["oper"] === "forall$2" || expr["oper"] === "forall$3") {
+                if (i$23 + 1 === n$19 && generateTerm) {
+                  code$22 += ans + " = " + r$20.term + ";\n";
+                }
+              } else {
+                if (generateTerm) {
+                  code$22 += accesslist(ctype, i$23)([ans], [], this) + " = " + r$20.term + ";\n";
+                }
+              }
+            }
+          } else {
+            r$20 = this.compile(expr["args"][expr["args"].length === 2 ? 1 : 2], generateTerm);
+            var array = this.compile(expr["args"][0], true);
+            code$22 += array.code;
+            var sterm = array.term;
+            if (!this.variables[sterm] && !this.uniforms[sterm] && arraytype.length >= 2) {
+              sterm = generateUniqueHelperString();
+              code$22 += webgltype(arraytype) + " " + sterm + " = " + array.term + ";\n";
+            }
+            this.variables[it$21]["global"] = true;
+            for (var i$24 = 0;i$24 < n$19;i$24++) {
+              code$22 += it$21 + " = " + accesslist(arraytype, i$24)([sterm], [], this) + ";\n";
+              code$22 += r$20.code;
+              if (generateTerm) {
+                if (expr["oper"] === "forall$2" || expr["oper"] === "forall$3") {
+                  if (i$24 === n$19 - 1) {
+                    code$22 += ans + " = " + r$20.term + ";\n";
+                  }
+                } else {
+                  code$22 += accesslist(ctype, i$24)([ans], [], this) + " = " + r$20.term + ";\n";
+                }
+              }
+            }
+            if (ittype.type === "list") {
+              createstruct(ittype, this);
+            }
+          }
+          return generateTerm ? {code:code$22, term:ans} : {code:code$22};
+        } else {
+          if (expr["oper"] === "if$2" || expr["oper"] === "if$3") {
+            var cond = this.compile(expr["args"][0], true);
+            var condt = this.getType(expr["args"][0]);
+            var code$25 = "";
+            var ansvar$26 = "";
+            var ifbranch = this.compile(expr["args"][1], generateTerm);
+            if (generateTerm) {
+              ansvar$26 = generateUniqueHelperString();
+              if (!this.variables[ansvar$26]) {
+                this.initvariable(ansvar$26, true);
+                this.variables[ansvar$26].T = ctype;
+              }
+            }
+            if (condt.type != "constant") {
+              code$25 += cond.code;
+              code$25 += "if(" + cond.term + ") {\n";
+            }
+            if (condt.type != "constant" || condt.type == "constant" && condt.value["value"]) {
+              code$25 += ifbranch.code;
+              if (generateTerm) {
+                code$25 += ansvar$26 + " = " + this.castType(ifbranch.term, this.getType(expr["args"][1]), ctype) + ";\n";
+              }
+            }
+            if (expr["oper"] === "if$3") {
+              var elsebranch = this.compile(expr["args"][2], generateTerm);
+              if (condt.type != "constant") {
+                code$25 += "} else {\n";
+              }
+              if (condt.type != "constant" || condt.type == "constant" && !condt.value["value"]) {
+                code$25 += elsebranch.code;
+                if (generateTerm) {
+                  code$25 += ansvar$26 + " = " + this.castType(elsebranch.term, this.getType(expr["args"][2]), ctype) + ";\n";
+                }
+              }
+            }
+            if (condt.type != "constant") {
+              code$25 += "}\n";
+            }
+            return generateTerm ? {code:code$25, term:ansvar$26} : {code:code$25};
+          } else {
+            if (expr["ctype"] === "function" || expr["ctype"] === "infix") {
+              var fname = expr["oper"];
+              if (getPlainName(fname) === "verbatimglsl") {
+                var glsl = this.api.evaluateAndVal(expr["args"][0]).value;
+                return generateTerm ? {term:glsl, code:""} : {code:glsl};
+              }
+              var r$27 = expr["args"].map(function(e) {
+                return self.compile(e, true);
+              });
+              var termGenerator;
+              var currenttype = expr["args"].map(function(e) {
+                return self.getType(e);
+              });
+              var targettype;
+              if (this.myfunctions.hasOwnProperty(fname)) {
+                termGenerator = this.usemyfunction(fname);
+                targettype = new Array(r$27.length);
+                for (var i$28 = 0;i$28 < r$27.length;i$28++) {
+                  targettype[i$28] = this.variables[this.myfunctions[fname].body.bindings[this.myfunctions[fname]["arglist"][i$28]["name"]]].T;
+                }
+              } else {
+                fname = getPlainName(fname);
+                if (fname === "regional") {
+                  return generateTerm ? {term:"", code:""} : {code:""};
+                }
+                var implementation = webgl[fname](currenttype);
+                if (!implementation) {
+                  console.error("Could not find an implementation for " + fname + "(" + currenttype.map(typeToString).join(", ") + ").\nReturning empty code");
+                  return generateTerm ? {term:"", code:""} : {code:""};
+                }
+                targettype = implementation.args;
+                termGenerator = implementation.generator;
+              }
+              var code$29 = "";
+              var argterms = new Array(r$27.length);
+              for (var i$30 = 0;i$30 < r$27.length;i$30++) {
+                code$29 += r$27[i$30].code;
+                argterms[i$30] = this.castType(r$27[i$30].term, currenttype[i$30], targettype[i$30]);
+              }
+              var term = termGenerator(argterms, expr["modifs"], this);
+              if (generateTerm) {
+                return {term:term, code:code$29};
+              } else {
+                return {code:code$29 + term + ";\n"};
+              }
+            } else {
+              if (expr["ctype"] === "variable") {
+                var term$31 = expr["name"];
+                term$31 = expr.bindings[term$31] || term$31;
+                return generateTerm ? {term:term$31, code:""} : {code:term$31 + ";\n"};
+              } else {
+                if (expr["ctype"] === "void") {
+                  return generateTerm ? {term:"", code:""} : {code:""};
+                } else {
+                  if (expr["ctype"] === "field") {
+                    var index = {"x":0, "y":1, "z":2, "r":0, "g":1, "b":2, "a":3}[expr["key"]];
+                    if (index != undefined) {
+                      var term$32 = accesslist(this.getType(expr["obj"]), index)([self.compile(expr["obj"], true).term], null, this);
+                      return generateTerm ? {term:term$32, code:""} : {code:term$32 + ";\n"};
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  console.error("dont know how to this.compile " + JSON.stringify(expr));
+};
+CodeBuilder.prototype.usemyfunction = function(fname) {
+  this.compileFunction(fname, this.myfunctions[fname]["arglist"].length);
+  return usefunction(fname.replace("$", "_"));
+};
+CodeBuilder.prototype.compileFunction = function(fname, nargs) {
+  var self = this;
+  if (this.mark("compiledfunctions", fname)) {
+    return;
+  }
+  var m = this.myfunctions[fname];
+  var pname = fname.replace("$", "_");
+  var bindings = m.body.bindings;
+  var vars = new Array(nargs);
+  for (var i = 0;i < nargs;i++) {
+    vars[i] = m["arglist"][i]["name"];
+  }
+  var isvoid = this.variables[pname].T === type.voidt;
+  var code = webgltype(this.variables[pname].T) + " " + pname + "(" + vars.map(function(varname) {
+    return webgltype(self.variables[bindings[varname]].T) + " " + bindings[varname];
+  }).join(", ") + "){\n";
+  for (var i$33 in m.variables) {
+    var iname = m.variables[i$33];
+    code += webgltype(this.variables[iname].T) + " " + iname + ";\n";
+  }
+  var r = self.compile(m.body, !isvoid);
+  var rtype = self.getType(m.body);
+  code += r.code;
+  if (!isvoid) {
+    code += "return " + this.castType(r.term, rtype, this.variables[pname].T) + ";\n";
+  }
+  code += "}\n";
+  this.add("compiledfunctions", fname, function() {
+    return code;
+  });
+};
+CodeBuilder.prototype.generateListOfUniforms = function() {
+  var ans = [];
+  for (var uname in this.uniforms) {
+    if (this.uniforms[uname].type.type != "constant" && this.uniforms[uname].type != type.image) {
+      ans.push("uniform " + webgltype(this.uniforms[uname].type) + " " + uname + ";");
+    }
+  }
+  return ans.join("\n");
+};
+CodeBuilder.prototype.generateColorPlotProgram = function(expr) {
+  helpercnt = 0;
+  expr = cloneExpression(expr);
+  this.initvariable("cgl_pixel", false);
+  this.variables["cgl_pixel"].T = type.vec2;
+  var bindings = {"#":"cgl_pixel"};
+  this.precompile(expr, bindings);
+  var r = this.compile(expr, true);
+  var rtype = this.getType(expr);
+  var colorterm = this.castType(r.term, rtype, type.color);
+  if (!issubtypeof(rtype, type.color)) {
+    console.error("expression does not generate a color");
+  }
+  var code = this.generateSection("structs");
+  code += this.generateSection("uniforms");
+  code += this.generateListOfUniforms();
+  code += generateHeaderOfTextureReaders(this);
+  code += this.generateSection("includedfunctions");
+  code += this.generateSection("functions");
+  for (var iname in this.variables) {
+    if (this.variables[iname].T && this.variables[iname]["global"]) {
+      code += webgltype(this.variables[iname].T) + " " + iname + ";\n";
+    }
+  }
+  code += this.generateSection("compiledfunctions");
+  code += "void main(void) {\n" + r.code + "gl_FragColor = " + colorterm + ";\n}\n";
+  console.log(code);
+  var generations = {};
+  if (this.sections["compiledfunctions"]) {
+    for (var fname in this.sections["compiledfunctions"].marked) {
+      generations[fname] = this.api.getMyfunction(fname).generation;
+    }
+  }
+  return {code:code, uniforms:this.uniforms, texturereaders:this.texturereaders, generations:generations};
+};
+function TextureReader(name, expr, modifs, api) {
+  this.expr = expr;
+  this.api = api;
+  this.modifs = modifs;
+  this.name = name;
+  this.code = "uniform sampler2D _sampler" + name + ";\nuniform float _ratio" + name + ";\nuniform vec2 _cropfact" + name + ";\nuniform bool _repeat" + name + ";\nuniform bool _mipmap" + name + ";\nvec4 _imagergba" + name + " (vec2 A, vec2 B, vec2 p) {\n  p -= A; B -= A;\n  float b = dot(B,B);\n  p = vec2(dot(p,B),_ratio" + name + "*dot(p,vec2(-B.y,B.x)))/b;\n  if(_repeat" + name + ") p = mod(p, vec2(1.));\n  if(_repeat" + name + " && _mipmap" + name + ") {\n    vec4 color = vec4(0.);\n    float totalWeight = 0.;\n    for(int dx=0; dx<2; dx++) for(int dy=0; dy<2; dy++) {\n      vec2 delta = .5*vec2(dx, dy);\n      vec2 center = delta+vec2(.5);\n      vec2 tc = fract(p-delta)+delta;\n      float dst = dot(abs(tc-center),vec2(1.));\n      float w = max(.5-dst,0.);\n      w=w*w;\n      color += w * texture2D(_sampler" + 
+  name + ", tc*_cropfact" + name + ");\n      totalWeight += w;\n    }\n    return color/totalWeight;\n  }\n  if(0. <= p.x && p.x <= 1. && 0. <= p.y && p.y <= 1.)\n    return texture2D(_sampler" + name + ", p*_cropfact" + name + ");\n  else\n    return vec4(0.);\n  }";
+}
+TextureReader.prototype.name;
+TextureReader.prototype.code;
+TextureReader.prototype.expr;
+TextureReader.prototype.api;
+TextureReader.prototype.returnCanvaswrapper = function(properties) {
+  var nameorimageobject = this.api.evaluateAndVal(this.expr)["value"];
+  var imageobject = typeof nameorimageobject === "string" ? this.api.getImage(nameorimageobject, true) : nameorimageobject;
+  if (imageobject == null) {
+    console.error("Could not find image " + nameorimageobject + ".");
+    return nada;
+  }
+  return generateReadCanvasWrapperIfRequired(imageobject, this.api, properties);
+};
+function getNameFromImage(image) {
+  if (typeof image === "string") {
+    return image;
+  } else {
+    if (!image.hasOwnProperty("name")) {
+      image["name"] = generateUniqueHelperString();
+    }
+    return image["name"];
+  }
+}
+function generateTextureReaderIfRequired(uname, modifs, codebuilder) {
+  if (!codebuilder.texturereaders.hasOwnProperty(uname)) {
+    codebuilder.texturereaders[uname] = [];
+  }
+  var idx = codebuilder.texturereaders[uname].length;
+  for (var i in codebuilder.texturereaders[uname]) {
+    if (idx == codebuilder.texturereaders[uname].length) {
+      var othermodifs = codebuilder.texturereaders[uname][i].modifs;
+      var iscandidate = true;
+      for (var prop in["interpolation", "mipmap", "repeat"]) {
+        if (iscandidate) {
+          if (!expressionsAreEqual(othermodifs, modifs)) {
+            iscandidate = false;
+          }
+        }
+      }
+      if (iscandidate) {
+        idx = i;
+      }
+    }
+  }
+  var tname = uname + "_" + idx;
+  if (idx == codebuilder.texturereaders[uname].length) {
+    codebuilder.texturereaders[uname].push(new TextureReader(tname, codebuilder.uniforms[uname].expr, modifs, codebuilder.api));
+  }
+  return tname;
+}
+function useimagergba4(args, modifs, codebuilder) {
+  return ["_imagergba", generateTextureReaderIfRequired(args[2], modifs, codebuilder), "(", args[0], ",", args[1], ",", args[3], ")"].join("");
+}
+function useimagergb4(args, modifs, codebuilder) {
+  return ["(_imagergba", generateTextureReaderIfRequired(args[2], modifs, codebuilder), "(", args[0], ",", args[1], ",", args[3], ").rgb)"].join("");
+}
+function useimagergba2(args, modifs, codebuilder) {
+  codebuilder.add("uniforms", "corners", function() {
+    return "uniform vec2 _lowerleft, _lowerright;";
+  });
+  return ["_imagergba", generateTextureReaderIfRequired(args[0], modifs, codebuilder), "(_lowerleft, _lowerright, ", args[1], ")"].join("");
+}
+function useimagergb2(args, modifs, codebuilder) {
+  codebuilder.add("uniforms", "corners", function() {
+    return "uniform vec2 _lowerleft, _lowerright;";
+  });
+  return ["(_imagergba", generateTextureReaderIfRequired(args[0], modifs, codebuilder), "(_lowerleft, _lowerright, ", args[1], ").rgb)"].join("");
+}
+function generateHeaderOfTextureReaders(codebuilder) {
+  var ans = "";
+  for (var t in codebuilder.texturereaders) {
+    for (var i in codebuilder.texturereaders[t]) {
+      ans += codebuilder.texturereaders[t][i].code + "\n";
+    }
+  }
+  return ans;
+}
+;var coerce = {};
+coerce.toList = function(arg, def) {
+  def = def === undefined ? null : def;
+  if (arg["ctype"] !== "list") {
+    console.log("argument is not a list");
+    return def;
+  }
+  return (arg["value"]);
+};
+coerce.toHomog = function(arg, def, dim) {
+  def = def === undefined ? [0, 0, 0, 0] : def;
+  dim = dim === undefined ? 3 : dim;
+  var lst1 = coerce.toList(arg);
+  if (lst1 === null) {
+    return def;
+  }
+  var lst = lst1.map(coerce.toReal);
+  if (lst.length > dim + 1) {
+    console.log("Coordinate vector too long.");
+    lst = lst.slice(0, dim + 1);
+  }
+  while (lst.length < dim) {
+    lst.push(0);
+  }
+  if (lst.length === dim) {
+    lst.push(1);
+  }
+  return lst;
+};
+coerce.toDirection = function(arg, def) {
+  def = def === undefined ? [0, 0, 0] : def;
+  var lst1 = coerce.toList(arg);
+  if (lst1 === null) {
+    return def;
+  }
+  var lst = lst1.map(coerce.toReal);
+  if (lst.length > 3) {
+    console.log("Coordinate vector too long.");
+    lst = lst.slice(0, 3);
+  }
+  while (lst.length < 3) {
+    lst.push(0);
+  }
+  return lst;
+};
+coerce.toDirectionPoint = function(arg, def) {
+  def = def === undefined ? [0, 0, 0, 0] : def;
+  var lst = coerce.toDirection(arg, def);
+  if (lst !== def) {
+    lst[3] = 0;
+  }
+  return lst;
+};
+coerce.toColor = function(arg, def) {
+  def = def === undefined ? [.5, .5, .5] : def;
+  if (arg.ctype === "number") {
+    var c = coerce.toInterval(0, 1, arg);
+    if (!isNaN(c)) {
+      return [c, c, c];
+    }
+  }
+  var lst = coerce.toList(arg);
+  if (lst === null) {
+    return def;
+  }
+  if (lst.length != 3) {
+    console.log("Not an RGB color vector");
+    return def;
+  }
+  return lst.map(function(c) {
+    return coerce.toInterval(0, 1, c);
+  });
+};
+coerce.toReal = function(arg, def) {
+  def = def === undefined ? Number.NaN : def;
+  if (arg["ctype"] !== "number") {
+    console.log("argument is not a number");
+    return def;
+  }
+  var val = arg["value"], r = val["real"], i = val["imag"];
+  if (i !== 0) {
+    console.log("complex number is not real");
+  }
+  return r;
+};
+coerce.toInt = function(arg, def) {
+  def = def === undefined ? Number.NaN : def;
+  if (arg["ctype"] !== "number") {
+    console.log("argument is not a number");
+    return def;
+  }
+  var val = arg["value"], r = val["real"], i = val["imag"];
+  if (i !== 0) {
+    console.log("complex number is not real");
+  }
+  i = Math.round(r);
+  if (i !== r) {
+    console.log("number is not an integer");
+  }
+  return i;
+};
+coerce.clamp = function(min, max, arg) {
+  return arg < min ? min : arg > max ? max : arg;
+};
+coerce.toInterval = function(min, max, arg, def) {
+  def = def === undefined ? Number.NaN : def;
+  return coerce.clamp(min, max, coerce.toReal(arg, def));
+};
+coerce.toString = function(arg, def) {
+  def = def === undefined ? null : def;
+  if (arg["ctype"] === "string") {
+    return arg["value"];
+  }
+  console.log("argument is not a string");
+  return def;
+};
+coerce.toEnum = function(names, arg, def) {
+  def = def === undefined ? null : def;
+  var str = coerce.toString(arg, def);
+  if (str !== def && names.indexOf(str) !== -1) {
+    return str;
+  }
+  console.log("argument is not one of " + names.join(", "));
+  return def;
+};
+coerce.toBool = function(arg, def) {
+  if (arg["ctype"] === "boolean") {
+    return arg["value"];
+  }
+  console.log("argument is not boolean");
+  return def;
+};
+function GlError(message) {
+  this.message = message;
+}
+GlError.prototype.toString = function() {
+  return this.message;
+};
+function ShaderProgram(gl, vertexShaderCode, fragmentShaderCode) {
+  this.handle = gl.createProgram();
+  this.vs = this.createShader(gl, gl.VERTEX_SHADER, vertexShaderCode);
+  this.fs = this.createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderCode);
+  this.link(gl);
+  this.detectUniforms(gl);
+}
+ShaderProgram.prototype.handle;
+ShaderProgram.prototype.vs;
+ShaderProgram.prototype.fs;
+ShaderProgram.prototype.uniform;
+ShaderProgram.prototype.attrib;
+ShaderProgram.prototype.createShader = function(gl, kind, code) {
+  var shader = gl.createShader(kind);
+  gl.shaderSource(shader, code);
+  gl.compileShader(shader);
+  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+    console.warn(code.split("\n"));
+    throw new GlError("Error compiling shader:\n" + gl.getShaderInfoLog(shader));
+  }
+  gl.attachShader(this.handle, shader);
+  return shader;
+};
+ShaderProgram.prototype.use = function(gl) {
+  gl.useProgram(this.handle);
+  return this;
+};
+ShaderProgram.prototype.link = function(gl) {
+  var handle = this.handle;
+  gl.linkProgram(handle);
+  if (!gl.getProgramParameter(handle, gl.LINK_STATUS)) {
+    throw new GlError("Error linking shader:\n" + gl.getProgramInfoLog(handle));
+  }
+  gl.validateProgram(handle);
+  if (!gl.getProgramParameter(handle, gl.VALIDATE_STATUS)) {
+    throw new GlError("Error validating shader:\n" + gl.getProgramInfoLog(handle));
+  }
+};
+ShaderProgram.prototype.dispose = function(gl) {
+  gl.detachShader(this.handle, this.vs);
+  gl.deleteShader(this.vs);
+  gl.detachShader(this.handle, this.fs);
+  gl.deleteShader(this.fs);
+  gl.deleteProgram(this.handle);
+};
+ShaderProgram.prototype.detectUniforms = function(gl) {
+  this.uniform = this.detectImpl(gl, true);
+};
+ShaderProgram.prototype.detectAttributes = function(gl) {
+  this.attrib = this.detectImpl(gl, false);
+};
+ShaderProgram.prototype.detectImpl = function(gl, uniform) {
+  var i, n, handle = this.handle, info;
+  var name, match, root = {}, node, base, idx, leaf;
+  var size, j, arr, name2;
+  if (uniform) {
+    n = (gl.getProgramParameter(handle, gl.ACTIVE_UNIFORMS));
+  } else {
+    n = (gl.getProgramParameter(handle, gl.ACTIVE_ATTRIBUTES));
+  }
+  for (i = 0;i < n;++i) {
+    if (uniform) {
+      info = gl.getActiveUniform(handle, i);
+    } else {
+      info = gl.getActiveAttrib(handle, i);
+    }
+    if (info === null) {
+      continue;
+    }
+    name = info.name.replace(/\]/g, "");
+    if (!name) {
+      continue;
+    }
+    node = root;
+    while ((match = /[.\[]/.exec(name)) !== null) {
+      base = name.substr(0, match.index);
+      if (node.hasOwnProperty(base)) {
+        node = node[base];
+      } else {
+        if (match[0] === ".") {
+          node = node[base] = {};
+        } else {
+          node = node[base] = [];
+        }
+      }
+      name = name.substr(match.index + 1);
+    }
+    if (info.size > 1) {
+      size = info.size;
+      arr = Array(size);
+      for (j = 0;j < size;++j) {
+        name2 = info.name + "[" + j + "]";
+        if (uniform) {
+          leaf = this.uniformSetter(gl, name2, info);
+        } else {
+          leaf = this.attribFactory(gl, name2, info);
+        }
+        arr[j] = leaf;
+      }
+      node[name] = arr;
+    } else {
+      if (uniform) {
+        leaf = this.uniformSetter(gl, info.name, info);
+      } else {
+        leaf = this.attribFactory(gl, info.name, info);
+      }
+      node[name] = leaf;
+    }
+  }
+  return root;
+};
+ShaderProgram.prototype.uniformSetter = function(gl, name, info) {
+  var handle = this.handle, loc;
+  loc = gl.getUniformLocation(handle, name);
+  switch(info.type) {
+    case gl.FLOAT:
+      return gl.uniform1fv.bind(gl, loc);
+    case gl.FLOAT_VEC2:
+      return gl.uniform2fv.bind(gl, loc);
+    case gl.FLOAT_VEC3:
+      return gl.uniform3fv.bind(gl, loc);
+    case gl.FLOAT_VEC4:
+      return gl.uniform4fv.bind(gl, loc);
+    case gl.BOOL:
+    ;
+    case gl.INT:
+    ;
+    case gl.SAMPLER_2D:
+    ;
+    case gl.SAMPLER_CUBE:
+      return gl.uniform1iv.bind(gl, loc);
+    case gl.BOOL_VEC2:
+    ;
+    case gl.INT_VEC2:
+      return gl.uniform2iv.bind(gl, loc);
+    case gl.BOOL_VEC3:
+    ;
+    case gl.INT_VEC3:
+      return gl.uniform3iv.bind(gl, loc);
+    case gl.BOOL_VEC4:
+    ;
+    case gl.INT_VEC4:
+      return gl.uniform4iv.bind(gl, loc);
+    case gl.FLOAT_MAT2:
+      return gl.uniformMatrix2fv.bind(gl, loc, false);
+    case gl.FLOAT_MAT3:
+      return gl.uniformMatrix3fv.bind(gl, loc, false);
+    case gl.FLOAT_MAT4:
+      return gl.uniformMatrix4fv.bind(gl, loc, false);
+    default:
+      throw new GlError("Unknown data type for uniform " + name);;
+  }
+};
+ShaderProgram.prototype.attribFactory = function(gl, name, info) {
+  var handle = this.handle, loc;
+  loc = gl.getAttribLocation(handle, name);
+  switch(info.type) {
+    case gl.FLOAT:
+      return new VertexAttribute(gl, loc, gl.vertexAttrib1fv.bind(gl, loc));
+    case gl.FLOAT_VEC2:
+      return new VertexAttribute(gl, loc, gl.vertexAttrib2fv.bind(gl, loc));
+    case gl.FLOAT_VEC3:
+      return new VertexAttribute(gl, loc, gl.vertexAttrib3fv.bind(gl, loc));
+    case gl.FLOAT_VEC4:
+      return new VertexAttribute(gl, loc, gl.vertexAttrib4fv.bind(gl, loc));
+    default:
+      throw new GlError("Unknown data type for vertex attribute " + name);;
+  }
+};
+function VertexAttribute(gl, location, setter) {
+  this.gl = gl;
+  this.location = location;
+  this.set = setter;
+}
+;
 }).call(this);//# sourceMappingURL=CindyGL.js.map
 
 

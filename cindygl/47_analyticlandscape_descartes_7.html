@@ -205,7 +205,7 @@
         regional(cp, cf, acf);
         cp = ray(t);
         cf = F(cp.x+i*cp.y);
-        acf = |cf|-.7;
+        acf = |cf|-.68;
         cp.z-acf
       );
       
@@ -284,7 +284,7 @@
                 //=>colorize and break DFS
                 intersect = true;
                 id = 0,
-              if(cnt == 0, //there is no root
+              if(cnt == 0 & id>4, //there is no root
                 id = next(id), //break DFS
                 
                 //otherwise cnt>=2: there are cnt - 2*k roots.

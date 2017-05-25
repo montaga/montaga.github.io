@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+    <title>Cindy JS</title>
+    <script type="text/javascript" src="Cindy.js"></script>
+    <script type="text/javascript" src="CindyGL.js"></script>
+    <link rel="stylesheet" href="cindy.css">
+  </head>
+    
+	<body style="font-family:Arial;">
+    <!-- http://jamie-wong.com/2016/08/05/webgl-fluid-simulation/-->
+    <h1>CindyJS: A fluid simulation</h1>
+		Adapted from <a href="http://jamie-wong.com/2016/08/05/webgl-fluid-simulation/">http://jamie-wong.com/2016/08/05/webgl-fluid-simulation/</a>
+    <script id="csinit" type="text/x-cindyscript">
+				use("CindyGL");
+
+				N = 512;
+				L = [0, 0]; //bottom left corner
+				R = [N, 0]; //bottom right corner
+
+				img = "img";
+				u = "u";
+				ufract = "ufract";
+				d = "d";
+				p = "p";
+				ua = "ua";
+
+				forall(["ua", "d", "p", "u", "img", ufract], img,
+						createimage(img, N, N);
+						colorplot(L, R, img, imagergba(L, R, img, #, repeat -> true, interpolate -> false));
+						colorplot(L, R, img, [0, 0, 0, 0]);
+						
+				);
+
+				pixel2coord(x) := x / N * 4 + (-2, -2);
+				initu(x) := ( //vector field
+						.03 * cos(3 * x_2),
+						.03 * sin(3 * x_1) +
+						if ( | x - (0, -1) | < .2, -5, 0)
+				);
+
+				dt = .5;
+				rho = .1;
+				eps = 1;
+
+				genfract(u, ufract) := (
+					colorplot(L, R, ufract,
+						v = dt*imagergba(L, R, u, #, repeat -> true, interpolate -> false)
+							 +imagergba(L, R, ufract, #, repeat -> true, interpolate -> false);
+						(v_1-round(v_1), v_2-round(v_2), 0, 0);
+					);
+				);
+				
+				advect(img, u, ufract, res) := (
+						colorplot(L, R, res,
+								v = dt*imagergba(L, R, u, #, repeat -> true, interpolate -> false)
+									 +imagergba(L, R, ufract, #, repeat -> true, interpolate -> false)
+								;
+								imagergba(L, R, img, #+(v_1, v_2), repeat -> true, interpolate -> false);
+						);
+				);
+
+				divergence(ua, res) := (
+						colorplot(L, R, res,
+								(-2 * eps * rho / dt) * (
+										imagergba(L, R, ua, #+(1, 0), repeat -> true, interpolate -> false) _1 -
+										imagergba(L, R, ua, #+(-1, 0), repeat -> true, interpolate -> false) _1 +
+										imagergba(L, R, ua, #+(0, 1), repeat -> true, interpolate -> false) _2 -
+										imagergba(L, R, ua, #+(0, -1), repeat -> true, interpolate -> false) _2
+								)
+						); res
+				);
+
+				pressure(d, res) := (
+						p = res; colorplot(L, R, p,
+								0
+						);
+						repeat(20,
+								colorplot(L, R, p,
+										(
+												imagergba(L, R, d, #, repeat -> true, interpolate -> false) _1 +
+												imagergba(L, R, p, #+(2, 0), repeat -> true, interpolate -> false) _1 +
+												imagergba(L, R, p, #+(-2, 0), repeat -> true, interpolate -> false) _1 +
+												imagergba(L, R, p, #+(0, 2), repeat -> true, interpolate -> false) _1 +
+												imagergba(L, R, p, #+(0, -2), repeat -> true, interpolate -> false) _1
+										) / 4
+								);
+						); p
+				);
+
+
+				substgradient(ua, d, res) := (
+						colorplot(L, R, res,
+								imagergba(L, R, ua, #, repeat -> true, interpolate -> false) -
+								(dt / (2 * rho * eps)) * (
+										imagergba(L, R, p, #+(1, 0), repeat -> true, interpolate -> false) _1 -
+										imagergba(L, R, p, #+(-1, 0), repeat -> true, interpolate -> false) _1,
+										imagergba(L, R, p, #+(0, 1), repeat -> true, interpolate -> false) _1 -
+										imagergba(L, R, p, #+(0, -1), repeat -> true, interpolate -> false) _1,
+										0,
+										0
+								)
+						); res
+				);
+
+
+				colorplot(L, R, u,
+						val = initu(pixel2coord(#));
+						(val_1, val_2, 0, 1);
+				);
+
+
+				colorplot(img, mod(round(#.x * 5) + round(#.y * 5), 2));
+				dragging = false;
+				last = (random(), random());
+    </script>
+
+		<script id="csmousedown" type="text/x-cindyscript">	
+				dragging = true;
+				last = mouse();
+		</script>
+
+		<script id="csmouseup" type="text/x-cindyscript">	
+				dragging = false;
+		</script>
+
+    <script id="csdraw" type="text/x-cindyscript">
+				colorplot(L, R, img,
+			    if (dragging & |mouse() - pixel2coord(#)| < .1, hue(seconds()),
+			        imagergb(L, R, img, #, repeat -> true, interpolate -> false)
+			    )
+				);
+
+				delta = 5 * (last - mouse());
+				//errc(delta);
+				colorplot(L, R, u,
+				    if (dragging & | mouse() - pixel2coord(#) | < .1, (delta_1, delta_2, 0, 0), (0, 0, 0, 0)) +
+				        imagergba(L, R, u, #, repeat -> true, interpolate -> false)
+				);
+
+				last = mouse();
+
+				/*
+						u_a := advect field u through itself
+						d := calculate divergence of u_a
+						p := calculate pressure based on d, using jacobi iteration
+						u := u_a - gradient of p
+						c := advect field c through velocity field u
+						draw c
+				*/
+				
+				advect(u, u, ufract, ua);
+				advect(img, u, ufract, img);
+				genfract(u, ufract);
+				
+				divergence(ua, d);
+				pressure(d, p);
+				substgradient(ua, p, u);
+				
+
+
+
+				drawimage([-2, -2], [2, -2], img);
+    </script>
+
+    <div  id="CSCanvas" style="position:relative; top:10px;"></div>
+    <script type="text/javascript">
+        
+        cdy = CindyJS({canvasname:"CSCanvas",
+                    scripts: "cs*",
+                    geometry:[
+                      //{name:"A", kind:"P", type:"Free", pos:[1  ,-1],size:3},
+                      //{name:"B", kind:"P", type:"Free", pos:[-1 ,1],size:3}
+                    ],
+                    animation: {autoplay: true},
+										images: {image: "image.png"},
+                    ports: [{
+                      id: "CSCanvas",
+                      width: 512,
+                      height: 512,
+                      transform: [ { visibleRect: [-2, -2, 2, 2] } ]
+                    }]
+                  });
+    </script>              
+	</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+    <title>Cindy JS</title>
+    <script type="text/javascript" src="Cindy.js"></script>
+    <script type="text/javascript" src="CindyGL.js"></script>
+    <link rel="stylesheet" href="cindy.css">
+  </head>
+    
+	<body style="font-family:Arial;">
+    <!-- http://jamie-wong.com/2016/08/05/webgl-fluid-simulation/-->
+    <h1>CindyJS: advection on image given a vector field</h1>
+    <script id="csinit" type="text/x-cindyscript">
+      use("CindyGL");
+      
+      L = [0, 0]; //bottom left corner
+      R = [512, 0]; //bottom right corner
+
+			createimage("res", 512, 512);
+
+      pixel2coord(x) := x/512*4+(-2,-2);
+      v(x) := (
+        f1=(x-A)/abs(x-A)^2;
+        f2=(x-B)/abs(x-B)^2;
+        f1-f2;
+        //s=abs(f);
+      ); //vector field
+
+			
+			img = "image";
+    </script>
+
+    <script id="csdraw" type="text/x-cindyscript">	
+			eps = .1;
+			advect(img) := (
+				colorplot(L, R, "res",
+					imagergb(L, R, img, #+eps*v(pixel2coord(#)), repeat->true);
+				);
+				"res"
+			);
+			
+			
+			img = advect(img);
+			drawimage([-2, -2], [2, -2], img);
+    </script>
+
+    <div  id="CSCanvas" style="position:relative; top:10px;"></div>
+    <script type="text/javascript">
+        
+        cdy = CindyJS({canvasname:"CSCanvas",
+                    scripts: "cs*",
+                    geometry:[
+                      {name:"A", kind:"P", type:"Free", pos:[1  ,-1],size:3},
+                      {name:"B", kind:"P", type:"Free", pos:[-1 ,1],size:3}
+                    ],
+                    animation: {autoplay: true},
+										images: {image: "image.png"},
+                    ports: [{
+                      id: "CSCanvas",
+                      width: 512,
+                      height: 512,
+                      transform: [ { visibleRect: [-2, -2, 2, 2] } ]
+                    }]
+                  });
+    </script>              
+	</body>
+</html>
