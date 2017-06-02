@@ -57,7 +57,7 @@
 								v = dt*imagergba(L, R, u, #, repeat -> true, interpolate -> false)
 									 +imagergba(L, R, ufract, #, repeat -> true, interpolate -> false)
 								;
-								imagergba(L, R, img, #+(v_1, v_2), repeat -> true, interpolate -> false);
+								imagergba(L, R, img, #+(round(v_1), round(v_2)), repeat -> true, interpolate -> false);
 						);
 				);
 
@@ -73,9 +73,10 @@
 				);
 
 				pressure(d, res) := (
-						p = res; colorplot(L, R, p,
+						p = res;
+						/*colorplot(L, R, p,
 								0
-						);
+						);*/
 						repeat(20,
 								colorplot(L, R, p,
 										(
@@ -152,6 +153,7 @@
 				
 				advect(u, u, ufract, ua);
 				advect(img, u, ufract, img);
+				
 				genfract(u, ufract);
 				
 				divergence(ua, d);
@@ -161,7 +163,7 @@
 
 
 
-				drawimage([-2, -2], [2, -2], img);
+					drawimage([-2, -2], [2, -2], img);
     </script>
 
     <div  id="CSCanvas" style="position:relative; top:10px;"></div>

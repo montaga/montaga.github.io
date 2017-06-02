@@ -13,42 +13,31 @@
     <h1>CindyJS: Simulation of a fluid</h1>
 		Adapted from <a href="http://jamie-wong.com/2016/08/05/webgl-fluid-simulation/">http://jamie-wong.com/2016/08/05/webgl-fluid-simulation/</a>
     <script id="csinit" type="text/x-cindyscript">
-				
-				
-				init(res) := (
-					N = res;
-					L = [0, 0]; //bottom left corner
-					R = [N, 0]; //bottom right corner
+				use("CindyGL");
 
-					img = "img";
-					u = "u";
-					d = "d";
-					p = "p";
-					ua = "ua";
-					dragging = false;
+				N = 512;
+				L = [0, 0]; //bottom left corner
+				R = [N, 0]; //bottom right corner
 
-					forall(["ua", "d", "p", "u", "img"], img,
-							createimage(img, N, N); colorplot(L, R, img, [0, 0, 0, 0]);
-					);
-					
-					alpha = random()*2*pi;
-					dir = (cos(alpha), sin(alpha));
-					colorplot(L, R, u,
-							val = initu(dir, pixel2coord(#));
-							(val_1, val_2, 0, 1);
-					);
+				img = "img";
+				u = "u";
+				d = "d";
+				p = "p";
+				ua = "ua";
+				dragging = false;
 
-					colorplot(img, mod(round(#.x * 5) + round(#.y * 5), 2));
+				forall(["ua", "d", "p", "u", "img"], img,
+						createimage(img, N, N); colorplot(L, R, img, [0, 0, 0, 0]);
 				);
 
-				pixel2coord(x) := x / N * 4 + (-2, -2);
-				initu(dir, x) := ( //vector field
-						.03 * (cos(3 * x_2), sin(3 * x_1))
-						+ if ( | x - dir | < .2, 3*dir, (0,0))
-						//max(0, 1-3*| x - dir |)*3*dir
+				pixel2coord(x) := (x / N * 4 + (-2, -2))/2;
+				initu(x) := ( //vector field
+						.03 * cos(3 * x_2),
+						.03 * sin(3 * x_1) +
+						if ( | x - (0, -1) | < .1, -5, 0)
 				);
 
-				dt = 1;
+				dt = 2;
 				rho = .1;
 				eps = 1;
 
@@ -75,7 +64,7 @@
 							colorplot(L, R, p, 0); //init value
 						);
 						//else: use old value of p for starting point for Jacobi iteration
-						repeat(niterations,
+						repeat(6,
 								colorplot(L, R, p,
 										(
 												imagergba(L, R, d, #, repeat -> true, interpolate -> false) _1 +
@@ -103,9 +92,16 @@
 						); res
 				);
 
-				init(512);
+
+				colorplot(L, R, u,
+						val = initu(pixel2coord(#));
+						(val_1, val_2, 0, 1);
+				);
+
+
+				colorplot(img, mod(round(#.x * 5) + round(#.y * 5), 2));
+				
 				last = (random(), random());
-				niterations = 16;
     </script>
 
 		<script id="csmousedown" type="text/x-cindyscript">	
@@ -125,20 +121,19 @@
 		</script>
 
     <script id="csdraw" type="text/x-cindyscript">
-				clamp(c) := (min(1, max(c_1, 0)), min(1, max(c_2, 0)), min(1 ,max(c_3, 0)));
+		clamp(c) := (min(1,max(c_1,0)), min(1,max(c_2,0)), min(1,max(c_3,0)));
 				colorplot(L, R, img,
 			    //if (false & dragging & |mouse() - pixel2coord(#)| < .025, hue(seconds()),
-					clamp(
-			        imagergb(L, R, img, #)
-							+ .003*imagergb(L, R, u, #) //just add some color based on u to make it less greyish
-					)
+			        clamp(imagergb(L, R, img, #)
+							+ .01*imagergb(L, R, u, #) //just add some color based on u to make it less greyish
+							)
 			    //)
 				);
 
-				delta = 20 * (last - mouse());
+				delta = 10 * (last - mouse());
 				//errc(delta);
 				colorplot(L, R, u,
-				    if (dragging & | mouse() - pixel2coord(#) | < .15, (delta_1, delta_2, 0, 0), (0, 0, 0, 0)) +
+				    if (dragging & | (mod(mouse()_1+1,2)-1,mod(mouse()_2+1,2)-1) - pixel2coord(#) | < .05, (delta_1, delta_2, 0, 0), (0, 0, 0, 0)) +
 				        imagergba(L, R, u, #)
 				);
 
@@ -161,17 +156,16 @@
 
 
 
-				drawimage([-2, -2], [2, -2], img);
+				//drawimage([-2, -2], [2, -2], img, repeat->true);
+				colorplot(imagergba(img, #*2, repeat->true));
     </script>
 
-		<div id="container" style="width:512px; height: 512px">
-	    <div id="CSCanvas" style="width:100%; height:100%"></div>
-	  </div>
     <div id="CSCanvas"></div>
 		<div>
 			Press <b>space</b> to reset advected image to checkerboard.
 		</div>
     <script type="text/javascript">
+        
         cdy = CindyJS({canvasname:"CSCanvas",
                     scripts: "cs*",
                     geometry:[
@@ -180,41 +174,13 @@
                     ],
                     animation: {autoplay: true},
 										images: {image: "image.png"},
-										use: ["CindyGL"],
                     ports: [{
                       id: "CSCanvas",
+                      width: 1024,
+                      height: 1024,
                       transform: [ { visibleRect: [-2, -2, 2, 2] } ]
                     }]
                   });
-									
-				var container = document.getElementById("container");
-				function setsize(N) {
-					cdy.evokeCS(`init(${N})`);
-			    container.style.width = container.style.height = Math.max(N,512) + "px";
-				}
-    </script>
-		<div>
-			Resolution:
-			<select onchange="setsize(this.value);">  
-				<option>256</option>
-				<option selected>512</option>
-				<option>768</option>
-				<option>1024</option>
-			</select> px.
-		</div>
-		<div>
-			Number of iterations in Jacobi method for solving pressure
-			<select onchange="cdy.evokeCS('niterations = ' + this.value);">  
-				<option>2</option>
-				<option>4</option>
-				<option>8</option>
-				<option selected>16</option>
-				<option>24</option>
-				<option>32</option>
-				<option>48</option>
-				<option>64</option>
-				<option>128</option>
-			</select>
-		</div>
+    </script>              
 	</body>
 </html>

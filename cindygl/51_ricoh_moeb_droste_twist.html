@@ -1,0 +1,100 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>Webcam in Cindy JS</title>
+<meta charset="UTF-8">
+<script type="text/javascript" src="Cindy.js"></script>
+<script type="text/javascript" src="CindyGL.js"></script>
+<script id="csinit" type="text/x-cindyscript">
+video = camera video();
+
+M = [[-1,0],[0,1]] * [[1,1],[1,-1]];
+//M = M*M;
+//M = [[1,0],[0,1]];
+</script>
+<script id="csdraw" type="text/x-cindyscript">
+latlon2complex(latlon) := (
+  //phi = latlon_1;
+  //alpha = phi/2+pi/4
+  tan(latlon_1/2+pi/4)*(cos(latlon_2) + i *sin(latlon_2))
+);
+
+complex2latlon(z) := (
+  //lambda = arctan2(re(z), im(z));
+  //alpha = arctan(|z|);
+  //2*alpha + pi/2-phi = pi
+  //phi = 2*alpha - pi/2;
+  (2*arctan(|z|)-pi/2, arctan2(re(z), im(z)))
+);
+
+readcamera(latlon) := (
+  regional(phi, lambda);
+  phi = latlon_1;
+  lambda = latlon_2;
+  t1 = (-.505,.065) + (cos(lambda), sin(lambda))*(pi/2-phi)*.2779; //phi>0
+  t2 = (.505,.065) + (cos(pi-lambda), sin(pi-lambda))*(pi/2+phi)*.2779; //phi<0
+  w1 = exp(20*phi);
+  w2 = exp(-20*phi);  
+  (w1 * imagergba([-1,-720/1280], [1,-720/1280], video, t1) + w2 * imagergba([-1,-720/1280], [1,-720/1280], video, t2))/(w1+w2);
+);
+
+screen2complex(pixel) := (
+  regional(z, w);
+  z = latlon2complex([pixel_2-A.y, pixel_1-A.x]);
+  w = M*[z,1];
+  w_1/w_2;
+);
+
+anti(z) := (-1/conj(z));
+
+if (image ready(video),
+  //draw image (A, B, video);
+  
+  colorplot(
+    z = screen2complex(#);
+    //z = 1.3*z;
+    
+    
+    
+
+      z = log(z - screen2complex(B));
+      z = mod(z*(1+i), 2*pi+2*pi*i);
+      z = exp(z) + screen2complex(B);
+
+      readcamera(complex2latlon(z));
+    
+  );
+  
+  /*
+  colorplot(
+    imagergba([-1,-720/1280], [1,-720/1280], video, #)
+  );*/
+);
+
+
+//draw(circle(A,.48));
+//errc(A.xy);
+</script>
+<script type="text/javascript">
+var cdy = CindyJS({
+  ports: [{id: "CSCanvas", transform:[{visibleRect:[-1,-1,1,1]}]}],
+  scripts: "cs*",
+  language: "en",
+  defaultAppearance: {
+  },
+  geometry: [
+    {name:"A", type:"Free", pos:[-.7,-.4], visible:true},
+    {name:"B", type:"Free", pos:[.5,.2], visible:true, color:[0,.6,0]}
+  ],
+  use: ["CindyGL"]
+});
+</script>
+</head>
+
+<body style="font-family:Arial;">
+  <div id="CSCanvas" style="width:804px; height:604px; border:2px solid black"></div>
+</body>
+
+</html>
