@@ -171,19 +171,19 @@ var cdy = CindyJS({
   <p>
   f(z) = <input type="text" id="inp" value="z"  onkeypress="if((event.which ? event.which : event.keyCode)==13) { cdy.evokeCS('f(z) := (' + this.value + ');'); }" size="14" style="font-size:18px">
 
-  <select id="sel" style="width:6em;">
+  <select id="sel" style="width:8em;">
     <option>z</option>
     <option>z/5</option>
     <option>z+sin(seconds())</option>
     <option>z^2</option>
-    <option>z^(3/2+sin(seconds())/2)</option>
+    <option value="z^(3/2+sin(seconds())/2)">animated squaring</option>
     <option>z^5-1</option>
     <option>exp(z)</option>
-    <option>exp(mod(log(z),1+2*pi*i))</option>
-    <option>exp(mod((log(z)+mod(seconds()/2,1)),1+2*pi*i))</option>
-    <option>exp(mod(log(z)*(1+i),2*pi+2*pi*i))</option>
-    <option>exp(mod((log(z)+mod(seconds()/2,2*pi))*(1+i),2*pi+2*pi*i))</option>
-    <option>a=0; repeat(17, a=a*a+z); a</option>
+    <option value="exp(mod(log(z),1+2*pi*i))">Droste</option>
+    <option value="exp(mod((log(z)+mod(seconds()/2,1)),1+2*pi*i)-1/2)">Droste +zoom</option>
+    <option value="exp(mod(log(z)*(1+i),2*pi+2*pi*i))">twisted Droste</option>
+    <option value="exp(mod((log(z)+mod(seconds()/2,2*pi))*(1+i),2*pi+2*pi*i))">twisted Droste +zoom</option>
+    <option value="a=0; repeat(17, a=a*a+z); a">Mandelbrot set</option>
   </select>
 </p>
   <script type="text/javascript">
