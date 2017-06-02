@@ -88,7 +88,7 @@ complex2latlon(z) := (
 readcamera(latlon) := (
   regional(phi, lambda);
   phi = latlon_1;
-  lambda = latlon_2;
+  lambda = -latlon_2;
   t1 = (-.505,.065) + (cos(lambda), sin(lambda))*(pi/2-phi)*.2779; //phi>0
   t2 = (.505,.065) + (cos(pi-lambda), sin(pi-lambda))*(pi/2+phi)*.2779; //phi<0
   w1 = exp(20*phi);
