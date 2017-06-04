@@ -35,7 +35,11 @@ M = [[1,1],[1,-1]];
 //M = [[-1,0],[0,1]] * [[1,1],[1,-1]];
 
 
-f(z) := z;
+//f(z) := z;
+
+f(z):= (
+  z
+);
 
 //0 -> a, oo -> b, 1 -> c
 moebhelp(a, b, c) := (
@@ -181,8 +185,8 @@ var cdy = CindyJS({
     <option>exp(z)</option>
     <option value="exp(mod(log(z),1+2*pi*i))">Droste</option>
     <option value="exp(mod((log(z)+mod(seconds()/2,1)),1+2*pi*i)-1/2)">Droste +zoom</option>
-    <option value="exp(mod(log(z)*(1+i),2*pi+2*pi*i))">twisted Droste</option>
-    <option value="exp(mod((log(z)+mod(seconds()/2,2*pi))*(1+i),2*pi+2*pi*i))">twisted Droste +zoom</option>
+    <option value="modulus = (1+2*pi*i);alpha = modulus/(2*pi*i);l = log(z)*alpha; exp( mod(l + i*im((2*pi*i)*alpha)*floor(re(l)), modulus))">twisted Droste</option>
+    <option value="modulus = (1+2*pi*i);alpha = modulus/(2*pi*i);l = log(z)*alpha; exp( mod(l + mod(seconds()/2,1) + i*im((2*pi*i)*alpha)*floor(re(l)), modulus))">twisted Droste +zoom</option>
     <option value="a=0; repeat(17, a=a*a+z); a">Mandelbrot set</option>
   </select>
 </p>
