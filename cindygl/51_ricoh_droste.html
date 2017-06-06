@@ -31,19 +31,26 @@
 video = camera video();
 
 M = [[1,1],[1,-1]];
-Z = [[1,0],[0,1]];
-
 //M = [[1,0],[0,1]];
 //M = [[-1,0],[0,1]] * [[1,1],[1,-1]];
 
 
-//f(z) := z;
+f(z) := z;
 
+polarsquared(phi) := (
+  abs(log(min(1/|cos(phi)|, 1/|sin(phi)|)))
+);
 
 project2square(z) :=  z/max(|re(z)|,|im(z)|);
 
 
-f(z) := (z);
+f(z) := (
+  offset = re(log(project2square(z)));
+  offset = 0;
+  exp(
+    mod(log(z) + offset, 1+2*pi*i) - offset
+  )
+);
 
 //0 -> a, oo -> b, 1 -> c
 moebhelp(a, b, c) := (
@@ -101,15 +108,8 @@ readcamera(latlon) := (
   t2 = (.505,.065) + (cos(pi-lambda), sin(pi-lambda))*(pi/2+phi)*.2779; //phi<0
   w1 = exp(20*phi);
   w2 = exp(-20*phi);  
-  (w1 * imagergba([-1,-720/1280], [1,-720/1280], video, t1) + w2 * imagergba([-1,-720/1280], [1,-720/1280], video, t2))/(w1+w2);
+  w1/(w1+w2) * imagergba([-1,-720/1280], [1,-720/1280], video, t1) + w2/(w1+w2) * imagergba([-1,-720/1280], [1,-720/1280], video, t2);
 );
-
-
-setcenter() := (
-  Z = inverse(M);
-  //M = [[1,0],[0,1]];
-);
-
 
 dragging = false;
 m0 = [0,1];
@@ -146,9 +146,8 @@ if (image ready(video),
   
   colorplot(
     z = screen2complex(M, #);
-    //z = moeb(Z, z);
     z = f(z);
-    //z = moeb(inverse(Z), z);
+    //z = z + 4;
     readcamera(complex2latlon(z));
   );
   
@@ -164,7 +163,7 @@ if (image ready(video),
 </script>
 <script type="text/javascript">
 var cdy = CindyJS({
-  ports: [{id: "CSCanvas", transform:[{visibleRect:[-1,-1,1,1]}]}],
+  ports: [{id: "CSCanvas", transform:[{visiblesquared:[-1,-1,1,1]}]}],
   scripts: "cs*",
   language: "en",
   defaultAppearance: {
@@ -200,18 +199,22 @@ var cdy = CindyJS({
     <option value="modulus = (1+2*pi*i); alpha = modulus/(2*pi*i); l = log(z)*alpha; exp(mod(l + i*im((2*pi*i)*alpha)*floor(re(l)), modulus))">twisted Droste</option>
     <option value="modulus = (1+2*pi*i); alpha = modulus/(2*pi*i); l = log(z)*alpha; exp(mod(l + mod(seconds()/2,1) + i*im((2*pi*i)*alpha)*floor(re(l)), modulus))">twisted Droste +zoom</option>
     <option value="
-    offset = re(log(project2square(z)));
-    exp(mod(log(z) + offset, 1+2*pi*i) - offset)
+      l = log(z);
+      exp(
+        mod(l + polarsquared(im(l)),1+2*pi*i) - polarsquared(im(l))
+      )
     ">squared Droste</option>
     <option value="
-    offset = re(log(project2square(z)));
-    modulus = (1+2*pi*i); alpha = modulus/(2*pi*i); l = log(z)*alpha;
-    exp(mod(l + offset + i*im((2*pi*i)*alpha)*floor(re(l)), modulus) - offset)">twisted squared Droste</option>
-    </option>
-    <option value="a=0; repeat(37, a=a*a+z); a">Mandelbrot set</option>
+    modulus = (1+2*pi*i);
+    alpha = modulus/(2*pi*i);
+    l = log(z)*alpha;
+    exp(
+      mod(l + i*im((2*pi*i)*alpha)*floor(re(l)) + polarsquared(im(l)), modulus) - polarsquared(im(l))
+    )
+    ">squared twisted Droste</option>
+    <option value="a=0; repeat(17, a=a*a+z); a">Mandelbrot set</option>
   </select>
 </p>
-<!--<p><button onclick="cdy.evokeCS('setcenter()')">set current center to 0</button></p>-->
   <script type="text/javascript">
   var select = document.getElementById("sel");
   select.addEventListener('change', function(event) {
