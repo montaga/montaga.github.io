@@ -30,10 +30,10 @@
 <script id="csinit" type="text/x-cindyscript">
 video = camera video();
 
-M = [[1,1],[1,-1]];
+//M = [[1,1],[1,-1]];
 Z = [[1,0],[0,1]];
 
-//M = [[i,0],[0,1]];
+M = [[i,0],[0,1]]*[[1,1],[1,-1]];
 //M = [[-1,0],[0,1]] * [[1,1],[1,-1]];
 
 
@@ -96,7 +96,7 @@ screen2complex(M, pixel) := (
 );
 
 complex2screen(M, z) := (
-  gauss(moeb(inverse(M), z)/1.3)
+  gauss(moeb(inverse(M), z))
 );
 
 complex2latlon(z) := (
