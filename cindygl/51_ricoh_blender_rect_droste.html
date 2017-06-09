@@ -108,7 +108,7 @@ complex2latlon(z) := (
 );
 
 readcamera(latlon) := (
-  imagergba([-pi,-pi/2], [pi,-pi/2], video, (-latlon_2, latlon_1));
+  imagergba([-pi,-pi/2], [pi,-pi/2], video, (-latlon_2, latlon_1), repeat->true);
 );
 
 
