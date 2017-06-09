@@ -82,7 +82,7 @@ moeb(M, z) := (
 
 screen2complex(M, pixel) := (
   //moeb(M, latlon2complex(1.5*[pixel_2, pixel_1]))
-  moeb(M, (1.5*(pixel_1 + i*pixel_2)))
+  moeb(M, ((pixel_1 + i*pixel_2)))
 );
 
 complex2latlon(z) := (
