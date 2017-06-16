@@ -124,6 +124,12 @@ m0 = [0,1];
 ptselect = true;
 
 pts = [];
+
+
+zoom = exp(0.5);
+doffset = 0;
+goffset = 0;
+lasttick = seconds();
 </script>
 
 <script id="csmousedown" type="text/x-cindyscript">
@@ -158,17 +164,17 @@ if(ptselect,
     
     tpts = apply(pts, p, moeb((T),sphere2complex(p)));
     stpts = apply(tpts, p, complex2sphere(p));
-  
+    
     
     f(z) := (
       z = moeb(T, z);
       offset = re(log(project2rectangle(z)));
-      modulus = (2+2*pi*i);
+      modulus = (zoom+2*pi*i);
       l = log(z);
       moeb(inverse(T),
         exp(
           mod(
-            l - offset,
+            l - offset - goffset,
             modulus
           ) + offset
         )
@@ -191,6 +197,10 @@ dragging = false;
 </script>
 
 <script id="csdraw" type="text/x-cindyscript">
+now = seconds();
+goffset = goffset+doffset*(now-lasttick);
+
+lasttick = now;
 
 if(dragging & |mouse()-m0|>.01,
   p1 = screen2complex(M0, mouse());
@@ -225,7 +235,7 @@ if (image ready(video),
 );
 if(ptselect,
 
-  drawtext((0,0), "select " + (4-length(pts)) + " points for the Droste-rectangle");
+  drawtext((0,0), "select " + (4-length(pts)) + " points for the Droste-rectangle", size->30, align->"mid");
   
   forall(pts, p,
     draw(complex2screen(M, sphere2complex(p)));
@@ -278,70 +288,57 @@ var cdy = CindyJS({
   <p><!--
   f(z) = <textarea type="text" id="inp" value="z"  onkeypress="if((event.which ? event.which : event.keyCode)==13) { cdy.evokeCS('f(z) := (' + this.value + ');'); }" size="24">z</textarea>
 -->
-  <select id="sel" style="width:8em;">
-    <option>z</option>
-  
+  <select id="sel" style="width:8em;" size="2">
     <option value="z = moeb(T, z);
     offset = re(log(project2rectangle(z)));
-    modulus = (2+2*pi*i);
+    modulus = (zoom+2*pi*i);
     l = log(z);
     moeb(inverse(T),
       exp(
         mod(
-          l - offset,
+          l - offset - goffset,
           modulus
         ) + offset
       )
     );
-  ">Droste</option>
+  " selected>Droste</option>
     <option value="z = moeb(T, z);
-    offset = re(log(project2rectangle(z)));
-    modulus = (2+2*pi*i);
-    l = log(z);
-    moeb(inverse(T),
-      exp(
-        mod(
-          l - offset - mod(seconds()/4,2),
-          modulus
-        ) + offset
-      )
-    );
-  ">Droste +zoom</option>
-    <option value="z = moeb(T, z);
-    modulus = (2+2*pi*i);
+    modulus = (zoom+2*pi*i);
     alpha = modulus/(2*pi*i); l = log(z)*alpha;
     offset = re(log(project2rectangle(exp(l))));
     moeb(inverse(T),
       exp(
         mod(
-          l - offset + i*im((2*pi*i)*alpha)*floor(re(l-offset)),
+          l - offset + i*im((2*pi*i)*alpha)*floor(re(l-offset)) - goffset,
           modulus
         ) + offset
       )
     );
   ">twisted Droste</option>
-    <option value="z = moeb(T, z);
-    modulus = (2+2*pi*i);
-    alpha = modulus/(2*pi*i); l = log(z)*alpha;
-    offset = re(log(project2rectangle(exp(l))));
-    moeb(inverse(T),
-      exp(
-        mod(
-          l - offset + i*im((2*pi*i)*alpha)*floor(re(l)) - mod(seconds()/4,2),
-          modulus
-        ) + offset
-      )
-    );
-  ">twisted Droste +zoom</option>
   </select>
+</p>
+<p>
+  zoom: <input type="range" id="zoom" min="-1" max="2.1" step="0.01" value="0.5"></input>
+  speed: <input type="range" id="doffset" min="-1.1" max="1.1" step="0.01" value="0"></input>
 </p>
 <!--<p><button onclick="cdy.evokeCS('setcenter()')">set current center to 0</button></p>-->
   <script type="text/javascript">
-  var select = document.getElementById("sel");
-  select.addEventListener('change', function(event) {
+  document.getElementById("sel").addEventListener('change', function(event) {
   //  document.getElementById('inp').value = this.value;
     cdy.evokeCS('f(z) := (' + this.value + ');');
   }, false);
+  
+  document.getElementById("zoom").addEventListener('mousemove', function(event) {
+  //  document.getElementById('inp').value = this.value;
+    cdy.evokeCS('zoom = exp(' + this.value + ');');
+  }, false);
+  
+  document.getElementById("doffset").addEventListener('mousemove', function(event) {
+  //  document.getElementById('inp').value = this.value;
+    cdy.evokeCS('doffset = (' + this.value + ');');
+  }, false);
+  
+  
   </script>
   
   <div>
