@@ -94,11 +94,11 @@ moeb(M, z) := (
 
 screen2complex(M, pixel) := (
   //moeb(M, latlon2complex(1.5*[pixel_2, pixel_1]))
-  moeb(M, ((pixel_1 + i*pixel_2)))
+  moeb(M, (exp(azoom)*(pixel_1 + i*pixel_2)))
 );
 
 complex2screen(M, z) := (
-  gauss(moeb(inverse(M), z))
+  gauss(moeb(inverse(M), z)/exp(azoom))
 );
 
 complex2latlon(z) := (
@@ -126,6 +126,12 @@ setcenter() := (
   Z = inverse(M);
 );
 
+onScroll(delta) := (
+  errc(delta);
+  azoom = azoom-delta/1000
+);
+
+azoom = 0;
 
 dragging = false;
 m0 = [0,1];
@@ -135,7 +141,7 @@ ptselect = true;
 pts = [];
 
 
-zoom = exp(0.5);
+zoom = exp(1);
 doffset = 0;
 goffset = 0;
 lasttick = seconds();
@@ -265,7 +271,7 @@ var cdy = CindyJS({
 </head>
 
 <body style="font-family:Arial;">
-  <div id="CSCanvas" style="width:100vw; height:100vh; border:0px;"></div>
+  <div id="CSCanvas" style="width:100vw; height:100vh; border:0px;" onwheel="cdy.evokeCS('onScroll(' + event.wheelDelta + ')');"></div>
   <div id="overlay">
   <div>
     <p>
@@ -304,7 +310,7 @@ var cdy = CindyJS({
   </select>
 </p>
 <p>
-  zoom: <input type="range" id="zoom" min="-1" max="2.1" step="0.01" value="0.5"></input>
+  zoom: <input type="range" id="zoom" min="-1" max="2.1" step="0.01" value="1"></input>
   speed: <input type="range" id="doffset" min="-1.1" max="1.1" step="0.1" value="0"></input>
 </p>
 <!--<p><button onclick="cdy.evokeCS('setcenter()')">set current center to 0</button></p>-->
