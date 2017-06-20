@@ -28,14 +28,14 @@
   }
 </style>
 <script id="csinit" type="text/x-cindyscript">
-video = camera video();
+image = "image";
 
 //M = [[1,1],[1,-1]];
 Z = [[1,0],[0,1]];
 
-M = [[i,0],[0,1]];
-//M = [[-1,0],[0,1]] * [[1,1],[1,-1]];
-
+//M = [[1,1],[1,-1]]*[[-i,0],[0,1]];
+//M = [[-1,0],[0,1]] * [[1,1],[1,-1]]*[[-i,0],[0,1]];
+M = [[1,0],[0,1]];
 
 //f(z) := z;
 
@@ -94,14 +94,7 @@ complex2latlon(z) := (
 );
 
 readcamera(latlon) := (
-  regional(phi, lambda);
-  phi = latlon_1;
-  lambda = -latlon_2;
-  t1 = (-.505,.065) + (cos(lambda), sin(lambda))*(pi/2-phi)*.2779; //phi>0
-  t2 = (.505,.065) + (cos(pi-lambda), sin(pi-lambda))*(pi/2+phi)*.2779; //phi<0
-  w1 = exp(20*phi);
-  w2 = exp(-20*phi);  
-  (w1/(w1+w2) * imagergb([-1,-720/1280], [1,-720/1280], video, t1) + w2/(w1+w2) * imagergb([-1,-720/1280], [1,-720/1280], video, t2));
+  imagergba([-pi,-pi/2], [pi,-pi/2], image, (-latlon_2, latlon_1), repeat->true);
 );
 
 
@@ -116,9 +109,7 @@ onScroll(delta) := (
 );
 
 zoom = 0;
-
 dragging = false;
-lines = false;
 m0 = [0,1];
 </script>
 
@@ -148,34 +139,34 @@ if(dragging & |mouse()-m0|>.01,
 
 );
 
-if (image ready(video),
-  //draw image (A, B, video);
   
   colorplot(
     z = screen2complex(M, #);
-    w = z;
     //z = moeb(Z, z);
     z = f(z);
     //z = moeb(inverse(Z), z);
-    readcamera(complex2latlon(z))*if(lines & mod(round(im(w)/(2*pi)),2)==1, .5, 1);
-  );
-  
-  /*
-  colorplot(
-    imagergba([-1,-720/1280], [1,-720/1280], video, #)
-  );*/
+    readcamera(complex2latlon(z));
 );
 
 
 //draw(circle(A,.48));
 //errc(A.xy);
 </script>
+
+<script id="csondrop" type="text/x-cindyscript">
+  dropped = dropped();
+  dump(dropped);
+  if (!isundefined(dropped_1_1), image = dropped_1_1; dump(image););
+  
+</script>
+
 <script type="text/javascript">
 var cdy = CindyJS({
   ports: [{id: "CSCanvas", transform:[{visibleRect:[-1,-1,1,1]}]}],
   scripts: "cs*",
+  autoplay: false,
   language: "en",
-  autoplay: true,
+  images: {image:"world.jpg"},
   defaultAppearance: {
   },
   geometry: [
@@ -194,21 +185,19 @@ var cdy = CindyJS({
   Enter or select a pullback function from the list
 </p>-->
   <p>
-  f(z) = <input type="text" id="inp" value="z"  onkeypress="if((event.which ? event.which : event.keyCode)==13) { cdy.evokeCS('f(z) := (' + this.value + ');'); }" size="18" style="font-size:18px">
+  f(z) = <input type="text" id="inp" value="z"  onkeypress="if((event.which ? event.which : event.keyCode)==13) { cdy.evokeCS('f(z) := (' + this.value + ');'); }" size="14" style="font-size:18px">
 
-  <select id="sel" style="width:4em;">
+  <select id="sel" style="width:8em;">
     <option>z</option>
-    <option>exp(z)</option>
-    <option>exp(mod(z,3)-.6)</option>
-    <option>exp(mod(log(z),3)-.6)</option>
-    <option>exp(mod(z*(3+2*pi*i)/(2*pi*i),3)-.6)</option>
-    <option>exp(mod(log(z)*(3+2*pi*i)/(2*pi*i),3)-.6)</option>
+    <option>z/5</option>
+    <option>z+sin(seconds())</option>
+    <option>z^2</option>
     <option value="z^(3/2+sin(seconds())/2)">animated squaring</option>
     <option>z^5-1</option>
     <option>exp(z)</option>
     <option value="exp(mod(log(z),1+2*pi*i))">Droste</option>
     <option value="exp(mod((log(z)+mod(seconds()/2,1)),1+2*pi*i)-1/2)">Droste +zoom</option>
-    <option value="modulus = (1+2*pi*i); alpha = modulus/(2*pi*i); exp(mod(log(z)*alpha, modulus))">twisted Droste</option>
+    <option value="modulus = (1+2*pi*i); alpha = modulus/(2*pi*i); l = log(z)*alpha; exp(mod(l + i*im((2*pi*i)*alpha)*floor(re(l)), modulus))">twisted Droste</option>
     <option value="modulus = (1+2*pi*i); alpha = modulus/(2*pi*i); l = log(z)*alpha; exp(mod(l + mod(seconds()/2,1) + i*im((2*pi*i)*alpha)*floor(re(l)), modulus))">twisted Droste +zoom</option>
     <option value="
     offset = -1+re(log(project2square(z)));
@@ -221,8 +210,6 @@ var cdy = CindyJS({
     </option>
     <option value="a=0; repeat(37, a=a*a+z); a">Mandelbrot set</option>
   </select>
-  <button type="button" onclick="cdy.evokeCS('M=[[1,0],[0,1]]; zoom=0;');">->0</button>
-  <button type="button" onclick="cdy.evokeCS('lines = !lines;');">2 pi i</button>
 </p>
 <!--<p><button onclick="cdy.evokeCS('setcenter()')">set current center to 0</button></p>-->
   <script type="text/javascript">

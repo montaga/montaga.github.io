@@ -43,13 +43,15 @@ M = [[1,1],[1,-1]]*[[-i,0],[0,1]];
 project2square(z) :=  z/max(|re(z)|,|im(z)|);
 
 project2rectangle(z) := (
-  //z/(|re(z/tpts_1)| + |re(z/tpts_2)|);
-  z/max(|re(z/(tpts_2-tpts_1))|+|re(z/(tpts_3-tpts_4))|, |re(z/(tpts_3-tpts_2))|+|re(z/(tpts_4-tpts_1))|)
-  //p = complex2sphere(z);
-  //z/max(|(p*stmid_1)/(stpts_2*stmid_1)|, |(p*stmid_2)/(stpts_2*stmid_2)|)
-  //z/max(|(p*stmid_1)/(1+stpts_2*stmid_1)|, |(p*stmid_2)/(1+stpts_2*stmid_2)|)
-  //dst = p*stmid_1;
-  //sphere2complex(p - stmid_1*(p*stmid_1));
+  p = complex2sphere(1e3*z); //works only for points that are outside of the rectangle
+  forall(1..4, j,
+    v = p-scenter;
+    //if(((p*mid_j)/(v*mid_j))>0, 
+    if((p*mid_j)>0, 
+      p = p - ((p*mid_j)/(v*mid_j))*v;
+    );
+  );
+  sphere2complex(p)
 );
 
 
@@ -112,9 +114,9 @@ readcamera(latlon) := (
 );
 
 
+
 setcenter() := (
   Z = inverse(M);
-  //M = [[1,0],[0,1]];
 );
 
 
@@ -150,21 +152,17 @@ if(ptselect,
       p1, a1, a2,
       p0, a1, a2
     );
-    
-    
-    
+    scenter = complex2sphere(center);
+
     mid = apply(1..4, j,
       cross((pts_j), (pts_(mod(j,4)+1)));
     );
     mid = apply(mid, m, m/|m|);
+    forall(1..4, j, if(|mid_j,scenter|<|-mid_j,scenter|, mid_j = -mid_j;));
 
-    
-    stmid = apply(mid, p, complex2sphere(moeb(T,sphere2complex(p))));
-    
-    
-    tpts = apply(pts, p, moeb((T),sphere2complex(p)));
-    stpts = apply(tpts, p, complex2sphere(p));
-    
+    //apply moebius transformations on all of these points
+    mid = apply(mid, p, complex2sphere(moeb(T,sphere2complex(p))));
+    scenter = complex2sphere(0);
     
     f(z) := (
       z = moeb(T, z);
@@ -180,9 +178,7 @@ if(ptselect,
         )
       );
     );
-    
-    //f(z) = z;
-    
+
   );
 );
 M0 = M;
@@ -222,16 +218,11 @@ if (image ready(video),
   
   colorplot(
     z = screen2complex(M, #);
-    //z = moeb(Z, z);
     z = f(z);
-    //z = moeb(inverse(Z), z);
     readcamera(complex2latlon(z));
   );
   
-  /*
-  colorplot(
-    imagergba([-1,-720/1280], [1,-720/1280], video, #)
-  );*/
+
 );
 if(ptselect,
 
@@ -242,19 +233,6 @@ if(ptselect,
   );
 
   ,
-  //draw(complex2screen(M, project2rectangle(screen2complex(M, mouse()))));
-  /*colorplot(
-    z = screen2complex(M, #);
-    if(|complex2sphere(z)-mid_1|<|pts_1-mid_1|
-    % |complex2sphere(z)-mid_2|<|pts_2-mid_2|
-    % |complex2sphere(z)-mid_3|<|pts_3-mid_3|
-    % |complex2sphere(z)-mid_4|<|pts_4-mid_4|
-    ,
-      [1,0,0,.2],
-      [0,0,0,0]
-    )
-  );*/
-//  draw(complex2screen(M, center), color->[1,0,0,0]);
   
 );
 
@@ -268,6 +246,7 @@ var cdy = CindyJS({
   ports: [{id: "CSCanvas", transform:[{visibleRect:[-1,-1,1,1]}]}],
   scripts: "cs*",
   language: "en",
+  autoplay: true,
   defaultAppearance: {
   },
   geometry: [
@@ -304,13 +283,13 @@ var cdy = CindyJS({
   " selected>Droste</option>
     <option value="z = moeb(T, z);
     modulus = (zoom+2*pi*i);
-    alpha = modulus/(2*pi*i); l = log(z)*alpha;
+    alpha = (2*pi*i)/modulus; l = log(z)/alpha;
     offset = re(log(project2rectangle(exp(l))));
     moeb(inverse(T),
       exp(
         mod(
-          l - offset + i*im((2*pi*i)*alpha)*floor(re(l-offset)) - goffset,
-          modulus
+          l - offset - goffset,
+          zoom
         ) + offset
       )
     );
@@ -319,7 +298,7 @@ var cdy = CindyJS({
 </p>
 <p>
   zoom: <input type="range" id="zoom" min="-1" max="2.1" step="0.01" value="0.5"></input>
-  speed: <input type="range" id="doffset" min="-1.1" max="1.1" step="0.01" value="0"></input>
+  speed: <input type="range" id="doffset" min="-1.1" max="1.1" step="0.1" value="0"></input>
 </p>
 <!--<p><button onclick="cdy.evokeCS('setcenter()')">set current center to 0</button></p>-->
   <script type="text/javascript">

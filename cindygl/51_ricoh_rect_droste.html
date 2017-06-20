@@ -43,13 +43,15 @@ M = [[i,0],[0,1]];
 project2square(z) :=  z/max(|re(z)|,|im(z)|);
 
 project2rectangle(z) := (
-  //z/(|re(z/tpts_1)| + |re(z/tpts_2)|);
-  z/max(|re(z/(tpts_2-tpts_1))|+|re(z/(tpts_3-tpts_4))|, |re(z/(tpts_3-tpts_2))|+|re(z/(tpts_4-tpts_1))|)
-  //p = complex2sphere(z);
-  //z/max(|(p*stmid_1)/(stpts_2*stmid_1)|, |(p*stmid_2)/(stpts_2*stmid_2)|)
-  //z/max(|(p*stmid_1)/(1+stpts_2*stmid_1)|, |(p*stmid_2)/(1+stpts_2*stmid_2)|)
-  //dst = p*stmid_1;
-  //sphere2complex(p - stmid_1*(p*stmid_1));
+  p = complex2sphere(1e3*z); //works only for points that are outside of the rectangle
+  forall(1..4, j,
+    v = p-scenter;
+    //if(((p*mid_j)/(v*mid_j))>0, 
+    if((p*mid_j)>0, 
+      p = p - ((p*mid_j)/(v*mid_j))*v;
+    );
+  );
+  sphere2complex(p)
 );
 
 
@@ -92,11 +94,11 @@ moeb(M, z) := (
 
 screen2complex(M, pixel) := (
   //moeb(M, latlon2complex(1.5*[pixel_2, pixel_1]))
-  moeb(M, (1.3*(pixel_1 + i*pixel_2)))
+  moeb(M, ((pixel_1 + i*pixel_2)))
 );
 
 complex2screen(M, z) := (
-  gauss(moeb(inverse(M), z)/1.3)
+  gauss(moeb(inverse(M), z))
 );
 
 complex2latlon(z) := (
@@ -109,8 +111,8 @@ complex2latlon(z) := (
 
 readcamera(latlon) := (
   regional(phi, lambda);
-  phi = latlon_1;
-  lambda = -latlon_2;
+  phi = -latlon_1;
+  lambda = latlon_2;
   t1 = (-.505,.065) + (cos(lambda), sin(lambda))*(pi/2-phi)*.2779; //phi>0
   t2 = (.505,.065) + (cos(pi-lambda), sin(pi-lambda))*(pi/2+phi)*.2779; //phi<0
   w1 = exp(20*phi);
@@ -119,9 +121,9 @@ readcamera(latlon) := (
 );
 
 
+
 setcenter() := (
   Z = inverse(M);
-  //M = [[1,0],[0,1]];
 );
 
 
@@ -131,6 +133,12 @@ m0 = [0,1];
 ptselect = true;
 
 pts = [];
+
+
+zoom = exp(0.5);
+doffset = 0;
+goffset = 0;
+lasttick = seconds();
 </script>
 
 <script id="csmousedown" type="text/x-cindyscript">
@@ -151,39 +159,33 @@ if(ptselect,
       p1, a1, a2,
       p0, a1, a2
     );
-    
-    
-    
+    scenter = complex2sphere(center);
+
     mid = apply(1..4, j,
       cross((pts_j), (pts_(mod(j,4)+1)));
     );
     mid = apply(mid, m, m/|m|);
+    forall(1..4, j, if(|mid_j,scenter|<|-mid_j,scenter|, mid_j = -mid_j;));
 
-    
-    stmid = apply(mid, p, complex2sphere(moeb(T,sphere2complex(p))));
-    
-    
-    tpts = apply(pts, p, moeb((T),sphere2complex(p)));
-    stpts = apply(tpts, p, complex2sphere(p));
-  
+    //apply moebius transformations on all of these points
+    mid = apply(mid, p, complex2sphere(moeb(T,sphere2complex(p))));
+    scenter = complex2sphere(0);
     
     f(z) := (
       z = moeb(T, z);
       offset = re(log(project2rectangle(z)));
-      modulus = (2+2*pi*i);
+      modulus = (zoom+2*pi*i);
       l = log(z);
       moeb(inverse(T),
         exp(
           mod(
-            l - offset,
+            l - offset - goffset,
             modulus
           ) + offset
         )
       );
     );
-    
-    //f(z) = z;
-    
+
   );
 );
 M0 = M;
@@ -198,6 +200,10 @@ dragging = false;
 </script>
 
 <script id="csdraw" type="text/x-cindyscript">
+now = seconds();
+goffset = goffset+doffset*(now-lasttick);
+
+lasttick = now;
 
 if(dragging & |mouse()-m0|>.01,
   p1 = screen2complex(M0, mouse());
@@ -219,39 +225,21 @@ if (image ready(video),
   
   colorplot(
     z = screen2complex(M, #);
-    //z = moeb(Z, z);
     z = f(z);
-    //z = moeb(inverse(Z), z);
     readcamera(complex2latlon(z));
   );
   
-  /*
-  colorplot(
-    imagergba([-1,-720/1280], [1,-720/1280], video, #)
-  );*/
+
 );
 if(ptselect,
 
-  drawtext((0,0), "select " + (4-length(pts)) + " points for the Droste-rectangle");
+  drawtext((0,0), "select " + (4-length(pts)) + " points for the Droste-rectangle", size->30, align->"mid");
   
   forall(pts, p,
     draw(complex2screen(M, sphere2complex(p)));
   );
 
   ,
-  //draw(complex2screen(M, project2rectangle(screen2complex(M, mouse()))));
-  /*colorplot(
-    z = screen2complex(M, #);
-    if(|complex2sphere(z)-mid_1|<|pts_1-mid_1|
-    % |complex2sphere(z)-mid_2|<|pts_2-mid_2|
-    % |complex2sphere(z)-mid_3|<|pts_3-mid_3|
-    % |complex2sphere(z)-mid_4|<|pts_4-mid_4|
-    ,
-      [1,0,0,.2],
-      [0,0,0,0]
-    )
-  );*/
-//  draw(complex2screen(M, center), color->[1,0,0,0]);
   
 );
 
@@ -265,6 +253,7 @@ var cdy = CindyJS({
   ports: [{id: "CSCanvas", transform:[{visibleRect:[-1,-1,1,1]}]}],
   scripts: "cs*",
   language: "en",
+  autoplay: true,
   defaultAppearance: {
   },
   geometry: [
@@ -285,70 +274,57 @@ var cdy = CindyJS({
   <p><!--
   f(z) = <textarea type="text" id="inp" value="z"  onkeypress="if((event.which ? event.which : event.keyCode)==13) { cdy.evokeCS('f(z) := (' + this.value + ');'); }" size="24">z</textarea>
 -->
-  <select id="sel" style="width:8em;">
-    <option>z</option>
-  
+  <select id="sel" style="width:8em;" size="2">
     <option value="z = moeb(T, z);
     offset = re(log(project2rectangle(z)));
-    modulus = (2+2*pi*i);
+    modulus = (zoom+2*pi*i);
     l = log(z);
     moeb(inverse(T),
       exp(
         mod(
-          l - offset,
+          l - offset - goffset,
           modulus
         ) + offset
       )
     );
-  ">Droste</option>
+  " selected>Droste</option>
     <option value="z = moeb(T, z);
-    offset = re(log(project2rectangle(z)));
-    modulus = (2+2*pi*i);
-    l = log(z);
-    moeb(inverse(T),
-      exp(
-        mod(
-          l - offset - mod(seconds()/4,2),
-          modulus
-        ) + offset
-      )
-    );
-  ">Droste +zoom</option>
-    <option value="z = moeb(T, z);
-    modulus = (2+2*pi*i);
-    alpha = modulus/(2*pi*i); l = log(z)*alpha;
+    modulus = (zoom+2*pi*i);
+    alpha = (2*pi*i)/modulus; l = log(z)/alpha;
     offset = re(log(project2rectangle(exp(l))));
     moeb(inverse(T),
       exp(
         mod(
-          l - offset + i*im((2*pi*i)*alpha)*floor(re(l-offset)),
-          modulus
+          l - offset - goffset,
+          zoom
         ) + offset
       )
     );
   ">twisted Droste</option>
-    <option value="z = moeb(T, z);
-    modulus = (2+2*pi*i);
-    alpha = modulus/(2*pi*i); l = log(z)*alpha;
-    offset = re(log(project2rectangle(exp(l))));
-    moeb(inverse(T),
-      exp(
-        mod(
-          l - offset + i*im((2*pi*i)*alpha)*floor(re(l)) - mod(seconds()/4,2),
-          modulus
-        ) + offset
-      )
-    );
-  ">twisted Droste +zoom</option>
   </select>
+</p>
+<p>
+  zoom: <input type="range" id="zoom" min="-1" max="2.1" step="0.01" value="0.5"></input>
+  speed: <input type="range" id="doffset" min="-1.1" max="1.1" step="0.1" value="0"></input>
 </p>
 <!--<p><button onclick="cdy.evokeCS('setcenter()')">set current center to 0</button></p>-->
   <script type="text/javascript">
-  var select = document.getElementById("sel");
-  select.addEventListener('change', function(event) {
+  document.getElementById("sel").addEventListener('change', function(event) {
   //  document.getElementById('inp').value = this.value;
     cdy.evokeCS('f(z) := (' + this.value + ');');
   }, false);
+  
+  document.getElementById("zoom").addEventListener('mousemove', function(event) {
+  //  document.getElementById('inp').value = this.value;
+    cdy.evokeCS('zoom = exp(' + this.value + ');');
+  }, false);
+  
+  document.getElementById("doffset").addEventListener('mousemove', function(event) {
+  //  document.getElementById('inp').value = this.value;
+    cdy.evokeCS('doffset = (' + this.value + ');');
+  }, false);
+  
+  
   </script>
   
   <div>
