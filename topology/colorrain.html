@@ -70,19 +70,20 @@ In the visualization, an approximate $f$ is computed for an arbitrary metric $d:
 			x = 2*[random()-.5,random()-.5]; //raindrop on x
 			//sgn = if(imagergb((-1,-1), (1,-1),"sum", x)_1>0,-1,1);
 			sgn = (-1)^cnt;
+			col = 2*[random(), random(), random()];
 	    colorplot("sum",
 				y = #;
-				cur = imagergb("sum", y, interpolation->false).r;
+				cur = imagergb("sum", y, interpolation->false);
 				dst = 4*d(x,y);
-				cur + sgn*(.1^(1/1000))^cnt*(1/(dst^2+1))
+				cur + sgn*(.1^(1/1000))^cnt*(1/(dst^2+1))*col;
 			);	
 		)
 	);
 	//output the current content of top
 	colorplot(
 		y = #;
-		cur = imagergb("sum", y, interpolation->false).r;
-		sin(cur/2)/2+1/2;
+		cur = imagergb("sum", y, interpolation->false);
+		[sin(cur.r/2)/2+1/2, sin(cur.g/2)/2+1/2, sin(cur.b/2)/2+1/2];
 	);	
 </script>
 

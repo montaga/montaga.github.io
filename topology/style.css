@@ -7,3 +7,7 @@ body {
     background-color: #edf1f3;
     font-size: 16px;
 }
+
+div.author {
+  font-style: italic;
+}

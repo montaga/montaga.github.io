@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+            <title>Cindy JS</title>
+            <script type="text/javascript" src="Cindy.js"></script>
+						<script type="text/javascript" src="CindyGL.js"></script>
+						<link rel="stylesheet" href="style.css">
+						<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+});
+</script>
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+  </head>
+
+	<body>
+
+        <h1>Non Hausdorff-quotientspaces</h1>
+				<div class="author">Inspired from K. Jänich, Topologie, Springer.<div>
+			
+					<h3>Question:</h3>
+				Let $X$ be Hausdorff. What are the requirements for $\sim$ that the quotient space $X / \sim$ becomes Hausdorff?
+			
+				<h3>Observation:</h3> If $X / \sim$ is Hausdorff, then all equivalence classes of $\sim$ in $X$ are closed:
+				If there was a $y \in \overline{[x]} \setminus [x]$, then one could not seperate $[y]$ from $[x]$ in $X / \sim$.
+				
+				<h3>Does the converse hold?</h3> Are there equivalence relations $\sim$ on a Hausdorff space $X$ where the sets $[x]$ are closed, but $X / \sim$ is not Hausdorff?
+				For that consider the two examples:
+
+<script id='csinit' type='text/x-cindyscript'>
+init():= (
+	
+	if(mode=="nonhausdorff",
+		f(x) := if(x_1>=1, 2*x_1-2,
+		 if(x_1<=-1, 2*x_1+2,
+			 (1/(x_1^2-1) - x_2)
+		 )
+		);
+
+		df(x) := if(x_1>=1, 2,
+		 if(x_1<=-1, 2,
+			 (1/(x_1^2-1))
+		 )
+		);
+		samecomponent(x,y) := ((x_1 <= -1) & (y_1 <= -1)) % ((-1<x_1 & x_1<1) & (-1<y_1 & y_1<1)) % ((1<=x_1) & (1<=y_1)) ;
+		
+		,
+		f(x) := (3/4*x_1 + (x_1)^5/4 - x_2)+5;
+		df(x) := (3/4 + 3*(x_1)^4/4);
+		samecomponent(x,y) := true;	
+  );
+	errc(mode);
+);
+mode="nonhausdorff";
+init();
+
+
+</script>
+
+<script id='csdraw' type='text/x-cindyscript'>
+eps = .2;
+x = mouse();
+fx = floor(20*f(x))/20 +0.025;
+dfx = floor(20*df(x))/20;
+colorplot(
+	if(samecomponent(#,x) & |f(#) - fx|<.025, red(1),
+ -[.0,.2,.4]*(if(
+	 samecomponent(#,x) & |f(#) - fx|<eps*|dfx|
+	 % (1<=x_1 & x_1 < 1+eps & f(#)*4<-1/(eps-(x_1 -1)))
+	 % (x_1<=-1 & -1-eps < x_1  & f(#)*4<-1/(eps+(x_1 +1)))
+	 
+	 ,1,0)) +
+		if(mod(f(#),.1)<.05, gray(.8-.2/|df(#)|), gray(.8+.2/|df(#)|))
+	)
+);
+
+drawtext(x, "$[x]$", color->red(1.));
+</script>
+
+<script type="text/javascript">
+
+		var cdy = CindyJS({
+			ports: [{id: "CSCanvas", transform:[{visibleRect:[-1.5,-1.5,1.5, 1.5]}]}],
+		csconsole: false,
+		use: ["katex", "CindyGL"],
+								scripts:"cs*",
+								geometry:[]});
+		</script>
+		<div>The following applet visualizes differerent topologies in $\mathbb{R}^2/\sim$. The orange shape corresponds to an open neighborhood of $[x]$ in the given topology.</div>
+        <div  id="CSCanvas" style="float: left; width:650px; height:650px; margin:15px;"></div>
+				
+					<div><h3>Select one topology of the following list:</h3></div>
+					<div>
+						<select id="sel" size="2" onchange='cdy.evokeCS("mode := (\"" + this.value + "\"); init();");' style="width:20em;">  
+						  <option value="hausdorff">A Hausdorff example</option>
+							<option value="nonhausdorff" selected>A non Hausdorff example</option>
+						</select>
+					</div>
+</body>
+</html>
