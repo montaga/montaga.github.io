@@ -147,8 +147,10 @@ goffset = 0;
 lasttick = seconds();
 
 islikecolor(c):=(
-  //|c/(c*(1,1,1)), color/(color*(1,1,1))|<tolerance
-  |c,color|<tolerance
+  //|c,color|+|c/(c*(1,1,1)), color/(color*(1,1,1))|<tolerance
+  //|c,color|+|c_3,color_3|<tolerance
+  
+  |(c_1+c_3-2*c_2)-(color_1+color_3-2*color_2)|<tolerance
 )
 </script>
 
