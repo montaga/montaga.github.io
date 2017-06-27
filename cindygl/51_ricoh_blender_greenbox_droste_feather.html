@@ -241,11 +241,8 @@ if (image ready(video),
 );
 if(ptselect,
 
-  drawtext((0,0), "select the center and tolerance of the greenbox for the Droste-area and press ENTER when you are done", size->30, align->"mid");
-  
-  forall(pts, p,
-    draw(complex2screen(M, sphere2complex(p)));
-  );
+  drawtext((0,0), "select the tolerance and center of the greenbox 
+  for the Droste-area and press ENTER when you are done", size->30, align->"mid");
 
   ,
   
