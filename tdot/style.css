@@ -1,0 +1,43 @@
+body {
+    max-width: 1024px;
+    margin: 20px auto 100px auto;
+    font-family: Trebuchet MS, Tahoma, Arial, Helvetica, sans-serif;
+    background-color: #edf1f3;
+    font-size: 16px;
+}
+
+div.author {
+  font-style: italic;
+}
+
+
+.showcase {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.showcase div {
+  width: 300px;
+  margin: 10px;
+}
+
+a {
+  color: rgb(100,100,100);
+  text-shadow: 0 0 5px rgba(0,0,0,0.2);
+  text-decoration: none;
+}
+
+a:hover {
+  color: rgb(255,150,0);
+  text-shadow: 0 0 5px rgba(0,0,0,0.1);
+  text-decoration: underline;
+}
+
+img {
+  width: 100%;
+  box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.2);
+}
+
+img:hover {
+  box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.5);
+}
