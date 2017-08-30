@@ -354,7 +354,7 @@ In 2002 the Dutch mathematicians Hendrik Lenstra and Bart de Smit <a href="http:
       cdy.evokeCS(`
 readcamera(z) := (
   regional(latlon, phi, lambda);
-  latlon = complex2latlon(z);
+  latlon = complex2latlon(i*z);
   phi = latlon_1;
   lambda = -latlon_2;
   t1 = (-.505,.065) + (cos(lambda), sin(lambda))*(pi/2-phi)*.2779; //phi>0
@@ -368,7 +368,7 @@ readcamera(z) := (
       cdy.evokeCS(`
         readcamera(z) := (
           latlon = complex2latlon(z);
-          imagergba([-pi,-pi/2], [pi,-pi/2], video, (-latlon_2, latlon_1), repeat->true);
+          imagergb([-pi,-pi/2], [pi,-pi/2], video, (-latlon_2, latlon_1), repeat->true);
         );
       `);
     }
