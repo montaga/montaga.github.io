@@ -35,18 +35,6 @@ reset();
 
 project2square(z) :=  z/max(|re(z)|,|im(z)|);
 
-project2rectangle(z) := (
-  p = complex2sphere(1e3*z); //works only for points that are outside of the rectangle
-  forall(1..4, j,
-    v = p-scenter;
-    //if(((p*mid_j)/(v*mid_j))>0, 
-    if((p*mid_j)>0, 
-      p = p - ((p*mid_j)/(v*mid_j))*v;
-    );
-  );
-  sphere2complex(p)
-);
-
 
 //0 -> a, oo -> b, 1 -> c
 moebhelp(a, b, c) := (
@@ -86,8 +74,8 @@ moeb(M, z) := (
 screen2complex(M, pixel) := (
   //( pixel_1]))
   if(spherical,
-    moeb(M, (exp(azoom)*(pixel_1 + i*pixel_2))),
-    ( (exp(azoom)*(pixel_1 + i*pixel_2)))
+    moeb(M, exp(azoom)*complex(pixel)),
+    exp(azoom)*complex(pixel)
   )
   
 );
@@ -400,39 +388,52 @@ readcamera(z) := (
           drawtext((0,0), "select " + (4-length(pts)) + " points for the Droste-rectangle", size->30, align->"mid");
           
           forall(pts, p,
-            draw(complex2screen(M, sphere2complex(p)));
+            draw(complex2screen(M, if(spherical, sphere2complex(p), p)));
           );
         );
         
         selectionmousedownfun() := (
-          pts = pts :> complex2sphere(screen2complex(M, mouse()));
+          if(spherical,
+            pts = pts :> complex2sphere(screen2complex(M, mouse()));
+            ,
+            pts = pts :> screen2complex(M, mouse());
+          );
           if(length(pts)==4,
             selectionmode = false;
-          
-            center = sphere2complex(sum(pts));
             
-            p0 = 0;
-            p1 = center;
-            
-            a1 = sphere2complex(cross(complex2sphere(p0), complex2sphere(p1)));
-            a2 = sphere2complex(-cross(complex2sphere(p0), complex2sphere(p1)));
+            if(spherical,
+              center = sphere2complex(sum(pts));
+              
+              p0 = 0;
+              p1 = center;
+              
+              a1 = sphere2complex(cross(complex2sphere(p0), complex2sphere(p1)));
+              a2 = sphere2complex(-cross(complex2sphere(p0), complex2sphere(p1)));
 
-            T = genmoeb(
-              p1, a1, a2,
-              p0, a1, a2
-            );
-            scenter = complex2sphere(center);
+              T = genmoeb(
+                p1, a1, a2,
+                p0, a1, a2
+              );
+              scenter = complex2sphere(center);
 
-            mid = apply(1..4, j,
-              cross((pts_j), (pts_(mod(j,4)+1)));
-            );
-            mid = apply(mid, m, m/|m|);
-            forall(1..4, j, if(|mid_j,scenter|<|-mid_j,scenter|, mid_j = -mid_j;));
+              mid = apply(1..4, j,
+                cross((pts_j), (pts_(mod(j,4)+1)));
+              );
+              mid = apply(mid, m, m/|m|);
+              forall(1..4, j, if(|mid_j,scenter|<|-mid_j,scenter|, mid_j = -mid_j;));
 
-            //apply moebius transformations on all of these points
-            mid = apply(mid, p, complex2sphere(moeb(T,sphere2complex(p))));
-            scenter = complex2sphere(0);
+              //apply moebius transformations on all of these points
+              mid = apply(mid, p, complex2sphere(moeb(T,sphere2complex(p))));
+              scenter = complex2sphere(0);
+              ,
+              center = sum(pts)/4;
+              normal = apply(1..4, j,
+                inverse([gauss(pts_j-center), gauss(pts_(mod(j,4)+1)-center)])*[1,1]; // [a-center,b-center]*normal_i = 1
+              );
+            )
           );
+          errc(center);
+          errc(normal);
         );
       `);
     } else if(selectionmode=="greenscreen"){
@@ -533,6 +534,32 @@ readcamera(z) := (
         col;
         )`);
       }
+    }
+    if(spherical) {
+      cdy.evokeCS(`
+        project2rectangle(z) := (
+          p = complex2sphere(1e3*z); //works only for points that are outside of the rectangle
+          forall(1..4, j,
+            v = p-scenter;
+            if((p*mid_j)>0, 
+              p = p - ((p*mid_j)/(v*mid_j))*v;
+            );
+          );
+          sphere2complex(p)
+        );
+      `);
+    } else {
+      cdy.evokeCS(`
+        project2rectangle(z) := (
+          p = (1e3*gauss(z));
+          forall(1..4, j,
+            if((p*normal_j)>1,
+              p = p/(p*normal_j);
+            );
+          );
+          complex(p)
+        );
+      `);
     }
     
     if(input!=lastinput || selectionmode!=lastselectionmode) {
