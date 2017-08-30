@@ -106,6 +106,12 @@ greenval(c):=(
   min(max(((-c_1-c_3+2*c_2)-(-color_1-color_3+2*color_2))/tolerance+1.5,0),1)
 );
 
+information(text):=(
+  forall(1..6,k,
+    drawtext(gauss(exp(2*pi*i*k/6)*0.002), text, size->30, align->"mid");
+  );
+  drawtext((0,0), text, size->30, align->"mid", color->[1,1,1]);
+);
 </script>
 
 <script id="cskeydown" type="text/x-cindyscript">
@@ -206,7 +212,7 @@ if(spherical,
   
 </script>
 </head>
-<body onload="change()">>
+<body onload="change()">
   <h1>The Droste effect</h1>
   <p>
     The so called <a href="https://en.wikipedia.org/wiki/Droste_effect">"Droste effect"</a> refers to a picture that contains the picture itself. Within this embedded picture, the original picture occurs recursively. Some advertisements utilize this effect.
@@ -249,12 +255,12 @@ In 2002 the Dutch mathematicians Hendrik Lenstra and Bart de Smit <a href="http:
 </div>
 </div>
 <p>
-  zoom: <input type="range" id="zoom" min="-1.5" max="1.5" step="0.01" value="0"></input>
-  speed: <input type="range" id="doffset" min="-1.1" max="1.1" step="0.1" value="0"></input>
-  tolerance: <input type="range" id="tolerance" min="0.0001" max="0.5" step="0.001" value="0.2"></input>
+  <span id="zoomoption">zoom: <input type="range" id="zoom" min="-1.5" max="1.5" step="0.01" value="0"></input></span>
+  <span id="speedoption">speed: <input type="range" id="doffset" min="-1.1" max="1.1" step="0.1" value="0"></input></span>
+  <span id="toleranceoption" hidden>tolerance: <input type="range" id="tolerance" min="0.0001" max="1.3" step="0.001" value="0.2"></input></span>
 </p>
-<p>
-  f(z) = <input type="text" id="finp" disabled value="z^2" onkeypress="if((event.which ? event.which : event.keyCode)==13) { change() }" size="24"></input>
+<p id="foption" hidden>
+  f(z) = <input type="text" id="finp" value="z^2" onkeypress="if((event.which ? event.which : event.keyCode)==13) { change() }" size="24"></input>
 </p>
   <p>
   <div id="outer">
@@ -364,7 +370,8 @@ In 2002 the Dutch mathematicians Hendrik Lenstra and Bart de Smit <a href="http:
             z = screen2complex(M, #);
             readcamera(z)
           );
-          drawtext((0,0), "select " + (4-length(pts)) + " points for the Droste-rectangle", size->30, align->"mid");
+          information("select " + (4-length(pts)) + " points for the Droste-rectangle");
+          
           
           forall(pts, p,
             draw(complex2screen(M, if(spherical, sphere2complex(p), p)));
@@ -424,8 +431,8 @@ In 2002 the Dutch mathematicians Hendrik Lenstra and Bart de Smit <a href="http:
           gv = greenval(c);
           gv*[1,0,0]+(1-gv)*c;
         );
-        drawtext((0,0), "select the tolerance and center of the greenbox 
- for the Droste-area and press ENTER when you are done", size->30, align->"mid");
+        information("select the tolerance and center of the greenbox 
+for the Droste-area and press ENTER when you are done");
       );
 
       selectionmousedownfun() := (
@@ -556,7 +563,10 @@ In 2002 the Dutch mathematicians Hendrik Lenstra and Bart de Smit <a href="http:
         readcamera(${finp.value})
         )`);
     }
-    finp.disabled=(transformmode!="manualf");
+    document.getElementById("foption").hidden=(transformmode!="manualf");
+    document.getElementById("toleranceoption").hidden=(selectionmode!="greenscreen" || transformmode=="manualf");
+    document.getElementById("zoomoption").hidden=(transformmode=="manualf");
+    document.getElementById("speedoption").hidden=(transformmode=="manualf");
     
     console.log(`change: -> ${input} ${selectionmode} ${transformmode}`);
   }
