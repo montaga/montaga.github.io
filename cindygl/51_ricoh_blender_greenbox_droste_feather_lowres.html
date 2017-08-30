@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 
@@ -318,6 +319,7 @@ var cdy = CindyJS({
     col;
   ">twisted Droste</option>
   </select>
+  resolution: <input type="text" value="1024" id="resx" size="2" onchange="updateres()"></input><input type="text" value="512" id="resy" size="2" onchange="updateres()"></input>
 </p>
 <p>
   zoom: <input type="range" id="zoom" min="-1" max="2.1" step="0.01" value="1"></input>
@@ -346,7 +348,11 @@ var cdy = CindyJS({
     cdy.evokeCS('tolerance = (' + this.value + ');');
   }, false);
   
-  
+  function updateres() {
+    cdy.evokeCS(`
+    video = camera video(resolution->[${document.getElementById("resx").value},${document.getElementById("resy").value}]);  
+      `)
+  }
   </script>
   
   <div>
