@@ -8,6 +8,7 @@ body {
 
 div.author {
   font-style: italic;
+  text-align: right;
 }
 
 
@@ -46,6 +47,7 @@ img:hover {
 .parameters {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
 }
 
 .parameters div {
@@ -53,31 +55,34 @@ img:hover {
   margin: 0px;
   font-style: italic;
   font-weight: bolder;
+  margin: 5px auto;
 }
 
 
 select {
-  border: none;
+  margin: 3px;
   background: none;
   height: 100%;
   width: 250px;
   overflow: hidden;
-  
+  border: none;
 }
+
 .options option, .mybutton {
+    
   width: 200px;
-  margin: 5px;
   padding: 5px;
   text-align: center;
   font-size: 18px;
 /*  background-color: #509050;
   color: white;*/
   box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.2);
-  border: 5px;
+  border: 4px;
   border-style: solid;
   border-color: white;
   border-radius: 10px;
   text-shadow: 0 0 5px rgba(0,0,0,0.2);
+  margin: 5px auto;
 }
 
 .options option:hover, .mybutton:hover {

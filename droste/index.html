@@ -98,7 +98,6 @@ setcenter() := (
 );
 
 onScroll(delta) := (
-  errc(delta);
   azoom = azoom-delta/1000
 );
 
@@ -108,7 +107,7 @@ greenval(c):=(
 
 information(text):=(
   forall(1..6,k,
-    drawtext(gauss(exp(2*pi*i*k/6)*0.002), text, size->30, align->"mid");
+    drawtext(gauss(exp(2*pi*i*k/6)*0.004), text, size->30, align->"mid");
   );
   drawtext((0,0), text, size->30, align->"mid", color->[1,1,1]);
 );
@@ -130,23 +129,6 @@ if(keycode()==13,  //ENTER
     p0, a1, a2
   );
   
-    f(z) := (
-      z = ( z-center);    
-      z = z/exp(4*zoom+mod(goffset,zoom)); //zoom in
-      run = true;
-      col = [0,0,0];
-      gv = 1;
-      repeat(16, //and walk out as long as required
-        if(run,
-          gc = readcamera(((z+ center)));
-          col = (1-gv)*col + gv*gc;//use old gv
-          gv = greenval(gc);
-          if(gv<.1, run = false);
-          z = z*exp(zoom);
-        );
-      );
-      col;
-    );
 
 );
 </script>
@@ -167,7 +149,7 @@ dragging = false;
 
 <script id="csdraw" type="text/x-cindyscript">
 now = seconds();
-goffset = goffset+doffset*(now-lasttick);
+goffset = mod(goffset+doffset*(now-lasttick),zoom);
 
 lasttick = now;
 
@@ -214,6 +196,53 @@ if(spherical,
 </head>
 <body onload="change()">
   <h1>The Droste effect</h1>
+<div class="parameters">
+<div>
+  Input source:
+  <select id="input" class="options" multiple="multiple" onchange="javascript:change();">
+    <option selected value="image">Use static image</a>
+    <option value="webcam">Use webcam</a>
+    <option value="spherical">Spherical webcam (Theta)</a>
+    <option value="sphericalblender">Spherical (Theta Blender)</a>
+  </select>
+</div>
+<div>
+  Selection Mode:
+  <select id="selectionmode" class="options" multiple="multiple" onchange="javascript:change();">
+    <option value="rectangle">Select rectangle by hand</a>
+    <option selected value="greenscreen">Use greenscreen</a>
+  </select>
+</div>
+<div>
+  Transformation-mode:
+<select id="transformmode" class="options" multiple="multiple" onchange="javascript:change();">
+  <option value="droste" selected>Droste</option>
+  <option value="twisteddroste">Twisted Droste</option>
+  <option value="manualf">Enter a manual function</option>
+">twisted Droste</option>
+</select>
+</div>
+</div>
+<p class="parameters">
+  <span id="zoomoption">zoom: <input type="range" id="zoom" min="-1.5" max="1.5" step="0.01" value="0"></input></span>
+  <span id="speedoption">speed: <input type="range" id="doffset" min="-1.1" max="1.1" step="0.1" value="0"></input></span>
+  <span id="toleranceoption" hidden>tolerance: <input type="range" id="tolerance" min="0.0001" max=".8" step="0.001" value="0.2"></input></span>
+</p>
+<p id="foption" hidden>
+  f(z) = <input type="text" id="finp" value="z^2" onkeypress="if((event.which ? event.which : event.keyCode)==13) { change() }" size="24"></input>
+</p>
+  <p>
+  <div id="outer">
+    <div id="CSCanvas" onwheel="cdy.evokeCS('onScroll(' + event.deltaY  + ')');"></div>
+  </div>
+  </p>
+  <div class="mybutton" id="fs">Enter Fullscreen</div>
+  <p>
+  <div class="author">  
+    Author: <a href="https://www-m10.ma.tum.de/bin/view/Lehrstuhl/AaronMontag">Aaron Montag</a>
+  </div>
+  </p>
+  
   <p>
     The so called <a href="https://en.wikipedia.org/wiki/Droste_effect">"Droste effect"</a> refers to a picture that contains the picture itself. Within this embedded picture, the original picture occurs recursively. Some advertisements utilize this effect.
   </p>
@@ -227,53 +256,10 @@ In 2002 the Dutch mathematicians Hendrik Lenstra and Bart de Smit <a href="http:
     <a href="https://arxiv.org/abs/1605.01396">In their article,</a> Saul Schleimer and Henry Segerman demonstrated how the (twisted) Droste effect could be applied to spherical images by utilizing the complex exponential, logarithm, and Möbius transformations.
     If you have a spherical camera (such as the Ricoh Theta), you can also try out this effect in real-time on this website.
   </p>
-<div class="parameters">
-<div>
-  Input source:
-  <select id="input" class="options" multiple="multiple" onchange="javascript:change();">
-    <option selected value="image">Use static image</a>
-    <option value="webcam">Use my webcam</a>
-    <option value="spherical">spherical webcam (theta)</a>
-    <option value="sphericalblender">spherical webcam (theta Blender)</a>
-  </select>
-</div>
-<div>
-  Selection Mode:
-  <select id="selectionmode" class="options" multiple="multiple" onchange="javascript:change();">
-    <option selected value="rectangle">Select rectangle by hand</a>
-    <option value="greenscreen">Use a greenscreen</a>
-  </select>
-</div>
-<div>
-  Transformation-mode:
-<select id="transformmode" class="options" multiple="multiple" onchange="javascript:change();">
-  <option value="droste" selected>Droste</option>
-  <option value="twisteddroste">Twisted Droste</option>
-  <option value="manualf">Enter a manual function</option>
-">twisted Droste</option>
-</select>
-</div>
-</div>
-<p>
-  <span id="zoomoption">zoom: <input type="range" id="zoom" min="-1.5" max="1.5" step="0.01" value="0"></input></span>
-  <span id="speedoption">speed: <input type="range" id="doffset" min="-1.1" max="1.1" step="0.1" value="0"></input></span>
-  <span id="toleranceoption" hidden>tolerance: <input type="range" id="tolerance" min="0.0001" max="1.3" step="0.001" value="0.2"></input></span>
-</p>
-<p id="foption" hidden>
-  f(z) = <input type="text" id="finp" value="z^2" onkeypress="if((event.which ? event.which : event.keyCode)==13) { change() }" size="24"></input>
-</p>
   <p>
-  <div id="outer">
-    <div id="CSCanvas" onwheel="cdy.evokeCS('onScroll(' + event.wheelDelta + ')');"></div>
-  </div>
+    Matt Parker and Henry Segerman made <a href="https://www.youtube.com/watch?v=Yp12c3-IL-I">an awesome demonstration of this effect in a YouTube-video.</a>
   </p>
-  <a class="mybutton" id="fs">Enter Fullscreen</a>
-  <p>
-  </div>
-  <div class="author">  
-    Author: <a href="https://www-m10.ma.tum.de/bin/view/Lehrstuhl/AaronMontag">Aaron Montag</a>
-  </div>
-  </p>
+
   
   <script type="text/javascript">
   
@@ -313,8 +299,12 @@ In 2002 the Dutch mathematicians Hendrik Lenstra and Bart de Smit <a href="http:
   }
   
   var lastinput, lastselectionmode, lasttransformmode;
+  var video = false;
   function change() {
     var input = readselected("input");
+    if(lastinput!=input) {
+      document.getElementById("selectionmode").selectedIndex = 0;
+    }
     var selectionmode = readselected("selectionmode");
     var transformmode = readselected("transformmode");
     var spherical = (input=="spherical" || input=="sphericalblender");
@@ -323,7 +313,10 @@ In 2002 the Dutch mathematicians Hendrik Lenstra and Bart de Smit <a href="http:
       spherical = ${spherical};
       imagemode = ${imagemode};
     `);
-    if(!imagemode) cdy.evokeCS(`video = camera video();`);
+    if(!imagemode & !video) {
+      cdy.evokeCS(`video = camera video();`);
+      video = true;
+    }
       
     if(input=="image"){
       cdy.evokeCS(`
@@ -372,10 +365,11 @@ In 2002 the Dutch mathematicians Hendrik Lenstra and Bart de Smit <a href="http:
           );
           information("select " + (4-length(pts)) + " points for the Droste-rectangle");
           
-          
-          forall(pts, p,
-            draw(complex2screen(M, if(spherical, sphere2complex(p), p)));
+          screenp = apply(pts, p,
+            complex2screen(M, if(spherical, sphere2complex(p), p));
           );
+          forall(screenp, p , draw(p));
+          if(!spherical, connect(screenp));
         );
         
         selectionmousedownfun() := (
@@ -418,8 +412,6 @@ In 2002 the Dutch mathematicians Hendrik Lenstra and Bart de Smit <a href="http:
               );
             )
           );
-          errc(center);
-          errc(normal);
         );
       `);
     } else if(selectionmode=="greenscreen"){
@@ -431,7 +423,7 @@ In 2002 the Dutch mathematicians Hendrik Lenstra and Bart de Smit <a href="http:
           gv = greenval(c);
           gv*[1,0,0]+(1-gv)*c;
         );
-        information("select the tolerance and center of the greenbox 
+        information("Select the tolerance and center of the greenscreen
 for the Droste-area and press ENTER when you are done");
       );
 
