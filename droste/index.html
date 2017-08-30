@@ -72,18 +72,16 @@ moeb(M, z) := (
 );
 
 screen2complex(M, pixel) := (
-  //( pixel_1]))
   if(spherical,
     moeb(M, exp(azoom)*complex(pixel)),
     exp(azoom)*complex(pixel)
   )
-  
 );
 
 complex2screen(M, z) := (
   if(spherical,
     gauss(moeb(inverse(M), z)/exp(azoom)),
-    gauss(( z)/exp(azoom))
+    gauss(z/exp(azoom))
   )
 );
 
@@ -95,7 +93,6 @@ readcamera(z) := (
   imagergb([-1,-1/2], [1,-1/2], image, (re(z), im(z)), interpolate->true);
 );
 
-
 setcenter() := (
   Z = inverse(M);
 );
@@ -105,14 +102,8 @@ onScroll(delta) := (
   azoom = azoom-delta/1000
 );
 
-
-
 greenval(c):=(
-  //|c,color|+|c/(c*(1,1,1)), color/(color*(1,1,1))|<tolerance
-  //|c,color|+|c_3,color_3|<tolerance
-  
   min(max(((-c_1-c_3+2*c_2)-(-color_1-color_3+2*color_2))/tolerance+1.5,0),1)
-  //min(max((c * color - color*color + 1),0),1)
 );
 
 </script>
