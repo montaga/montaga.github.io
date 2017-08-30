@@ -1,0 +1,96 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>Webcam in Cindy JS</title>
+<meta charset="UTF-8">
+<script type="text/javascript" src="Cindy.js"></script>
+<script type="text/javascript" src="CindyGL.js"></script>
+<script id="csinit" type="text/x-cindyscript">
+video = camera video();
+last = "last";
+component = "component";
+photo = "photo";
+createimage(last, 1280, 720);
+createimage(component, 1280, 720);
+createimage(photo, 1280, 720);
+colorplot(component, if(#_1>600, 0, 1));
+colorplot(last, 0);
+eps = .05;
+delta = 10;
+photoset = false;
+moving(pixel) := (|imagergb(last, pixel)-imagergb(video, pixel)|>eps);
+covered(pixel) := (|imagergb(photo, pixel)-imagergb(video, pixel)|>eps);
+wascovered(pixel) := (|imagergb(photo, pixel)-imagergb(last, pixel)|>eps);
+</script>
+
+<script id="cskeydown" type="text/x-cindyscript">
+print("pressed key" + keycode());
+if(keycode()==13 & !photoset,  //ENTER
+  photoset = true;
+  colorplot(photo, imagergb(video, #));
+);
+</script>
+
+<script id="csdraw" type="text/x-cindyscript">
+if (image ready(video),
+  //draw image (A, B, video);
+  colorplot(imagergb(video, #));
+  
+  
+  colorplot(if(moving(#), [.4,0,0,.1],[0,0,0,0]));
+  colorplot(imagergb(component, #)_1*[0,.3,0,.1]);
+  if(photoset,
+    colorplot(if(covered(#), [0,0,0.5,.1],[0,0,0,0]));
+    
+    colorplot(component, 
+      ccomponent = imagergb(component, #)_1;
+      change = false;
+      if(covered(#) & !wascovered(#),
+      forall([3,10,20,40,50,80], delta,
+        forall([(1,0), (-1,0), (0,1), (0,-1),(1,1),(-1,1),(1,-1),(-1,-1)], dir,
+          if(|imagergb(component, #+delta*dir)_1-ccomponent|>.5 & moving(#+delta*dir), change = true);
+        );
+        );
+      );
+      if(change, round(1-ccomponent), ccomponent);
+    );
+    alpha = 1;
+    gamma = 1;
+    colorplot(component, 
+      ccomponent = imagergb(component, #)_1;
+      //cnt = 0;
+      sum = 0;
+      forall([(1,0), (-1,0), (0,1), (0,-1),(1,1),(-1,1),(1,-1),(-1,-1)], dir,
+        //if(imagergb(component, #+dir)_1 != ccomponent, cnt = cnt+1;);
+        sum = sum + imagergb(component, #+dir)_1;
+      );
+      max(0,min(1,gamma*(alpha*sum/8+(1-alpha)*ccomponent-.5)+.5))
+    );
+  );
+  colorplot(last, imagergb(video, #));
+  
+  
+  if(!photoset, drawtext((600,500), "press enter to take photo of empty screen", size->30, align->"mid", color->[0,1,0]););
+);
+
+</script>
+<script type="text/javascript">
+var cdy = CindyJS({
+  ports: [{id: "CSCanvas", transform:[{visibleRect:[0,0,1280,720]}]}],
+  scripts: "cs*",
+  language: "en",
+  defaultAppearance: {
+  },
+  geometry: [],
+  use: ["CindyGL"]
+});
+</script>
+</head>
+
+<body style="font-family:Arial;">
+  <div id="CSCanvas" style="width:1280px; height:720px; border:0px;"></div>
+</body>
+
+</html>

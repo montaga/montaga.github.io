@@ -2159,7 +2159,7 @@ function cs_onDrop(lst, pos) {
 function cindy_cancelmove() {
     move = undefined;
 }
-var version = [0,8,4,49,"gd23d1a4"];
+var version = [0,8,4,109,"gd659205"];
 //==========================================
 //      Complex Numbers
 //==========================================
@@ -5992,6 +5992,22 @@ General.wrapJSON = function(data) {
 
 General.identity = function(x) {
     return x;
+};
+
+General.deeplyEqual = function(a, b) {
+    if (typeof a !== "object" || typeof b !== "object" ||
+        a === null || b === null)
+        return a === b;
+    var cnt = 0;
+    var k;
+    for (k in a) {
+        ++cnt;
+        if (!(k in b && General.deeplyEqual(a[k], b[k])))
+            return false;
+    }
+    for (k in b)
+        --cnt;
+    return cnt === 0;
 };
 /*jshint -W069 */
 
@@ -10539,6 +10555,94 @@ evaluator.allelements$1 = function(args, modifs) {
     });
 };
 
+evaluator.elementsatmouse$0 = function(args, modifs) {
+    var eps = 0.5;
+    var mouse = List.realVector([csmouse[0], csmouse[1], 1]);
+
+    var distMouse = function(p) {
+        if (CSNumber._helper.isAlmostZero(p.value[2])) return Infinity;
+        var pz = List.normalizeZ(p);
+        return List.abs(List.sub(pz, mouse)).value.real;
+    };
+
+    var getPerp = function(l) {
+        var fp = List.turnIntoCSList([l.value[0], l.value[1], CSNumber.zero]);
+        return List.normalizeMax(List.cross(mouse, fp));
+    };
+
+    var inciPP = function(p) {
+        return (distMouse(p.homog) < eps);
+    };
+
+    var inciPL = function(l) {
+        var perp = getPerp(l.homog);
+        var pp = List.normalizeMax(List.cross(l.homog, perp));
+        var d = distMouse(pp);
+        return (d < eps);
+    };
+
+    var inciPC = function(c) {
+        var l = General.mult(c.matrix, mouse);
+        var perp = getPerp(l);
+        var sect = geoOps._helper.IntersectLC(perp, c.matrix);
+        var dists = sect.map(function(el) {
+            return distMouse(el);
+        });
+
+        var erg = Math.min(dists[0], dists[1]);
+
+        return (erg < eps);
+    };
+
+    var points = csgeo.points.filter(inciPP);
+
+    var lines = csgeo.lines.filter(function(el) {
+        var val = inciPL(el);
+        // fetch segment
+        if (val && el.kind === "S") {
+            var line = el.homog;
+            var tt = List.turnIntoCSList([line.value[0], line.value[1], CSNumber.zero]);
+            var cr = List.crossratio3(
+                el.farpoint, el.startpos, el.endpos, mouse, tt).value.real;
+            if (cr < 0 || cr > 1) val = false;
+        }
+
+        return val;
+    });
+
+    var conics = csgeo.conics.filter(function(el) {
+        var val = inciPC(el);
+        // fetch arc
+        if (val && el.isArc) {
+            var cr = List.crossratio3harm(el.startPoint, el.endPoint,
+                el.viaPoint, mouse, List.ii);
+            var m = cr.value[0];
+            var n = cr.value[1];
+            if (!CSNumber._helper.isAlmostZero(m)) {
+                n = CSNumber.div(n, m);
+                m = CSNumber.real(1);
+            } else {
+                m = CSNumber.div(m, n);
+                n = CSNumber.real(1);
+            }
+            var nor = List.abs(List.turnIntoCSList([n, m]));
+            m = CSNumber.div(m, nor);
+            n = CSNumber.div(n, nor);
+
+            var prod = CSNumber.mult(n, m);
+            if (m.value.real < 0) prod = CSNumber.neg(prod);
+
+            if (prod.value.real < 0) val = false;
+        }
+        return val;
+    });
+
+
+    var elts = points.concat(lines, conics);
+
+    return List.ofGeos(elts);
+};
+
 evaluator.incidences$1 = evaluator.allelements$1;
 
 evaluator.createpoint$2 = function(args, modifs) {
@@ -13616,7 +13720,7 @@ evaluator.cameravideo$0 = function(args, modifs) {
         // width, but Chrome again appears to have a problem with this. See also
         // https://bugs.chromium.org/p/chromium/issues/detail?id=657145
         if (false) {
-            constraints = constraints.concat([1.34, 1.59, 1.78].map(function(a) {
+            constraints = constraints.concat([1.34, 1.59, 1.78, 2].map(function(a) {
                 return {
                     aspectRatio: {
                         max: a
@@ -17796,6 +17900,7 @@ function csinit(gslp) {
     csgeo.texts = [];
     csgeo.free = [];
     csgeo.polygons = [];
+    csgeo.ifs = [];
 
     gslp.forEach(addElementNoProof);
     checkConjectures();
@@ -18019,6 +18124,9 @@ function addElementNoProof(el) {
     if (el.kind === "Poly") {
         csgeo.polygons.push(el);
         polygonDefault(el);
+    }
+    if (el.kind === "IFS") {
+        csgeo.ifs.push(el);
     }
 
     if (true || op.stateSize !== 0) {
@@ -18484,6 +18592,17 @@ function drawgeopolygon(el) {
     eval_helper.drawpolygon([el.vertices], modifs, "D", true);
 }
 
+function drawgeoifs() {
+    if (ifs.dirty ||
+        !General.deeplyEqual(ifs.mat, csport.drawingstate.matrix)) {
+        geoOps.IFS.updateParameters();
+        ifs.dirty = false;
+    }
+    if (ifs.img) {
+        csctx.drawImage(ifs.img, 0, 0, csw, csh);
+    }
+}
+
 function render() {
 
     var i;
@@ -18509,6 +18628,10 @@ function render() {
 
     for (i = 0; i < csgeo.texts.length; i++) {
         drawgeotext(csgeo.texts[i]);
+    }
+
+    if (csgeo.ifs.length) {
+        drawgeoifs();
     }
 
 }
@@ -19437,7 +19560,8 @@ geoOps._helper = {};
  * V  - (numeric) value
  * Text - Text
  * "**" - arbitrary number of arguments with arbitrary types
- * Poly - Polygons
+ * Poly - Polygon
+ * IFS  - Iterated Function System
  */
 
 
@@ -21556,26 +21680,23 @@ geoOps._helper.moebiusPair = function(el) {
     var m = el.moebius;
     var neg = CSNumber.neg;
     var flip = m.anti ? neg : General.identity;
-    el.mat1 = List.normalizeMax(List.matrix([
+    var mats = List.normalizeMax(List.turnIntoCSList([List.matrix([
         [neg(m.cr), flip(m.ci), neg(m.dr)],
         [m.ci, flip(m.cr), m.di],
         [m.ar, neg(flip(m.ai)), m.br]
-    ]));
-    el.mat2 = List.normalizeMax(List.matrix([
+    ]), List.matrix([
         [neg(m.ci), neg(flip(m.cr)), neg(m.di)],
         [neg(m.cr), flip(m.ci), neg(m.dr)],
         [m.ai, flip(m.ar), m.bi]
-    ]));
+    ])]));
+    el.mat1 = mats.value[0];
+    el.mat2 = mats.value[1];
 };
 
-geoOps.TrInverseMoebius = {};
-geoOps.TrInverseMoebius.kind = "Mt";
-geoOps.TrInverseMoebius.signature = ["Mt"];
-geoOps.TrInverseMoebius.updatePosition = function(el) {
-    var m = csgeo.csnames[el.args[0]].moebius;
+geoOps._helper.inverseMoebius = function(m) {
     var neg = CSNumber.neg;
     var flip = m.anti ? neg : General.identity;
-    el.moebius = {
+    return {
         anti: m.anti,
         ar: m.dr,
         ai: flip(m.di),
@@ -21586,6 +21707,14 @@ geoOps.TrInverseMoebius.updatePosition = function(el) {
         dr: m.ar,
         di: flip(m.ai)
     };
+};
+
+geoOps.TrInverseMoebius = {};
+geoOps.TrInverseMoebius.kind = "Mt";
+geoOps.TrInverseMoebius.signature = ["Mt"];
+geoOps.TrInverseMoebius.updatePosition = function(el) {
+    var m = csgeo.csnames[el.args[0]].moebius;
+    el.moebius = geoOps._helper.inverseMoebius(m);
     geoOps._helper.moebiusPair(el);
 };
 
@@ -22483,7 +22612,6 @@ geoOps._helper.initializeLine = function(el) {
     return pos;
 };
 
-
 geoOps.Poly = {};
 geoOps.Poly.kind = "Poly";
 geoOps.Poly.signature = "P*";
@@ -22492,6 +22620,199 @@ geoOps.Poly.updatePosition = function(el) {
         return csgeo.csnames[x].homog;
     }));
 };
+
+var ifs = null;
+
+geoOps.IFS = {};
+geoOps.IFS.kind = "IFS";
+geoOps.IFS.signature = "**"; // (Tr|Mt)*
+geoOps.IFS.signatureConstraints = function(el) {
+    for (var i = 0; i < el.args.length; ++i) {
+        var kind = csgeo.csnames[el.args[i]].kind;
+        if (kind !== "Tr" && kind !== "Mt")
+            return false;
+    }
+    return el.args.length > 0;
+};
+geoOps.IFS.initialize = function(el) {
+    if (ifs) {
+        ifs.dirty = true;
+        return;
+    }
+    var baseDir = CindyJS.getBaseDir();
+    if (baseDir === false)
+        return;
+    ifs = {
+        dirty: false,
+        params: {
+            generation: 0
+        },
+    };
+    var worker = ifs.worker = new Worker(baseDir + "ifs.js");
+    worker.onmessage = function(msg) {
+        if (ifs.img && typeof ifs.img.close === "function")
+            ifs.img.close();
+        if (isShutDown) return;
+        var d = msg.data;
+        if (d.generation === ifs.params.generation) {
+            if (d.buffer) {
+                if (!ifs.canvas) {
+                    ifs.canvas = document.createElement("canvas");
+                    ifs.ctx = ifs.canvas.getContext("2d");
+                }
+                ifs.canvas.width = d.width;
+                ifs.canvas.height = d.height;
+                var imgSize = d.width * d.height * 4;
+                var imgBytes = new Uint8ClampedArray(
+                    d.buffer, d.imgPtr, imgSize);
+                var imgData = new ImageData(imgBytes, d.width, d.height);
+                ifs.ctx.putImageData(imgData, 0, 0);
+                ifs.img = ifs.canvas;
+            } else {
+                ifs.img = d.img;
+            }
+            scheduleUpdate();
+        } else {
+            ifs.img = null;
+        }
+        if (d.buffer) {
+            worker.postMessage({
+                cmd: "next",
+                buffer: d.buffer
+            }, [d.buffer]);
+        } else {
+            worker.postMessage({
+                cmd: "next",
+            });
+        }
+    };
+    shutdownHooks.push(worker.terminate.bind(worker));
+};
+geoOps.IFS.updatePosition = function(el) {
+    ifs.dirty = true;
+};
+geoOps.IFS.updateParameters = function() {
+    if (!ifs.worker)
+        return; // no worker, nothing we can do
+    var supersampling = 4;
+    var msg = {
+        cmd: "init",
+        generation: ifs.params.generation,
+        width: csw * supersampling,
+        height: csh * supersampling
+    };
+    msg.systems = csgeo.ifs.map(function(el) {
+        var sum = 0;
+        var i;
+        var params = el.ifs || [];
+        var trs = el.args.map(function(name, i) {
+            var p = params[i] || {};
+            return {
+                prob: p.prob || 1,
+                color: p.color || [0, 0, 0]
+            };
+        });
+        for (i = 0; i < trs.length; ++i)
+            sum += trs[i].prob;
+        var scale = List.realMatrix([
+            [1, 0, 0],
+            [0, 1, 0],
+            [0, 0, supersampling]
+        ]);
+        var px2hom = List.productMM(csport.toMat(), scale);
+        for (i = 0; i < el.args.length; ++i) {
+            var trel = csgeo.csnames[el.args[i]];
+            var kind = trel.kind;
+            var tr = trs[i];
+            tr.kind = kind;
+            tr.prob /= sum;
+            if (kind === "Tr") {
+                var mat = List.normalizeMax(List.productMM(
+                    List.adjoint3(px2hom),
+                    List.productMM(trel.matrix, px2hom)));
+                if (!List._helper.isAlmostReal(mat)) {
+                    tr.kind = "cplx";
+                    continue;
+                }
+                tr.mat = mat.value.map(function(row) {
+                    return row.value.map(function(entry) {
+                        return entry.value.real;
+                    });
+                });
+            } else if (kind === "Mt") {
+                // drawingstate matrix as a Möbius transformation
+                // from homogeneous coordinates to pixels
+                var view = csport.drawingstate.matrix;
+                view = {
+                    anti: view.det > 0,
+                    ar: CSNumber.real(view.a),
+                    ai: CSNumber.real(view.c),
+                    br: CSNumber.real(view.tx),
+                    bi: CSNumber.real(-view.ty),
+                    cr: CSNumber.zero,
+                    ci: CSNumber.zero,
+                    dr: CSNumber.real(1 / supersampling),
+                    di: CSNumber.zero
+                };
+                // now compose view * trel * view^{-1}
+                var elLike = {};
+                geoOps._helper.composeMtMt(elLike, trel.moebius, view);
+                view = geoOps._helper.inverseMoebius(view);
+                geoOps._helper.composeMtMt(elLike, view, elLike.moebius);
+                var moeb = elLike.moebius;
+                moeb = List.turnIntoCSList([
+                    moeb.ar,
+                    moeb.ai,
+                    moeb.br,
+                    moeb.bi,
+                    moeb.cr,
+                    moeb.ci,
+                    moeb.dr,
+                    moeb.di
+                ]);
+                if (!List._helper.isAlmostReal(moeb)) {
+                    tr.kind = "cplx";
+                    continue;
+                }
+                moeb = moeb.value;
+                tr.moebius = {
+                    ar: moeb[0].value.real,
+                    ai: moeb[1].value.real,
+                    br: moeb[2].value.real,
+                    bi: moeb[3].value.real,
+                    cr: moeb[4].value.real,
+                    ci: moeb[5].value.real,
+                    dr: moeb[6].value.real,
+                    di: moeb[7].value.real,
+                    sign: trel.moebius.anti ? -1 : 1
+                };
+            }
+        }
+        return {
+            trafos: trs
+        };
+    });
+    if (General.deeplyEqual(msg, ifs.params)) {
+        // console.log("IFS not modified");
+        return;
+    }
+    ++msg.generation;
+    ifs.img = null;
+    ifs.params = msg;
+    ifs.mat = csport.drawingstate.matrix;
+    // console.log(msg);
+    ifs.worker.postMessage(msg);
+};
+geoOps.IFS.probSetter = function(i, el, value) {
+    if (value.ctype === "number") {
+        el.ifs[i].prob = value.value.real;
+        ifs.dirty = true;
+    }
+};
+(function() {
+    for (var i = 0; i < 10; ++i)
+        geoOps.IFS["set_prob" + i] = geoOps.IFS.probSetter.bind(null, i);
+})();
 
 geoOps._helper.snapPointToLine = function(pos, line) {
     // fail safe for far points
@@ -22506,8 +22827,8 @@ geoOps._helper.snapPointToLine = function(pos, line) {
     var ry = Math.round(sy / csgridsize) * csgridsize;
     var newpos = List.realVector([rx, ry, 1]);
     if (Math.abs(rx - sx) < 0.2 && Math.abs(ry - sy) < 0.2 &&
-        CSNumber.abs(List.scalproduct(line, newpos)).value.real < CSNumber.eps) {
-        pos = newpos;
+        CSNumber._helper.isAlmostZero(List.scalproduct(line, newpos))) {
+        pos = geoOps._helper.projectPointToLine(newpos, line);
     }
     return pos;
 };

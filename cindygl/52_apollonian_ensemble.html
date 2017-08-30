@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>52_apollonian_fromcdy.cdy</title>
+    <style type="text/css">
+        * {
+            margin: 0px;
+            padding: 0px;
+        }
+
+        #CSConsole {
+            background-color: #FAFAFA;
+            border-top: 1px solid #333333;
+            bottom: 0px;
+            height: 200px;
+            overflow-y: scroll;
+            position: fixed;
+            width: 100%;
+        }
+    </style>
+    <script type="text/javascript" src="Cindy.js"></script>
+<script id="csdraw" type="text/x-cindyscript">
+inversion(z, c, r) := c+r^2/conjugate(z-c); // circle inversion
+color(n) := grey(1-n/15); // colorization function
+
+radius = apply([C1,C2,C3,C4], c, c.radius);
+center = apply([C1,C2,C3,C4], c, complex(c.center));
+
+
+colorplot(
+p = complex(#); //interpret pixel coordinate as complex number
+  
+  ensemble = apply([1+i, 1-i, -1+i, -1-i], delta, p+delta/50);
+  col=(1,1,1);
+  repeat(10,
+    
+    
+    /*
+    if(abs(|p-complex(C5.center)|-C5.radius)<.1,
+      col=(0,0,0);
+    );
+    if(abs(|p-complex(C6.center)|-C6.radius)<.1,
+      col=(0,0,0);
+    );
+    if(abs(|p-complex(C7.center)|-C7.radius)<.1,
+      col=(0,0,0);
+    );
+    if(abs(|p-complex(C8.center)|-C8.radius)<.1,
+      col=(0,0,0);
+    );*/
+    
+  	forall(1..4, i,
+  		if(|p-center_i|<radius_i,
+  			p = inversion(p, center_i, radius_i);
+        ensemble = apply(ensemble, e, inversion(e, center_i, radius_i));
+  		);
+  	);
+    forall(ensemble, e,
+      if((|e-complex(C5.center)|-C5.radius)*(|p-complex(C5.center)|-C5.radius)<=0,
+        col=(0,0,0);
+      );
+      if((|e-complex(C6.center)|-C6.radius)*(|p-complex(C6.center)|-C6.radius)<=0,
+        col=(0,0,0);
+      );
+      if((|e-complex(C7.center)|-C7.radius)*(|p-complex(C7.center)|-C7.radius)<=0,
+        col=(0,0,0);
+      );
+      if((|e-complex(C8.center)|-C8.radius)*(|p-complex(C8.center)|-C8.radius)<=0,
+        col=(0,0,0);
+      );
+    );
+  );
+  col
+);
+</script>
+
+    <script type="text/javascript">
+CindyJS({ 
+	scripts: "cs*", 
+	defaultAppearance: { fontFamily: "sans-serif", lineSize: 1, pointSize: 5.0, textsize: 12.0 }, 
+	angleUnit: "°", 
+	geometry: [ 
+		{ name: "A", type: "Free", pos: [ 4.0, -0.3321361810931232, -0.11581478324948928 ], color: [ 1.0, 0.0, 0.0 ], labeled: true }, 
+		{ name: "B", type: "Free", pos: [ 3.8320795758222705, -4.0, 0.16161389096095652 ], color: [ 1.0, 0.0, 0.0 ], labeled: true }, 
+		{ name: "C", type: "Free", pos: [ -3.8052542063324135, -4.0, -0.11108141029052027 ], color: [ 1.0, 0.0, 0.0 ], labeled: true }, 
+		{ name: "a", type: "Segment", color: [ 0.0, 0.0, 0.0 ], args: [ "B", "C" ], alpha: 0.6666666666666666, visible:false }, 
+		{ name: "b", type: "Segment", color: [ 0.0, 0.0, 0.0 ], args: [ "C", "A" ], alpha: 0.6666666666666666, visible:false }, 
+		{ name: "c", type: "Segment", color: [ 0.0, 0.0, 0.0 ], args: [ "A", "B" ], alpha: 0.6666666666666666, visible:false }, 
+		{ name: "Collection__1", type: "AngularBisector", args: [ "b", "c", "A" ] }, 
+		{ name: "", type: "SelectL", pos: [ 0.11584459303560071, 3.5900679068875355E-4, 4.0 ], color: [ 1.0, 1.0, 1.0 ], args: [ "Collection__1" ], size: 0, visible:false }, 
+		{ name: "d", type: "SelectL", pos: [ 0.00416697505277117, -1.3446027810552144, 4.0 ], color: [ 0.098039225, 0.61960787, 0.30588236 ], args: [ "Collection__1" ], labeled: true, visible:false }, 
+		{ name: "Collection__2", type: "AngularBisector", args: [ "a", "b", "C" ], visible:false }, 
+		{ name: "e", type: "SelectL", pos: [ -0.5665360821267933, 0.4278720420974962, 4.0 ], color: [ 0.098039225, 0.61960787, 0.30588236 ], args: [ "Collection__2" ], labeled: true, visible:false }, 
+		{ name: "Collection__3", type: "AngularBisector", args: [ "a", "c", "B" ], visible:false }, 
+		{ name: "f", type: "SelectL", pos: [ -0.3674583305384931, -0.19041849989462042, 4.0 ], color: [ 0.098039225, 0.61960787, 0.30588236 ], args: [ "Collection__3" ], labeled: true, visible:false }, 
+		{ name: "D", type: "Meet", color: [ 1.0, 0.0, 0.0 ], args: [ "d", "e" ], alpha: 0.5213675213675214, visible:false }, 
+		{ name: "g", type: "Orthogonal", color: [ 0.7137255, 1.0, 0.6666667 ], args: [ "a", "D" ], alpha: 0.6923076923076923, labeled: true, visible:false }, 
+		{ name: "h", type: "Orthogonal", color: [ 0.7137255, 1.0, 0.6666667 ], args: [ "c", "D" ], alpha: 0.6923076923076923, labeled: true, visible:false }, 
+		{ name: "k", type: "Orthogonal", color: [ 0.7137255, 1.0, 0.6666667 ], args: [ "b", "D" ], alpha: 0.6923076923076923, labeled: true, visible:false }, 
+		{ name: "E", type: "Meet", color: [ 1.0, 0.0, 0.0 ], args: [ "b", "k" ], alpha: 0.5213675213675214, visible:false }, 
+		{ name: "F", type: "Meet", color: [ 1.0, 0.0, 0.0 ], args: [ "a", "g" ], alpha: 0.5213675213675214, visible:false }, 
+		{ name: "G", type: "Meet", color: [ 1.0, 0.0, 0.0 ], args: [ "c", "h" ], alpha: 0.5213675213675214, visible:false }, 
+		{ name: "C1", type: "CircleMP", color: [ 0.0, 0.0, 1.0 ], args: [ "B", "F" ], size: 3, printname: "$C_{1}$", labeled: true, visible:false }, 
+		{ name: "C2", type: "CircleMP", color: [ 0.0, 0.0, 1.0 ], args: [ "C", "F" ], size: 3, printname: "$C_{2}$", labeled: true, visible:false }, 
+		{ name: "C3", type: "CircleMP", color: [ 0.0, 0.0, 1.0 ], args: [ "A", "E" ], size: 3, printname: "$C_{3}$", labeled: true, visible:false }, 
+		{ name: "l", type: "Orthogonal", color: [ 0.0, 0.0, 1.0 ], args: [ "c", "C" ], labeled: true, visible:false }, 
+		{ name: "m", type: "Orthogonal", color: [ 0.0, 0.0, 1.0 ], args: [ "a", "A" ], labeled: true, visible:false }, 
+		{ name: "n", type: "Orthogonal", color: [ 0.0, 0.0, 1.0 ], args: [ "b", "B" ], labeled: true, visible:false }, 
+		{ name: "Collection__4", type: "IntersectionConicLine", args: [ "C2", "l" ], visible:false }, 
+		{ name: "H", type: "SelectP", pos: [ -2.88913395643206, -4.0, -0.05776564719807927 ], color: [ 1.0, 0.0, 0.0 ], args: [ "Collection__4" ], labeled: true }, 
+		{ name: "Collection__5", type: "IntersectionConicLine", args: [ "C1", "n" ], visible:false }, 
+		{ name: "K", type: "SelectP", pos: [ 2.9266023070781455, -4.0, 0.08479911265591503 ], color: [ 1.0, 0.0, 0.0 ], args: [ "Collection__5" ], labeled: true }, 
+		{ name: "Collection__6", type: "IntersectionConicLine", args: [ "C3", "m" ], visible:false }, 
+		{ name: "L", type: "SelectP", pos: [ 4.0, -0.5241514272432639, -0.054396631824796884 ], color: [ 1.0, 0.0, 0.0 ], args: [ "Collection__6" ], labeled: true, visible:false }, 
+		{ name: "o", type: "Segment", color: [ 1.0, 0.49803925, 0.0 ], args: [ "L", "F" ], alpha: 0.5641025641025641, labeled: true, visible:false }, 
+		{ name: "p", type: "Segment", color: [ 1.0, 0.49803925, 0.0 ], args: [ "H", "G" ], alpha: 0.5641025641025641, labeled: true, visible:false }, 
+		{ name: "q", type: "Segment", color: [ 1.0, 0.49803925, 0.0 ], args: [ "K", "E" ], alpha: 0.5641025641025641, labeled: true, visible:false }, 
+		{ name: "M", type: "OtherIntersectionCL", color: [ 1.0, 0.0, 0.0 ], args: [ "C2", "p", "H" ], labeled: true, visible:false }, 
+		{ name: "N", type: "OtherIntersectionCL", color: [ 1.0, 0.0, 0.0 ], args: [ "C1", "q", "K" ], labeled: true, visible:false }, 
+		{ name: "O", type: "OtherIntersectionCL", color: [ 1.0, 0.0, 0.0 ], args: [ "C3", "o", "L" ], labeled: true, visible:false }, 
+		{ name: "C4", type: "CircleBy3", color: [ 0.0, 0.0, 1.0 ], args: [ "M", "N", "O" ], size: 3, printname: "$C_{4}$", labeled: true, visible:false }, 
+    { name: "C5", type: "CircleBy3", color: [ 0.0, 0.0, 1.0 ], args: [ "E", "F", "G" ], size: 3, printname: "$C_{5}$", labeled: true, visible:false }, 
+    { name: "C6", type: "CircleBy3", color: [ 0.0, 0.0, 1.0 ], args: [ "G", "N", "O" ], size: 3, printname: "$C_{6}$", labeled: true, visible:false },
+  { name: "C7", type: "CircleBy3", color: [ 0.0, 0.0, 1.0 ], args: [ "M", "E", "O" ], size: 3, printname: "$C_{7}$", labeled: true, visible:false },
+{ name: "C8", type: "CircleBy3", color: [ 0.0, 0.0, 1.0 ], args: [ "M", "N", "F" ], size: 3, printname: "$C_{8}$", labeled: true, visible:false } ], 
+	ports: [ 
+		{ id: "CSCanvas", width: 1280, height: 713, transform: [ { visibleRect: [ -58.076117985435, 43.98123371574714, 102.61141490268035, -45.52674358833586 ] } ], background: "rgb(168,176,192)" } ], 
+	cinderella: { build: 1835, version: [ 2, 9, 1835 ] } });
+    </script>
+</head>
+<body>
+    <div id="CSCanvas"></div>
+</body>
+</html>
