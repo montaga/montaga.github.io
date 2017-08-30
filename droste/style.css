@@ -87,8 +87,8 @@ select {
 }
 
 #outer {
-  width: 800px;
-  height: 600px;
+  width: 768px; /*16:9*/
+  height: 432px;
 }
 
 #CSCanvas {
