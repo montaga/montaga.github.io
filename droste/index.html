@@ -240,7 +240,11 @@ if(spherical,
     <div id="CSCanvas" onwheel="cdy.evokeCS('onScroll(' + event.deltaY  + ')');"></div>
   </div>
   </p>
-  <div class="mybutton" id="fs">Enter Fullscreen</div>
+  <div class="buttons">
+    <div class="mybutton" id="reset">Reset Droste</div>
+    <div class="mybutton" id="fs">Enter Fullscreen</div>
+  </div>
+  
   <h1>The Droste effect</h1>
   <p>
   <div class="author">  
@@ -570,16 +574,19 @@ for the Droste-area and press ENTER when you are done");
   }
   
 
-  var btn = document.getElementById("fs");
   var div = document.getElementById("CSCanvas");
-  btn.onclick = function() {
+  document.getElementById("fs").onclick = function() {
     (div.requestFullscreen ||
      div.webkitRequestFullscreen ||
      div.mozRequestFullScreen ||
      div.msRequestFullscreen ||
      function(){}).call(div);
   };
+  document.getElementById("reset").onclick = function() {
+      cdy.evokeCS(`reset();`);
+  };
   
+
   </script>
 </body>
 </html>

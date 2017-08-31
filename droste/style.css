@@ -44,6 +44,19 @@ img:hover {
 }
 
 
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.buttons div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 5px auto;
+}
+
 .parameters {
   display: flex;
   flex-wrap: wrap;
