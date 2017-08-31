@@ -764,7 +764,7 @@ function createCindyNow() {
                 cscode.message
             );
         } else {
-            cscompiled[s] = cscode;
+            cscompiled[s] = labelCode(cscode, s);
         }
     });
     if (isCinderellaBeforeVersion(2, 9, 1888) && !cscompiled.keydown) {
@@ -1081,6 +1081,9 @@ function callFunctionNow(f) {
 function loadExtraModules() {
     if (usedFunctions.convexhull3d$1) {
         loadExtraPlugin("QuickHull3D", "QuickHull3D.js");
+    }
+    if (usedFunctions.colorplot$1 || usedFunctions.colorplot$2 || usedFunctions.colorplot$3 || usedFunctions.colorplot$4) {
+        loadExtraPlugin("CindyGL", "CindyGL.js");
     }
 }
 
@@ -2159,7 +2162,7 @@ function cs_onDrop(lst, pos) {
 function cindy_cancelmove() {
     move = undefined;
 }
-var version = [0,8,4,111,"g7714b4d!"];
+var version = [0,8,4,128,"g2172063"];
 //==========================================
 //      Complex Numbers
 //==========================================
@@ -6700,7 +6703,7 @@ evaluator.err$1 = function(args, modifs) { //OK
     }
     s = varname + " ===> " + niceprint(evaluate(s));
 
-    csconsole.err(s);
+    printStackTrace(s);
 
     return nada;
 };
@@ -6736,7 +6739,7 @@ evaluator.assert$2 = function(args, modifs) {
         if (v0.value === false)
             return evaluator.println$1([args[1]], modifs);
     } else {
-        csconsole.err("Condition for assert is not boolean");
+        printStackTrace("Condition for assert is not boolean");
     }
     return nada;
 };
@@ -7172,7 +7175,7 @@ function infix_assign(args, modifs) {
             // Copy on write
             eval_helper.assigntake(args[0], v1);
         } else {
-            console.error("Can't use infix expression as lvalue");
+            printStackTrace("Can't use infix expression as lvalue");
         }
     } else if (args[0].ctype === 'field') {
         eval_helper.assigndot(args[0], v1);
@@ -7180,10 +7183,10 @@ function infix_assign(args, modifs) {
         if (v1.ctype === "list") {
             eval_helper.assignlist(args[0].args, v1.value);
         } else {
-            console.error("Expected list in rhs of assignment");
+            printStackTrace("Expected list in rhs of assignment");
         }
     } else {
-        console.error("Left hand side of assignment is not a recognized lvalue");
+        printStackTrace("Left hand side of assignment is not a recognized lvalue");
     }
     return v1;
 }
@@ -7255,7 +7258,7 @@ evaluator.if$3 = function(args, modifs) { //OK
             return evaluate(args[2]);
         }
     } else {
-        csconsole.err("Condition for if is not boolean");
+        printStackTrace("Condition for if is not boolean");
     }
 
     return nada;
@@ -7678,7 +7681,7 @@ function infix_div(args, modifs) {
     var v0 = evaluateAndVal(args[0]);
     var v1 = evaluateAndVal(args[1]);
     if (v1.ctype === "number" && CSNumber._helper.isZero(v1))
-        csconsole.err("WARNING: Division by zero!");
+        printStackTrace("WARNING: Division by zero!");
     var erg = General.div(v0, v1);
     if (v0.usage === "Angle" && !v1.usage)
         erg = General.withUsage(erg, "Angle");
@@ -7867,14 +7870,14 @@ evaluator.autodiff$3 = function(args, modifs) {
     } else if (typeof(args[0].impl) === "function")
         ffunc = args[0];
     else {
-        console.log("could not parse function");
+        printStackTrace("could not parse function");
         return nada;
     }
     var xarr = evaluateAndVal(args[1]);
     var grade = evaluateAndVal(args[2]);
 
     if (grade.value.real < 1) {
-        console.log("grade cant be < 1");
+        printStackTrace("grade cant be < 1");
         return nada;
     }
 
@@ -9132,7 +9135,7 @@ function infix_take(args, modifs) {
                 "value": v0.value.charAt(ind - 1)
             };
         } else {
-            csconsole.err("WARNING: Index out of range!");
+            printStackTrace("WARNING: Index out of range!");
             return nada;
         }
     }
@@ -10650,12 +10653,12 @@ evaluator.createpoint$2 = function(args, modifs) {
     var pos = evaluateAndHomog(args[1]);
 
     if (name.ctype !== "string") {
-        console.log("Name must be a string");
+        printStackTrace("Name must be a string");
         return nada;
     }
 
     if (pos.ctype !== "list" && List.isNumberVector(pos)) {
-        console.log("Position must be a number vector");
+        printStackTrace("Position must be a number vector");
         return nada;
     }
 
@@ -10678,7 +10681,7 @@ evaluator.create$3 = function(args, modifs) {
     if (names.ctype === "string") {
         name = names.value;
     } else if (names.ctype !== "list") {
-        console.log("Names must be a string or a list of strings");
+        printStackTrace("Names must be a string or a list of strings");
         return nada;
     } else if (names.value.length !== 1) {
         // Create the compound object, then Select objects to split it up
@@ -10697,24 +10700,24 @@ evaluator.create$3 = function(args, modifs) {
         }
         return el;
     } else if (names.value[0].ctype !== "string") {
-        console.log("Element of names list must be a string");
+        printStackTrace("Element of names list must be a string");
         return nada;
     } else {
         name = names.value[0].value;
     }
     if (type.ctype !== "string") {
-        console.log("Type must be a string");
+        printStackTrace("Type must be a string");
         return nada;
     }
     if (defs.ctype !== "list") {
-        console.log("Arguments must be a list");
+        printStackTrace("Arguments must be a list");
         return nada;
     }
 
     if (!geoOps.hasOwnProperty(type.value) &&
         !geoAliases.hasOwnProperty(type.value) &&
         !geoMacros.hasOwnProperty(type.value)) {
-        console.log("Invalid geometric operation: '" + type.value + "'");
+        printStackTrace("Invalid geometric operation: '" + type.value + "'");
         return nada;
     }
 
@@ -10733,7 +10736,7 @@ evaluator.create$3 = function(args, modifs) {
             if (vec !== nada) {
                 pos = vec;
             } else {
-                console.log("Unknown argument type");
+                printStackTrace("Unknown argument type");
                 return nada;
             }
         }
@@ -10826,7 +10829,7 @@ evaluator.use$1 = function(args, modifs) {
                 "value": true
             };
         } else {
-            console.log("Plugin " + name + " not found");
+            printStackTrace("Plugin " + name + " not found");
             return {
                 "ctype": "boolean",
                 "value": false
@@ -11388,14 +11391,14 @@ evaluator.createtool$3 = function(args, modifs) {
             }
         });
     } else {
-        console.log("Name must be a string or a list of strings");
+        printStackTrace("Name must be a string or a list of strings");
         return nada;
     }
 
     if (modifs.flipped) {
         modif = evaluate(modifs.flipped);
         if (modif.ctype === "boolean" && modif.value) {
-            console.log("Flipping");
+            printStackTrace("Flipping");
             var ncols = 0;
             var nrows = names.length;
             names.forEach(function(row) {
@@ -11420,7 +11423,7 @@ evaluator.createtool$3 = function(args, modifs) {
         toolbar.appendChild(rowElt);
         row.forEach(function(name) {
             if (!tools.hasOwnProperty(name)) {
-                console.log("Tool '" + name + "' not implemented yet.");
+                printStackTrace("Tool '" + name + "' not implemented yet.");
                 name = null;
             }
             if (name === null) {
@@ -11473,7 +11476,7 @@ evaluator.parsecsv$1 = function(args, modifs) {
 
     var str = evaluateAndVal(args[0]);
     if (str.ctype !== "string") {
-        console.log("CSV data is not a string");
+        printStackTrace("CSV data is not a string");
         return nada;
     }
     str = str.value;
@@ -11564,7 +11567,7 @@ evaluator.load$3 = function(args, modifs) {
         if (req.status === 200) {
             value = General.string(String(req.responseText));
         } else {
-            csconsole.err("Failed to load " + url + ": " + req.statusText);
+            printStackTrace("Failed to load " + url + ": " + req.statusText);
             value = nada;
         }
         namespace.newvar(varname);
@@ -13140,6 +13143,9 @@ evaluator.clearimage$1 = function(args, modifs) {
     }
 
     var image = imageFromValue(name);
+    if (!image)
+        return nada;
+
     var localcanvas = image.img;
 
     if (typeof(localcanvas) === "undefined" || localcanvas === null) {
@@ -14751,7 +14757,10 @@ function evaluate(a) {
         return evaluate(namespace.getvar(a.name));
     }
     if (a.ctype === 'function') {
-        return eval_helper.evaluate(a.oper, a.args, a.modifs);
+        callStack.push(a);
+        a = eval_helper.evaluate(a.oper, a.args, a.modifs);
+        callStack.pop();
+        return a;
     }
     if (a.ctype === 'void') {
         return nada;
@@ -14888,6 +14897,32 @@ function analyse(code) {
     for (var name in parser.usedVariables)
         namespace.create(name);
     return res;
+}
+
+var callStack = [];
+
+function labelCode(code, label) {
+    function run() {
+        return evaluate(code);
+    }
+    return {
+        ctype: "infix",
+        args: [],
+        impl: function() {
+            callStack = [{
+                oper: label
+            }];
+            var res = evaluate(code);
+            callStack = [];
+            return res;
+        }
+    };
+}
+
+function printStackTrace(msg) {
+    csconsole.err(msg + callStack.map(function(frame) {
+        return "\n  at " + frame.oper;
+    }).join("\n"));
 }
 //*******************************************************
 // and here are the definitions of the sound operators
