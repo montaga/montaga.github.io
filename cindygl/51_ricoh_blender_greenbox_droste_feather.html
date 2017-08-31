@@ -110,7 +110,7 @@ complex2latlon(z) := (
 );
 
 readcamera(latlon) := (
-  imagergb([-pi,-pi/2], [pi,-pi/2], video, (-latlon_2, latlon_1));
+  imagergb([-pi,-pi/2], [pi,-pi/2], video, (-latlon_2, latlon_1), repeat->true);
 );
 
 setcenter() := (
