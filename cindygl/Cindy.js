@@ -2162,7 +2162,7 @@ function cs_onDrop(lst, pos) {
 function cindy_cancelmove() {
     move = undefined;
 }
-var version = [0,8,4,128,"g2172063"];
+var version = [0,8,5,4,"g3d533aa!"];
 //==========================================
 //      Complex Numbers
 //==========================================
@@ -15378,6 +15378,7 @@ Render2D.handleModifs = function(modifs, handlers) {
     Render2D.lineCap = "round";
     Render2D.lineJoin = "round";
     Render2D.miterLimit = 10;
+    Render2D.noborder = false;
 
     // Process handlers
     var key, handler;
@@ -15646,6 +15647,20 @@ Render2D.modifHandlers = {
         if (v.ctype === "number" && v.value.real > 0) {
             Render2D.miterLimit = Math.round(v.value.real);
         }
+    },
+    "noborder": function(v) {
+        if (v.ctype === 'boolean') {
+            Render2D.noborder = v.value;
+        } else {
+            console.error("noborder needs to be of type boolean");
+        }
+    },
+    "border": function(v) {
+        if (v.ctype === 'boolean') {
+            Render2D.noborder = !(v.value);
+        } else {
+            console.error("border needs to be of type boolean");
+        }
     }
 };
 
@@ -15671,6 +15686,8 @@ Render2D.pointModifs = {
     "size": true,
     "color": true,
     "alpha": true,
+    "noborder": true,
+    "border": true,
 };
 
 Render2D.pointAndLineModifs = Render2D.lineModifs;
@@ -15911,12 +15928,13 @@ Render2D.drawpoint = function(pt) {
     csctx.fillStyle = Render2D.pointColor;
 
     csctx.fill();
-
-    csctx.beginPath();
-    csctx.arc(xx, yy, Render2D.psize * 1.15, 0, 2 * Math.PI);
-    csctx.fillStyle = Render2D.black;
-    csctx.strokeStyle = Render2D.black;
-    csctx.stroke();
+    if (!Render2D.noborder) {
+        csctx.beginPath();
+        csctx.arc(xx, yy, Render2D.psize * 1.15, 0, 2 * Math.PI);
+        csctx.fillStyle = Render2D.black;
+        csctx.strokeStyle = Render2D.black;
+        csctx.stroke();
+    }
 };
 
 Render2D.clipLineCore = function(a, b, c) {
@@ -17889,7 +17907,9 @@ defaultAppearance.overhangLine = 1;
 defaultAppearance.overhangSeg = 1;
 defaultAppearance.dimDependent = 0.7;
 defaultAppearance.fontFamily = "sans-serif";
+defaultAppearance.textColor = [0, 0, 0];
 defaultAppearance.textsize = 20; // Cinderella uses 12 by default
+defaultAppearance.noborder = false;
 
 defaultAppearance.lineHeight = 1.45;
 /* The value of 1.45 for the line height agrees reasonably well with
@@ -17971,6 +17991,12 @@ function pointDefault(el) {
     }
     if (el.alpha === undefined) el.alpha = defaultAppearance.alpha;
     el.alpha = CSNumber.real(el.alpha);
+
+    if (typeof(el.noborder) !== 'boolean') el.noborder = defaultAppearance.noborder;
+    el.noborder = General.bool(el.noborder);
+
+    if (typeof(el.border) !== 'boolean') el.border = !(defaultAppearance.noborder);
+    el.border = General.bool(el.border);
 
     if (el.drawtrace) {
         setupTraceDrawing(el);
@@ -18361,7 +18387,9 @@ function drawgeopoint(el) {
     evaluator.draw$1([el.homog], {
         size: el.size,
         color: col,
-        alpha: el.alpha
+        alpha: el.alpha,
+        noborder: el.noborder,
+        border: el.border,
     });
     if (el.labeled && !el.tmp) {
         var lbl = el.printname || el.name || "P";
@@ -18378,6 +18406,10 @@ function drawgeopoint(el) {
         if (dist > 0) {
             factor = 1.0 + el.size.value.real / Math.sqrt(dist);
         }
+        var color = Render2D.makeColor(defaultAppearance.textColor);
+        if (el.noborder.value === true || el.border.value === false) color = col;
+
+        var alpha = el.alpha || CSNumber.real(defaultAppearance.alpha);
         eval_helper.drawtext(
             [el.homog, General.wrap(lbl)], {
                 'x_offset': General.wrap(factor * lpos.x),
@@ -18385,7 +18417,9 @@ function drawgeopoint(el) {
                 'size': General.wrap(textsize),
                 'bold': General.wrap(bold),
                 'italics': General.wrap(italics),
-                'family': General.wrap(family)
+                'family': General.wrap(family),
+                'color': color,
+                'alpha': alpha
             });
     }
 }
