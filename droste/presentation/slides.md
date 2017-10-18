@@ -105,7 +105,7 @@ $$c:(0, 2 \pi) \times (-\tfrac{\pi}{2},\tfrac{\pi}{2}) \to \mathcal{C}.$$
 
 Rotation of an image on vertical axis is simple: shift the image.
 
-<iframe data-src="http://localhost/cindyjs/examples/cindygl/51_tum_marquee.html" width="800" height="400"></iframe>
+<iframe data-src="applets/51_tum_marquee.html" width="800" height="400"></iframe>
 . . .
 
 **Aim 1**: How to rotate a spherical image about a non-vertical axis?
@@ -128,7 +128,7 @@ Rotation of an image on vertical axis is simple: shift the image.
 
 # Conformity matters
 
-<iframe data-src="http://localhost/cindyjs/examples/cindygl/51_world_pullback.html" class="cindy"></iframe>
+<iframe data-src="applets/51_world_pullback.html" class="cindy"></iframe>
 
 **Lemma:** The Stereographic Projection $SP: S^2 \to \hat{\mathbb{C}}$, $(u,v,w) \mapsto \tfrac{u}{1-w} + i \tfrac{v}{1-w}$ is bi-conformal.
 <!--
@@ -142,7 +142,7 @@ $\rightarrow$ it is bijective and it and its inverse preserve all angles (and or
 ---------------
 
 ## Pullbacks of $f : \hat{\mathbb{C}} \to \hat{\mathbb{C}}$
-<iframe data-src="http://localhost/cindyjs/examples/cindygl/51_world_pullback.html" class="cindy"></iframe>
+<iframe data-src="applets/51_world_pullback.html" class="cindy"></iframe>
 
 Let $f: \hat{\mathbb{C}} \to \hat{\mathbb{C}}$ be a function.
 
@@ -164,7 +164,7 @@ $$\{1, \dots, 1024\} \times \{1, \dots, 768\} \hookrightarrow \mathbb{C} \hookri
 ---------------
 
 # Generation of the Droste Effects
-<iframe data-src="http://localhost/cindyjs/examples/cindygl/51_garching_pullback.html" class="cindy"></iframe>
+<iframe data-src="applets/51_garching_pullback.html" class="cindy"></iframe>
 
 - Consider the image in polar-like coordinates by taking the $\log$ of the image.
 
@@ -172,9 +172,9 @@ $$\{1, \dots, 1024\} \times \{1, \dots, 768\} \hookrightarrow \mathbb{C} \hookri
 
 - Pull back this change in the modulus by taking the $\exp$ of the image.
 
-[Live demo](http://localhost/cindyjs/examples/cindygl/51_ricoh_moeb_pullback.html)
+[Live demo](applets/51_ricoh_moeb_pullback.html)
 
-[Droste on Rectangles](http://localhost/cindyjs/examples/cindygl/51_ricoh_rect_droste.html)
+[Droste on Rectangles](applets/51_ricoh_rect_droste.html)
 
 [https://montaga.github.io/droste/](https://montaga.github.io/droste/)
 
@@ -189,7 +189,7 @@ Eschers Print Gallery
 ---------------
 
 # Twist spherical images!
-<iframe data-src="http://localhost/cindyjs/examples/cindygl/51_garching_pullback_twist.html" class="cindy"></iframe>
+<iframe data-src="applets/51_garching_pullback_twist.html" class="cindy"></iframe>
 
 - **Idea:** Rotate the replicated $log$-deformed image. But how far such that this rotation is compatible with the consecutive $exp$-deformation?
 
@@ -205,11 +205,11 @@ $\alpha z \sim \alpha (z + p + 2 \pi i) = \alpha z + \alpha (p+2 \pi i)$. Hence 
 
 # Live Demo
 
-[Pullback of Functions](http://localhost/cindyjs/examples/cindygl/51_ricoh_moeb_pullback.html)
+[Pullback of Functions](applets/51_ricoh_moeb_pullback.html)
 
-[Droste on Rectangles](http://localhost/cindyjs/examples/cindygl/51_ricoh_rect_droste.html)
+[Droste on Rectangles](applets/51_ricoh_rect_droste.html)
 
-[Droste with a green-box](http://localhost/cindyjs/examples/cindygl/51_ricoh_greenbox_droste_feather.html)
+[Droste with a green-box](applets/51_ricoh_greenbox_droste_feather.html)
 
 [https://montaga.github.io/droste/](https://montaga.github.io/droste/)
 
