@@ -20,7 +20,12 @@
             position: fixed;
             width: 100%;
         }
+        #CSCanvas {
+          height: 100vh;
+          width: 100vw;
+        }
     </style>
+    
     <script type="text/javascript" src="Cindy.js"></script>
 <script id="csdraw" type="text/x-cindyscript">
 
@@ -237,10 +242,10 @@ forall(beams,b,processBeam(b));
 
 forall([[B,C],[A,E],[H,K]],v,
 angle = arctan2(v_2-v_1);
-drawtext(v_1, mod(-re(angle)/pi*180-90,360)+"°", color->[1,1,1],size->20);
+drawtext(v_1, mod(round(-re(angle)/pi*180)-90,360)+"°", color->[1,1,1],size->30);
 );
 
-drawtext(O, "Detektor", color->[1,1,1],align->"mid");
+drawtext(O, "Detektor", color->[1,1,1],align->"mid", size->20);
 
 
 ;
@@ -309,7 +314,7 @@ createCindy({
 		{ name: "Text0", type: "Text", pos: [ 4.0, 2.4606060606060605, -0.2990934391068737 ], color: [ 0.0, 0.0, 0.0 ], pinned: true, text: "Laser" }, 
 		{ name: "Text1", type: "Text", pos: [ -3.9523809523809526, -4.0, -0.5875049696742162 ], color: [ 0.0, 0.0, 0.0 ], pinned: true } ], 
 	ports: [ 
-		{ id: "CSCanvas", width: 984, height: 652, transform: [ { visibleRect: [ -4.231218684522035, 18.91414077945976, 25.72977464635366, -0.9380621186408046 ] } ], background: "rgb(0,0,0)" } ], 
+		{ id: "CSCanvas", transform: [ { visibleRect: [ -1, 18, 18, -1 ] } ], background: "rgb(0,0,0)" } ], 
 	cinderella: { build: 1835, version: [ 2, 9, 1835 ] } });
     </script>
 </head>
