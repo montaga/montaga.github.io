@@ -1,0 +1,362 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>stereographic projection</title>
+<meta charset="UTF-8">
+<script type="text/javascript" src="Cindy.js"></script>
+<script type="text/javascript" src="CindyGL.js"></script>
+<style>
+/*
+#CSCanvas {
+    border: 0px;
+    top: 0px;
+    left: 0px;
+    margin: 0px;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgb(0,0,0);
+}*/
+
+html,body { margin: 0px; padding: 0px; width: 100%; height: 100%; background-color: rgb(0,0,0); }
+#overlay{
+  position: absolute;
+  left:10px;
+  top:10px;
+  background:rgba(200,200,200,0.5);
+  border-radius: 25px;
+  padding: 10px; 
+}
+#inp {
+  background: rgba(255, 255, 255, 0.3);
+  border: none;
+}
+
+#sel {
+  background: rgba(255, 255, 255, 0.3);
+  border: none;
+}
+</style>
+<script id="csinit" type="text/x-cindyscript">
+rf(z) := z;
+f(z) := rf(z/(1-floorh))*(1-floorh);
+resetclock();
+
+ readcamera(latlon) := (
+   imagergb([-pi,-pi/2], [pi,-pi/2], "earth", (-latlon_2, latlon_1), repeat->true);
+ );
+
+ readspec(latlon) := (
+   imagergb([-pi,-pi/2], [pi,-pi/2], "earthspec", (-latlon_2, latlon_1), repeat->true)_1;
+ );
+
+rot(a, b) := (
+  //https://math.stackexchange.com/questions/180418/calculate-rotation-matrix-to-align-vector-a-to-vector-b-in-3d/897677#897677
+  v = cross(a,b);
+  s = |v|;
+  c = a*b;
+  K = [[0, v_3, -v_2], [-v_3,0,v_1], [v_2, -v_1, 0]];
+  I + K + K*K*(1-c)/(s^2)
+);
+
+
+
+sphere2latlon(s) := (
+  (re(arcsin(s_3)), arctan2(s_2, s_1))
+);
+
+floor2sphere(z) := (
+  z = z/(1-floorh);
+  l2 = |z|*|z|;
+  (2*z_1/(1+l2), 2*z_2/(1+l2), (-1+l2)/(1+l2))
+);
+
+sphere2floor(s) := (
+  s = s/|s|;
+  ///
+  (s_1,s_2)/(1-s_3)*(1-floorh)
+);
+
+
+onScroll(delta) := (
+  //errc(delta);
+  //azoom = azoom-delta/1000
+  p = p*exp(-delta/1000);
+);
+
+smoothstep(x) := (
+  if(x<0, 0, if(x>1, 1, 3*x^2-2*x^3));
+);
+
+dragging = false;
+I = [[1,0,0],[0,1,0],[0,0,1]];
+mat = I;
+
+dx = 0;
+dy = 0;
+sx = 0;
+sy = 0;
+p = (-3, 4, 4)/2;
+floorh = -1.3;
+showray = true;
+
+endangle = 0;
+endtime = seconds();
+timeforpi = 3; //it takes so many seconds to rotate the sphere
+mode = 0;
+</script>
+
+
+<script id="cskeydown" type="text/x-cindyscript">
+errc(keycode());
+if(keycode()==65,//a
+  floorh = floorh + .1;
+);
+if(keycode()==66,//b
+  floorh = floorh - .1;
+);
+
+if(keycode()==67,//c
+  mode = mod(mode+1,3);
+  errc(mode);
+  if(mode==2,
+    
+    camera = cameravideo();
+    readcamera(latlon) := (
+      imagergb([-pi,-pi/2], [pi,-pi/2], camera, (-latlon_2, latlon_1));
+    );
+    readspec(latlon) := 0;
+    ,
+    if(mode==1,
+      
+        camera = cameravideo();
+      readcamera(latlon) := (
+        regional(phi, lambda);
+        phi = latlon_1;
+        lambda = -latlon_2;
+        t1 = (-.505,.065) + (cos(lambda), sin(lambda))*(pi/2-phi)*.2779; //phi>0
+        t2 = (.505,.065) + (cos(pi-lambda), sin(pi-lambda))*(pi/2+phi)*.2779; //phi<0
+        w1 = exp(20*phi);
+        w2 = exp(-20*phi);  
+        (w1/(w1+w2) * imagergb([-1,-720/1280], [1,-720/1280], camera, t1) + w2/(w1+w2) * imagergb([-1,-720/1280], [1,-720/1280], camera, t2));
+      );
+      readspec(latlon) := 0;
+
+      ,
+      
+      
+      readcamera(latlon) := (
+        imagergb([-pi,-pi/2], [pi,-pi/2], "earth", (-latlon_2, latlon_1), repeat->true);
+      );
+      readspec(latlon) := (
+        imagergb([-pi,-pi/2], [pi,-pi/2], "earthspec", (-latlon_2, latlon_1), repeat->true)_1;
+      );
+  );
+  );
+);
+
+if(keycode()==82,//r
+  showray = !showray;
+);
+
+if(keycode()==73,//i -> invert
+  if(endtime<seconds(), //only if we are almost finished with roation
+    endangle = endangle + pi;
+    endtime = max(endtime,seconds())+timeforpi;
+  )
+);
+</script>
+
+<script id="csdraw" type="text/x-cindyscript">
+curangle = if(seconds()>=endtime, endangle, endangle-pi*smoothstep((endtime-seconds())/timeforpi));
+if(mode==1, curangle = curangle + pi/2);
+rotmat = ((1, 0, 0),
+    (0, cos(curangle), -sin(curangle)),
+    (0, sin(curangle), cos(curangle)));
+
+if (dragging,
+    dx = 3 * (sx - mouse().x); dy = 3 * (sy - mouse().y);,
+    //dx = .005 * cos(seconds() * .1); dy = .003 * sin(seconds() * .1);
+    dx = dx*.9; dy=dy*.9;
+);
+
+sx = mouse().x;
+sy = mouse().y;
+
+
+p = 
+/*(
+    (1, 0, 0),
+    (0, cos(dy), sin(dy)),
+    (0, -sin(dy), cos(dy))
+)**/
+((cos(dx), -sin(dx), 0), (sin(dx), cos(dx), 0), (0,0,1))*p;
+p_3 = p_3+5*dy;
+
+if(p_3 < floorh+.1, p_3 = floorh+.1;);
+
+v = cross((0,0,1), p);
+w = cross(p, v);
+v = v/|v|;
+w = w/|w|;
+
+if((mode == 0 & image ready("earth")) % (mode >= 1 & image ready(camera)),
+  colorplot(
+    dir = (-p/|p|)+#.x*v+#.y*w;
+    //ray(t) = p + t*dir
+    
+    b = 2*(p*dir);
+    a = (dir*dir);
+    c = (p*p)-1;
+    
+    d = b*b - 4*a*c;
+    floort = (floorh - p_3)/dir_3;
+    
+    if(d>0 % floort>0,
+      spheret = (-b - re(sqrt(d)))/(2*a);
+      if(d>0 & (spheret<floort % floort<=0),
+        s = p + spheret*dir;
+        s = s/|s|;
+        z = complex(sphere2floor(s));
+        ns = floor2sphere(gauss(f(z)));
+        ns = ns/|ns|;
+        latlon = sphere2latlon(rotmat*ns);
+        
+        readcamera(latlon)*1.2*(1+s_3/2)*(max(0,s*p/|p|)+1*readspec(latlon)*max(0,s*p/|p|)^12);
+
+        ,
+        
+        floorxy = (p_1 + floort*dir_1, p_2 + floort*dir_2);
+        
+        z = f(complex(floorxy));
+        latlon = sphere2latlon(rotmat*floor2sphere(gauss(z)));
+        
+        k = p - (floorxy_1, floorxy_2, floorh);
+        k = k/|k|;
+        
+        readcamera(latlon)*(1/(1+.1*|floorxy|) + readspec(latlon)*max(0,k_3)^12)
+      ),
+      [0,0,0]
+    )
+  );
+);
+
+
+if(showray,
+  draw(mouse());
+  ndir = (0,0,1)-p;
+  palpha = ndir*(-p/|p|);
+  ndir = ndir/palpha;
+  snorth = (ndir*v, ndir*w);
+
+  dir = (-p/|p|)+mouse().x*v+mouse().y*w;
+  floort = (floorh - p_3)/dir_3;
+  floorxy = (p_1 + floort*dir_1, p_2 + floort*dir_2);
+  
+  intersect = floor2sphere(floorxy);
+  idir = intersect-p;
+  
+  ialpha = idir*(-p/|p|);
+  idir = idir/ialpha;
+  sintersect = (idir*v, idir*w);
+
+  if(intersect*p>0,
+    draw(sintersect);
+  );
+
+  if((0,0,1)*p>0,
+    draw(snorth);
+  );
+  
+  draw(snorth, mouse());
+  
+draw(mouse());
+//ray(t) = p + t*dir
+)
+</script>
+
+<script id="csmousedown" type="text/x-cindyscript">
+sx = mouse().x;
+sy = mouse().y;
+
+dragging = true;
+</script>
+
+<script id="csmouseup" type="text/x-cindyscript">
+dragging = false;
+</script>
+
+
+<script type="text/javascript">
+  var cdy = CindyJS({
+    ports: [{id: "CSCanvas", transform:[{visibleRect:[-1,-1,1,1]}]}],
+    scripts: "cs*",
+    language: "en",
+    images: {earth: "earth.jpg", earthspec: "earthspec.jpg"},
+    autoplay: true,
+    geometry: [],
+    use: ["CindyGL"],
+    oninit: function(){
+      cdy.canvas.addEventListener("wheel", function() {
+        cdy.evokeCS('onScroll(' + event.wheelDelta + ')');
+      });
+    }
+  });
+</script>
+</head>
+
+<body>
+  
+  <div id="CSCanvas" style="width:100vw; height:100vh; border:0px;" onwheel="cdy.evokeCS('onScroll(' + event.wheelDelta + ')');"></div>
+ <div id="overlay">
+ <div>
+  <p>
+f(z) = <input type="text" id="inp" value="z"  onkeypress="if((event.which ? event.which : event.keyCode)==13) { cdy.evokeCS('rf(z) := (' + this.value + ');'); }" size="18" style="font-size:18px">
+
+<select id="sel" style="width:4em;">
+  <option>z</option>
+  <option>-z</option>
+  <option>1/z</option>
+  <option>z^2</option>
+  <option value="z^(3/2+sin(seconds())/2)">animated squaring</option>
+  <option>exp(z)</option>
+  <option>exp(mod(z,2)-1)</option>
+  <option>exp(mod(log(z),2)-1)</option>
+  <option>exp(mod(z*(2+2*pi*i)/(2*pi*i),2)-1)</option>
+  <option>exp(mod(log(z)*(2+2*pi*i)/(2*pi*i),2)-1)</option>
+  
+  <option>z^5-1</option>
+  <option>exp(z)</option>
+  <option value="exp(mod(log(z),1+2*pi*i))">Droste</option>
+  <option value="exp(mod((log(z)+mod(seconds()/2,1)),1+2*pi*i)-1/2)">Droste +zoom</option>
+  <option value="modulus = (1+2*pi*i); alpha = modulus/(2*pi*i); exp(mod(log(z)*alpha, modulus))">twisted Droste</option>
+  <option value="modulus = (1+2*pi*i); alpha = modulus/(2*pi*i); l = log(z)*alpha; exp(mod(l + mod(seconds()/2,1) + i*im((2*pi*i)*alpha)*floor(re(l)), modulus))">twisted Droste +zoom</option>
+  <option value="
+  offset = -1+re(log(project2square(z)));
+  exp(mod(log(z) - offset, 2+2*pi*i) + offset)
+  ">squared Droste</option>
+  <option value="
+  offset = -1.1+re(log(project2square(z)));
+  modulus = (2+2*pi*i); alpha = modulus/(2*pi*i); l = log(z)*alpha;
+  exp(mod(l - offset + i*im((2*pi*i)*alpha)*floor(re(l)), modulus) + offset)">twisted squared Droste</option>
+  </option>
+  <option value="a=0; repeat(37, a=a*a+z); a">Mandelbrot set</option>
+</select>
+
+  <button type="button" onclick="cdy.evokeCS('p = [0,-1.5,15]');">->0</button>
+  <!--<button type="button" onclick="cdy.evokeCS('lines = !lines;');">2 pi i</button>-->
+  
+</p>
+</div>
+</div>
+<script type="text/javascript">
+var select = document.getElementById("sel");
+select.addEventListener('change', function(event) {
+  document.getElementById('inp').value = this.value;
+  cdy.evokeCS('rf(z) := (' + this.value + ');');
+}, false);
+</script>
+
+</body>
+</html>
