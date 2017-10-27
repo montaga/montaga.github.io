@@ -200,7 +200,7 @@ if(keycode()==73,//i -> invert
 
 <script id="csdraw" type="text/x-cindyscript">
 curangle = if(seconds()>=endtime, endangle, endangle-pi*smoothstep((endtime-seconds())/timeforpi));
-if(mode==1, curangle = curangle + pi/2);
+if(mode==3, curangle = curangle + pi/2);
 rotmat = ((1, 0, 0),
     (0, cos(curangle), -sin(curangle)),
     (0, sin(curangle), cos(curangle)));
@@ -327,7 +327,7 @@ dragging = false;
     ports: [{id: "CSCanvas", transform:[{visibleRect:[-1,-1,1,1]}]}],
     scripts: "cs*",
     language: "en",
-    images: {earth: "earth.jpg", earthspec: "earthspec.jpg", image01:"image01.jpg", image02: "image02.jpg"},
+    images: {earth: "earth.jpg", earthspec: "earthspec.jpg", image01:"image01.png", image02: "image02.jpg"},
     videos: {video: "jugglers.mp4"},
     autoplay: true,
     geometry: [],

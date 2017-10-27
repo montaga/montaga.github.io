@@ -1,0 +1,153 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>stereographic projection</title>
+<meta charset="UTF-8">
+<script type="text/javascript" src="Cindy.js"></script>
+<script type="text/javascript" src="CindyGL.js"></script>
+<style>
+
+
+html,body { margin: 0px; padding: 0px; width: 100%; height: 100%;}
+#overlay{
+  position: absolute;
+  left:10px;
+  top:10px;
+  background:rgba(200,200,200,0.5);
+  border-radius: 25px;
+  padding: 10px; 
+}
+#inp {
+  background: rgba(255, 255, 255, 0.3);
+  border: none;
+}
+
+#sel {
+  background: rgba(255, 255, 255, 0.3);
+  border: none;
+}
+</style>
+<script id="csinit" type="text/x-cindyscript">
+rf(z) := z;
+f(z) := rf(z/(1-floorh))*(1-floorh);
+resetclock();
+
+ readcamera(latlon) := (
+   imagergb([-pi,-pi/2], [pi,-pi/2], "earth", (-latlon_2, latlon_1), repeat->true);
+ );
+
+ readspec(latlon) := (
+   imagergb([-pi,-pi/2], [pi,-pi/2], "earthspec", (-latlon_2, latlon_1), repeat->true)_1;
+ );
+
+rot(a, b) := (
+  //https://math.stackexchange.com/questions/180418/calculate-rotation-matrix-to-align-vector-a-to-vector-b-in-3d/897677#897677
+  v = cross(a,b);
+  s = |v|;
+  c = a*b;
+  K = [[0, v_3, -v_2], [-v_3,0,v_1], [v_2, -v_1, 0]];
+  I + K + K*K*(1-c)/(s^2)
+);
+
+
+
+sphere2latlon(s) := (
+  (re(arcsin(s_3)), arctan2(s_2, s_1))
+);
+
+floor2sphere(z) := (
+  z = z/(1-floorh);
+  l2 = |z|*|z|;
+  (2*z_1/(1+l2), 2*z_2/(1+l2), (-1+l2)/(1+l2))
+);
+
+sphere2floor(s) := (
+  s = s/|s|;
+  ///
+  (s_1,s_2)/(1-s_3)
+);
+
+
+onScroll(delta) := (
+  //errc(delta);
+  //azoom = azoom-delta/1000
+  p = p*exp(-delta/1000);
+);
+
+smoothstep(x) := (
+  if(x<0, 0, if(x>1, 1, 3*x^2-2*x^3));
+);
+
+dragging = false;
+I = [[1,0,0],[0,1,0],[0,0,1]];
+mat = I;
+
+dx = 0;
+dy = 0;
+sx = 0;
+sy = 0;
+p = (-3, 4, 4)/2;
+floorh = -1.3;
+showray = false;
+
+endangle = 0;
+endtime = seconds();
+timeforpi = 3; //it takes so many seconds to rotate the sphere
+mode = 0;
+lines = false;
+</script>
+
+<script id="csdraw" type="text/x-cindyscript">
+if(imageready("floor"),
+colorplot([.7,.7,.7]);
+colorplot(
+  latlon = #;
+  s = (cos(#.x+pi/2)*cos(#.y), sin(#.x+pi/2)*cos(#.y), sin(#.y));
+  z = sphere2floor(s);
+  imagergba([-2,-2], [2,-2], "floor", z);
+);
+,
+
+colorplot([1,0,0]);
+);
+</script>
+
+<script id="csmousedown" type="text/x-cindyscript">
+sx = mouse().x;
+sy = mouse().y;
+
+dragging = true;
+</script>
+
+<script id="csmouseup" type="text/x-cindyscript">
+dragging = false;
+</script>
+
+
+<script type="text/javascript">
+var pi = 3.14159;
+  var cdy = CindyJS({
+    ports: [{id: "CSCanvas", transform:[{visibleRect:[-pi,-pi/2,pi,pi/2]}]}],
+    scripts: "cs*",
+    language: "en",
+    images: {floor: "floor.png"},
+    autoplay: true,
+    geometry: [],
+    use: ["CindyGL"],
+    oninit: function(){
+      cdy.canvas.addEventListener("wheel", function() {
+        cdy.evokeCS('onScroll(' + event.wheelDelta + ')');
+      });
+    }
+  });
+</script>
+</head>
+
+<body>
+  
+  <div id="CSCanvas" style="width:2048px; height:1024px; border:0px;"></div>
+ 
+</body>
+</html>
