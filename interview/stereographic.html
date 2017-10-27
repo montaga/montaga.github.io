@@ -231,7 +231,11 @@ w = cross(p, v);
 v = v/|v|;
 w = w/|w|;
 
-if((mode == 0 & image ready("earth")) % (mode>=1 & mode<=2 & image ready("image0"+mode)) % (mode >= 3 & image ready(camera)),
+if((mode == 0 & image ready("earth")) % 
+(mode>=1 & mode<=2 & image ready("image0"+mode)) % 
+(mode >= 3 & mode<=4 & image ready(camera)) %
+(mode == 5 & image ready("video"))
+,
   colorplot(
     dir = (-p/|p|)+#.x*v+#.y*w;
     //ray(t) = p + t*dir
