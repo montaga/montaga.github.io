@@ -99,12 +99,80 @@ sx = 0;
 sy = 0;
 p = (-3, 4, 4)/2;
 floorh = -1.3;
-showray = true;
+showray = false;
 
 endangle = 0;
 endtime = seconds();
 timeforpi = 3; //it takes so many seconds to rotate the sphere
 mode = 0;
+lines = false;
+
+switchmode():= (
+  mode = mod(mode+1,6);
+  errc(mode);
+  
+  if(mode==0,
+      
+      
+      readcamera(latlon) := (
+        imagergb([-pi,-pi/2], [pi,-pi/2], "earth", (-latlon_2, latlon_1), repeat->true);
+      );
+      readspec(latlon) := (
+        imagergb([-pi,-pi/2], [pi,-pi/2], "earthspec", (-latlon_2, latlon_1), repeat->true)_1;
+      );
+  );
+  if(mode>=1 & mode<=2,
+    errc("image0"+mode);
+    readcamera(latlon) := (
+      imagergb([-pi,-pi/2], [pi,-pi/2], "image0"+mode, (-latlon_2, latlon_1), repeat->true);
+    );
+    readspec(latlon) := 0;
+  );
+  
+  
+  if(mode==3,
+        camera = cameravideo();
+      readcamera(latlon) := (
+        regional(phi, lambda);
+        phi = latlon_1;
+        lambda = -latlon_2;
+        t1 = (-.505,.065) + (cos(lambda), sin(lambda))*(pi/2-phi)*.2779; //phi>0
+        t2 = (.505,.065) + (cos(pi-lambda), sin(pi-lambda))*(pi/2+phi)*.2779; //phi<0
+        w1 = exp(20*phi);
+        w2 = exp(-20*phi);  
+        (w1/(w1+w2) * imagergb([-1,-720/1280], [1,-720/1280], camera, t1) + w2/(w1+w2) * imagergb([-1,-720/1280], [1,-720/1280], camera, t2));
+      );
+      readspec(latlon) := 0;
+  );
+  
+  
+  if(mode==4,
+    
+    camera = cameravideo();
+    readcamera(latlon) := (
+      imagergb([-pi,-pi/2], [pi,-pi/2], camera, (-latlon_2, latlon_1));
+    );
+    readspec(latlon) := 0;
+  );
+  
+  if(mode==5,
+    
+    playvideo("video");
+    readcamera(latlon) := (
+      imagergb([-pi,-pi/2], [pi,-pi/2], "video", (-latlon_2, latlon_1));
+    );
+    readspec(latlon) := 0;
+  );
+  
+  
+);
+
+invert():=(
+  if(endtime<seconds(), //only if we are almost finished with roation
+    endangle = endangle + pi;
+    endtime = max(endtime,seconds())+timeforpi;
+  )
+);
 </script>
 
 
@@ -118,42 +186,7 @@ if(keycode()==66,//b
 );
 
 if(keycode()==67,//c
-  mode = mod(mode+1,3);
-  errc(mode);
-  if(mode==2,
-    
-    camera = cameravideo();
-    readcamera(latlon) := (
-      imagergb([-pi,-pi/2], [pi,-pi/2], camera, (-latlon_2, latlon_1));
-    );
-    readspec(latlon) := 0;
-    ,
-    if(mode==1,
-      
-        camera = cameravideo();
-      readcamera(latlon) := (
-        regional(phi, lambda);
-        phi = latlon_1;
-        lambda = -latlon_2;
-        t1 = (-.505,.065) + (cos(lambda), sin(lambda))*(pi/2-phi)*.2779; //phi>0
-        t2 = (.505,.065) + (cos(pi-lambda), sin(pi-lambda))*(pi/2+phi)*.2779; //phi<0
-        w1 = exp(20*phi);
-        w2 = exp(-20*phi);  
-        (w1/(w1+w2) * imagergb([-1,-720/1280], [1,-720/1280], camera, t1) + w2/(w1+w2) * imagergb([-1,-720/1280], [1,-720/1280], camera, t2));
-      );
-      readspec(latlon) := 0;
-
-      ,
-      
-      
-      readcamera(latlon) := (
-        imagergb([-pi,-pi/2], [pi,-pi/2], "earth", (-latlon_2, latlon_1), repeat->true);
-      );
-      readspec(latlon) := (
-        imagergb([-pi,-pi/2], [pi,-pi/2], "earthspec", (-latlon_2, latlon_1), repeat->true)_1;
-      );
-  );
-  );
+  switchmode();
 );
 
 if(keycode()==82,//r
@@ -161,10 +194,7 @@ if(keycode()==82,//r
 );
 
 if(keycode()==73,//i -> invert
-  if(endtime<seconds(), //only if we are almost finished with roation
-    endangle = endangle + pi;
-    endtime = max(endtime,seconds())+timeforpi;
-  )
+  invert();
 );
 </script>
 
@@ -201,7 +231,7 @@ w = cross(p, v);
 v = v/|v|;
 w = w/|w|;
 
-if((mode == 0 & image ready("earth")) % (mode >= 1 & image ready(camera)),
+if((mode == 0 & image ready("earth")) % (mode>=1 & mode<=2 & image ready("image0"+mode)) % (mode >= 3 & image ready(camera)),
   colorplot(
     dir = (-p/|p|)+#.x*v+#.y*w;
     //ray(t) = p + t*dir
@@ -234,8 +264,8 @@ if((mode == 0 & image ready("earth")) % (mode >= 1 & image ready(camera)),
         
         k = p - (floorxy_1, floorxy_2, floorh);
         k = k/|k|;
-        
-        readcamera(latlon)*(1/(1+.1*|floorxy|) + readspec(latlon)*max(0,k_3)^12)
+        factor = if(!lines, 1, 1-0.3*mod(round(floorxy.y/(2*pi)/(1-floorh)),2) );
+        factor*(readcamera(latlon)*(1/(1+.1*|floorxy|) + readspec(latlon)*max(0,k_3)^12))
       ),
       [0,0,0]
     )
@@ -293,7 +323,8 @@ dragging = false;
     ports: [{id: "CSCanvas", transform:[{visibleRect:[-1,-1,1,1]}]}],
     scripts: "cs*",
     language: "en",
-    images: {earth: "earth.jpg", earthspec: "earthspec.jpg"},
+    images: {earth: "earth.jpg", earthspec: "earthspec.jpg", image01:"image01.jpg", image02: "image02.jpg"},
+    videos: {video: "jugglers.mp4"},
     autoplay: true,
     geometry: [],
     use: ["CindyGL"],
@@ -345,7 +376,10 @@ f(z) = <input type="text" id="inp" value="z"  onkeypress="if((event.which ? even
 </select>
 
   <button type="button" onclick="cdy.evokeCS('p = [0,-1.5,15]');">->0</button>
-  <!--<button type="button" onclick="cdy.evokeCS('lines = !lines;');">2 pi i</button>-->
+  <button type="button" onclick="cdy.evokeCS('invert()');">rotate sphere</button>
+  <button type="button" onclick="cdy.evokeCS('showray =!showray')">switch ray</button>
+  <button type="button" onclick="cdy.evokeCS('switchmode()')">switch image</button>
+  <button type="button" onclick="cdy.evokeCS('lines = !lines;');">2 pi i</button>
   
 </p>
 </div>
