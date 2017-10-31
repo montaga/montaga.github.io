@@ -90,8 +90,9 @@ complex2latlon(z) := (
   (2*arctan(|z|)-pi/2, arctan2(re(z), im(z)))
 );
 
+h = imagesize(image)_2/imagesize(image)_1;
 readcamera(z) := (
-  imagergb([-1,-1/2], [1,-1/2], image, (re(z), im(z)), repeat->true);
+  imagergb([-1,-h], [1,-h], image, (re(z), im(z)), repeat->true);
 );
 
 setcenter() := (
@@ -192,7 +193,10 @@ if(spherical,
   dropped = dropped();
   
   
-  if (!isundefined(dropped_1_1), image = dropped_1_1;);
+  if (!isundefined(dropped_1_1),
+    image = dropped_1_1;
+    h = imagesize(image)_2/imagesize(image)_1;
+  );
   selectionmode = true;
   reset();
 </script>
@@ -330,14 +334,18 @@ In 2002 the Dutch mathematicians Hendrik Lenstra and Bart de Smit <a href="http:
       
     if(input=="image"){
       cdy.evokeCS(`
+        h = imagesize(image)_2/imagesize(image)_1;
         readcamera(z) := (
-          imagergb([-1,-9/16], [1,-9/16], image, (re(z), im(z)), repeat->true);
+          imagergb([-1,-h], [1,-h], image, (re(z), im(z)), repeat->true);
         );
       `);
     } else if(input=="webcam") {
       cdy.evokeCS(`
+        h = imagesize(video)_2/imagesize(video)_1;
+        h = if(isreal(h), h, 9/16);
+        errc(h);
         readcamera(z) := (
-          imagergb([-1,-9/16], [1,-9/16], video, (re(z), im(z)), repeat->true);
+          imagergb([-1,-h], [1,-h], video, (re(z), im(z)), repeat->true);
         );
       `);
     } else if(input=="spherical") {
