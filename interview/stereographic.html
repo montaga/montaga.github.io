@@ -185,7 +185,7 @@ if(keycode()==66,//b
   floorh = floorh - .1;
 );
 
-if(keycode()==67,//c
+if(keycode()==67 % keycode()==77,//c or m
   switchmode();
 );
 
@@ -196,6 +196,11 @@ if(keycode()==82,//r
 if(keycode()==73,//i -> invert
   invert();
 );
+
+if(keycode()==76,//l -> lines
+  lines = !lines;
+);
+
 </script>
 
 <script id="csdraw" type="text/x-cindyscript">
@@ -348,7 +353,7 @@ dragging = false;
  <div>
   <p>
 f(z) = <input type="text" id="inp" value="z"  onkeypress="if((event.which ? event.which : event.keyCode)==13) { cdy.evokeCS('rf(z) := (' + this.value + ');'); }" size="30" style="font-size:18px">
-<button type="button" id="ok">ok</button>
+
 <select id="sel" style="width:4em;">
   <option>z</option>
   <option>-z</option>
@@ -378,13 +383,6 @@ f(z) = <input type="text" id="inp" value="z"  onkeypress="if((event.which ? even
   </option>
   <option value="a=0; repeat(37, a=a*a+z); a">Mandelbrot set</option>
 </select>
-
-  <button type="button" onclick="cdy.evokeCS('p = [0,-1.5,15]');">->0</button>
-  <button type="button" onclick="cdy.evokeCS('invert()');">rotate sphere</button>
-  <button type="button" onclick="cdy.evokeCS('showray =!showray')">switch ray</button>
-  <button type="button" onclick="cdy.evokeCS('switchmode()')">switch image</button>
-  <button type="button" onclick="cdy.evokeCS('lines = !lines;');">2 pi i</button>
-  
 </p>
 </div>
 </div>
