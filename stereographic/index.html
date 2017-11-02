@@ -125,6 +125,15 @@ switchmode():= (
   );
 
   if(mode==2,
+    camera = cameravideo();
+    readcamera(latlon) := (
+      //imagergb([-pi,-pi/2], [pi,-pi/2], camera, (-latlon_2, latlon_1));
+      imagergb([-pi-0.005,0], [pi+0.005,0], camera, (latlon_2, (latlon_1+pi/2)*(2*imagesize(camera)_2/imagesize(camera)_1)));
+    );
+    readspec(latlon) := 0;
+  );
+  
+  if(mode==3,
         camera = cameravideo();
       readcamera(latlon) := (
         regional(phi, lambda);
@@ -137,15 +146,6 @@ switchmode():= (
         (w1/(w1+w2) * imagergb([-1,-720/1280], [1,-720/1280], camera, t1) + w2/(w1+w2) * imagergb([-1,-720/1280], [1,-720/1280], camera, t2));
       );
       readspec(latlon) := 0;
-  );
-  
-  
-  if(mode==3,
-    camera = cameravideo();
-    readcamera(latlon) := (
-      imagergb([-pi,-pi/2], [pi,-pi/2], camera, (-latlon_2, latlon_1));
-    );
-    readspec(latlon) := 0;
   );
   
 );
@@ -211,7 +211,7 @@ if(keycode()==76,//l -> lines
 
 <script id="csdraw" type="text/x-cindyscript">
 curangle = if(seconds()>=endtime, endangle, endangle-pi*smoothstep((endtime-seconds())/timeforpi));
-if(mode==2, curangle = curangle + pi/2);
+if(mode==3, curangle = curangle + pi/2);
 rotmat = ((1, 0, 0),
     (0, cos(curangle), -sin(curangle)),
     (0, sin(curangle), cos(curangle)));
