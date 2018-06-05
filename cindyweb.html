@@ -1,0 +1,243 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>CindyJS Web</title>
+<meta charset="UTF-8">
+
+<script src="https://codemirror.net/lib/codemirror.js"></script>
+<script src="https://codemirror.net/mode/clike/clike.js"></script>
+<script src="https://codemirror.net/addon/edit/matchbrackets.js"></script>
+<script src="https://codemirror.net/addon/edit/closebrackets.js"></script>
+<link rel="stylesheet" href="https://codemirror.net/lib/codemirror.css">
+<link rel="stylesheet" href="https://codemirror.net/theme/base16-dark.css">
+
+<script type="text/javascript" src="https://cindyjs.org/dist/latest/Cindy.js"></script>
+<script type="text/javascript" src="https://cindyjs.org/dist/latest/CindyGL.js"></script>
+
+<style type="text/css">
+  body {
+    margin: 0;
+    background: rgb(30,30,30);
+    font-size: 22px;
+    color: rgb(255,255,255);
+    font-family: Roboto;
+  }
+  
+  select {
+    height: 29px;
+    overflow: hidden;
+    width: 100%;
+    font-size: 18px;
+    color: rgb(255,255,255);
+    background-color: rgba(255,255,255,.2);
+  }
+  
+  select *
+  {
+   color: rgb(100, 100, 100);
+  }
+  
+  #outer { 
+    width: 100%; height: 100%;
+    display: flex;
+  }
+  
+  
+  #geometry {
+    visibility: hidden;
+  }
+  
+  #sidebar {
+    margin: 2px;
+    width: 50vw;
+  }
+  
+  #controls {
+    margin: 10px;
+    position: relative;
+  }
+  
+  #code, #geometry {
+    position: absolute;
+    top: 0px;
+    height: 100%;
+  }
+  
+  #applet { 
+    width: 50vw; height: 100vh;
+    position: relative;
+  }
+  
+  #CSCanvas {  width: 100%; height: 100%}
+  
+  .CodeMirror {
+    background: rgba(0,0,0,0) !important;
+  }
+  
+  #statusbar {
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    width: 100%;
+    height: 2em;
+    text-align: center;
+    margin: auto;
+    background-color: rgba(0, 0, 0, .4);
+  }
+</style>
+</head>
+
+<script id="csinit" type="text/x-cindyscript">
+resetclock();
+drawcmd() := ();
+createtool([["Move", "Delete"], ["Point", "Intersection", "Mid"], ["Line", "Segment"], ["Circle", "Compass"], ["Parallel", "Orthogonal"]], 10, 20, space->10, toolbar->"toolbar");
+</script>
+
+<script id="csdraw" type="text/x-cindyscript">
+drawcmd();
+</script>
+
+<body>
+  <div id="outer">
+      <div id="sidebar">
+        <select id="sel">
+          <option value="init">init script</option>
+          <option value="draw" selected>draw script</option>
+          <option value="geometry">geometry</option>
+          <option value="url">encode into URL</option>
+        </select>
+        <div id="controls">
+          <div id="code"></div>
+          <div id="geometry">
+            Geometry operations:
+            <div id="toolbar" class="CindyJS-toolbar"></div>
+          </div>
+        </div>
+      </div>
+      <div id="applet">
+        <div id="CSCanvas"></div>
+        <!--div id="statusbar"></div>-->
+     </div>
+  </div>
+
+  <script type="text/javascript">
+  var csinit = `resetclock();`;
+  var csdraw = `colorplot(
+    [x, y, sin(seconds())]
+);`;
+  var gslp = [];
+
+  var url = new URL(document.location.href);
+  var draw = url.searchParams.get("draw");
+  if(draw) {
+    csdraw = decodeURIComponent(draw);
+  }
+  var init = url.searchParams.get("init");
+  if(init) {
+    csinit = decodeURIComponent(init);
+  }
+
+  var gslpstr = url.searchParams.get("gslp");
+  if(gslpstr) {
+    gslpstr = decodeURIComponent(gslpstr);
+    json = JSON.parse(gslpstr);
+    console.log(json);
+    if(json) {
+      gslp = json
+    }
+  }
+
+
+var cdy = CindyJS({
+  ports: [{
+    id: "CSCanvas",
+    transform: [{visibleRect:[-2,-2,2,2]}],
+  }],
+  scripts: "cs*",
+  autoplay: true,
+  use: ["CindyGL"],
+  language: "en",
+  geometry: gslp,
+  statusbar: "statusbar"
+});
+
+var sel = document.getElementById('sel');
+
+
+var lastselect = 1;
+
+
+
+var myCodeMirror = CodeMirror(document.getElementById("code"), {
+  value: csdraw,
+  autoCloseBrackets: true,
+  matchBrackets: true,
+  theme: "base16-dark",
+  lineNumbers: true,
+  lineWrapping: true
+});
+
+myCodeMirror.on("change", function(cm, change) {
+  console.log("something changed! (" + change.origin + ")");
+  if(sel.selectedIndex==1) {
+    csdraw = cm.getValue();
+    cdy.evokeCS(`drawcmd() := (${csdraw})`);
+  }
+  if(sel.selectedIndex==0) {
+    csinit = cm.getValue();
+    cdy.evokeCS(`initcmd() := (${csinit}); initcmd();`);
+  }
+
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+  cdy.evokeCS(`drawcmd() := (${csdraw})`);
+});
+
+sel.addEventListener('change', function() {
+  
+  if(sel.selectedIndex==0) {
+    document.getElementById('code').style.visibility = "visible";
+    document.getElementById('geometry').style.visibility = "hidden";
+    myCodeMirror.setValue(csinit);
+  } else if(sel.selectedIndex==1) {
+    document.getElementById('code').style.visibility = "visible";
+    document.getElementById('geometry').style.visibility = "hidden";
+    myCodeMirror.setValue(csdraw);
+  } else if(sel.selectedIndex==2) {
+    document.getElementById('code').style.visibility = "hidden";
+    document.getElementById('geometry').style.visibility = "visible";
+  } else if(sel.selectedIndex==3) {
+    var backup = console.log;
+    var str = "";
+    console.log = function(msg) {
+        str = msg;
+    };
+    CindyJS.dumpState();
+    console.log=backup;
+    
+    console.log(str);
+    var gslp = [];
+    var json = JSON.parse(str);
+    if(json && json["geometry"]) {
+      gslp = json["geometry"];
+    }
+    
+    history.pushState(null, null, `?draw=${
+      encodeURIComponent(csdraw)
+    }&init=${
+      encodeURIComponent(csinit)
+    }&gslp=${
+      encodeURIComponent(JSON.stringify(gslp))
+    }`);
+    
+    sel.selectedIndex = lastselect;
+  }
+  
+  lastselect = sel.selectedIndex;
+});
+  </script>
+</body>
+</html>
