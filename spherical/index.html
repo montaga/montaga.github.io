@@ -129,17 +129,10 @@ readcamera(latlon) := (
   imagergba([-pi,-pi/2], [pi,-pi/2], image, (-latlon_2, latlon_1), repeat->true);
 );
 
-
-setcenter() := (
-  Z = inverse(M);
-  //M = [[1,0],[0,1]];
-);
-
 onScroll(delta) := (
   errc(delta);
   zoom = zoom-delta/1000
 );
-
 
 switchmode():= (
   mode = mod(mode+1,5);
@@ -216,7 +209,7 @@ if(dragging & |mouse()-m0|>.01,
   p1 = screen2complex(mouse());
   a1 = sphere2complex(cross(complex2sphere(p0), complex2sphere(p1)));
   a2 = sphere2complex(-cross(complex2sphere(p0), complex2sphere(p1)));
-
+  //p1->p0, fix a1 and a2
   M = genmoeb(
     p1, a1, a2,
     p0, a1, a2
@@ -238,8 +231,6 @@ if((mode == 0 & image ready("complex")) %
 );
 
 
-//draw(circle(A,.48));
-//errc(A.xy);
 </script>
 
 
@@ -330,7 +321,7 @@ f(z) = <input type="text" id="inp" value="z"  onkeypress="if((event.which ? even
     You are inside a sphere, which you can rotate by dragging the mouse.
   </p>
   <p>
-    If you enter a complex function, it is <a href="../stereographic">pulled back through the stereographic projection</a>. Each pixel with complex coordinate <i>z</i> on the sphere gets the color of the pixel with coordinate <i>f(z)</i> on the sphere. You can select some example functions from the dropdown box.
+    If you enter a complex function, it is <a href="https://arxiv.org/abs/1605.01396">pulled back</a> through the <a href="../stereographic">stereographic projection</a>. Each pixel with complex coordinate <i>z</i> on the sphere gets the color of the pixel with coordinate <i>f(z)</i> on the sphere. You can select some example functions from the dropdown box.
   </p>
   <p>
     Controls:
