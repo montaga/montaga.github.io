@@ -104,18 +104,26 @@ smoothstep(x) := (
 
 
 switchmode():= (
-  mode = mod(mode+1,4);
+  mode = mod(mode+1,5);
   errc(mode);
   errc(image);
   
   if(mode==0,
+    readcamera(latlon) := (
+      imagergb([-pi,-pi/2], [pi,-pi/2], "complex", (latlon_2, latlon_1), repeat->true);
+    );
+    readspec(latlon) := 0;
+  );
+  
+  if(mode==1,
     readcamera(latlon) := (
       imagergb([-pi,-pi/2], [pi,-pi/2], image, (-latlon_2, latlon_1), repeat->true);
     );
     readspec(latlon) := 0;
   );
   
-  if(mode==1,
+  
+  if(mode==2,
       readcamera(latlon) := (
         imagergb([-pi,-pi/2], [pi,-pi/2], "earth", (-latlon_2, latlon_1), repeat->true);
       );
@@ -124,7 +132,7 @@ switchmode():= (
       );
   );
 
-  if(mode==2,
+  if(mode==3,
     camera = cameravideo();
     readcamera(latlon) := (
       //imagergb([-pi,-pi/2], [pi,-pi/2], camera, (-latlon_2, latlon_1));
@@ -133,7 +141,7 @@ switchmode():= (
     readspec(latlon) := 0;
   );
   
-  if(mode==3,
+  if(mode==4,
         camera = cameravideo();
       readcamera(latlon) := (
         regional(phi, lambda);
@@ -175,7 +183,7 @@ endtime = seconds();
 timeforpi = 3; //it takes so many seconds to rotate the sphere
 
 lines = false;
-image = "image";
+image = "tum";
 
 mode = -1;
 switchmode();
@@ -242,9 +250,10 @@ w = cross(p, v);
 v = v/|v|;
 w = w/|w|;
 
-if((mode == 0 & image ready(image)) %
-(mode == 1 & image ready("earth")) % 
-(mode >= 2 & mode<=3 & image ready(camera))
+if((mode == 0 & image ready("complex")) %
+  (mode == 1 & image ready(image)) %
+(mode == 2 & image ready("earth")) % 
+(mode >= 3 & mode<=4 & image ready(camera))
 ,
   colorplot(
     dir = (-p/|p|)+#.x*v+#.y*w;
@@ -332,7 +341,7 @@ dragging = true;
   
   
   if (!isundefined(dropped_1_1), image = dropped_1_1;
-    mode = -1;
+    mode = 0;
     switchmode();
   );
 </script>
@@ -347,7 +356,7 @@ dragging = false;
     ports: [{id: "CSCanvas", transform:[{visibleRect:[-1,-1,1,1]}]}],
     scripts: "cs*",
     language: "en",
-    images: {earth: "earth.jpg", earthspec: "earthspec.jpg", image:"image01.png"},
+    images: {earth: "earth.jpg", earthspec: "earthspec.jpg", complex:"complex.png", tum:"tum.jpg"},
     autoplay: true,
     geometry: [],
     use: ["CindyGL"],
@@ -370,10 +379,11 @@ f(z) = <input type="text" id="inp" value="z"  onkeypress="if((event.which ? even
 <select id="sel" style="width:4em;">
   <option>z</option>
   <option>-z</option>
-  <option>z+exp(i*seconds())</option>
   <option>1/z</option>
   <option>z^2</option>
   <option value="z^(3/2+sin(seconds())/2)">animated squaring</option>
+  <option>z^3</option>
+  <option>z+exp(i*seconds())</option>
   <option>(z+1)/(z-1)</option>
   <option>z^5-1</option>
   <option>sin(z)</option>
@@ -412,10 +422,11 @@ f(z) = <input type="text" id="inp" value="z"  onkeypress="if((event.which ? even
     <table>
       <tr><td>I:</td><td><b>I</b>nvert sphere.</td></tr>
       <tr><td>R:</td><td>Show <b>R</b>ay.</td></tr>
-      <tr><td>C/M:</td><td><b>C</b>hange the input <b>m</b>ode. By pressing <b>C</b> once, you can map <a href="http://planetpixelemporium.com/earth.html">a texture of the earth</a> to the sphere. If you have a spherical camera (such as the Ricoh Theta), then you can use the spherical footage instead with pressing <b>C</b> multiple times. You can also drag and drop your spherical images and use them as texture.</td></tr>
+      <tr><td>C/M:</td><td><b>C</b>hange the input <b>m</b>ode. By pressing <b>C</b> once, you can map a spherical image to the sphere. A further <b>C</b> maps <a href="http://planetpixelemporium.com/earth.html">a texture of the earth</a> to the sphere. If you have a spherical camera (such as the Ricoh Theta), then you can use the spherical footage instead with pressing <b>C</b> multiple times. You can also drag and drop your spherical images to this applet and use them as texture.</td></tr>
       <tr><td>L:</td><td>Show (<i>2 pi i</i>)-periodic <b>l</b>ines</td></tr>
       <tr><td>A/B:</td><td>Increase or decrease height of sphere.</td></tr>
     </table>
+    <p>You can also view, <a href="../spherical">how the world looks like inside the sphere (spherical view)</a></p>
     <p>Applet made with <a href="https://cindyjs.org/">CindyJS</a>. Author: <a href="">Aaron Montag</a>.</p>
   </p>
 </div>
