@@ -113,9 +113,9 @@ moeb(M, z) := (
 );
 
 screen2complex(pixel) := (
-  //moeb(M, latlon2complex(1.5*[pixel_2, pixel_1]))
-  
-  moeb(M, complex(exp(zoom)*pixel))
+  //moeb(M, latlon2complex([-pi/2+arctan2(1,exp(zoom)*|pixel|),arctan2(pixel)])) //projection of middle of S^2
+  moeb(M, complex(exp(zoom)*pixel)) //projection from north pole of S^2. is conformal :-)
+  //moeb(M, complex(exp(zoom)*pixel/(1+.3*exp(zoom)*|pixel|)))
 );
 
 complex2latlon(z) := (
@@ -302,6 +302,7 @@ f(z) = <input type="text" id="inp" value="z"  onkeypress="if((event.which ? even
   <option>z^3</option>
   <option>z+exp(i*seconds())</option>
   <option>(z+1)/(z-1)</option>
+  <option>z^4+1/(z^4)</option>
   <option>z^5-1</option>
   <option>sin(z)</option>
   <option>exp(z)</option>
