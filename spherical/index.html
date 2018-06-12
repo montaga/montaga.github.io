@@ -63,11 +63,11 @@ td:first-child {
 image = "tum";
 
 //M = [[1,1],[1,-1]];
-Z = [[1,0],[0,1]];
+//Z = [[1,0],[0,1]];
 
 //M = [[1,1],[1,-1]]*[[-i,0],[0,1]];
-//M = [[-1,0],[0,1]] * [[1,1],[1,-1]]*[[-i,0],[0,1]];
-M = [[1,0],[0,1]];
+M = [[-1,0],[0,1]] * [[1,1],[1,-1]]*[[-i,0],[0,1]]; //look straight
+//M = [[1,0],[0,1]]; //look to the floor
 
 //f(z) := z;
 
@@ -114,7 +114,8 @@ moeb(M, z) := (
 
 screen2complex(pixel) := (
   //moeb(M, latlon2complex(1.5*[pixel_2, pixel_1]))
-  moeb(M, (exp(zoom)*(pixel_1 + i*pixel_2)))
+  
+  moeb(M, complex(exp(zoom)*pixel))
 );
 
 complex2latlon(z) := (
@@ -209,11 +210,21 @@ if(dragging & |mouse()-m0|>.01,
   p1 = screen2complex(mouse());
   a1 = sphere2complex(cross(complex2sphere(p0), complex2sphere(p1)));
   a2 = sphere2complex(-cross(complex2sphere(p0), complex2sphere(p1)));
-  //p1->p0, fix a1 and a2
+  //p1->p0, fix a1 and a2  
   M = genmoeb(
     p1, a1, a2,
     p0, a1, a2
   )*M0;
+
+
+  if(|screen2complex((0,0))|>.001,
+    //correct rotation: gravity should play some role
+    angle = arctan2(
+      (screen2complex((0,.01))-screen2complex((0,0)))/screen2complex((0,0))
+    );
+    M = M*[[exp(-i*angle), 0],[0,1]];
+  );
+  
 
 );
 
@@ -229,7 +240,6 @@ if((mode == 0 & image ready("complex")) %
     
   );
 );
-
 
 </script>
 
@@ -285,6 +295,7 @@ f(z) = <input type="text" id="inp" value="z"  onkeypress="if((event.which ? even
 <select id="sel" style="width:4em;">
   <option>z</option>
   <option>-z</option>
+  <option>conjugate(z)</option>
   <option>1/z</option>
   <option>z^2</option>
   <option value="z^(3/2+sin(seconds())/2)">animated squaring</option>
