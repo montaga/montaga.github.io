@@ -110,7 +110,7 @@ switchmode():= (
   
   if(mode==0,
     readcamera(latlon) := (
-      imagergb([-pi,-pi/2], [pi,-pi/2], "complex", (latlon_2, latlon_1), repeat->true);
+      .8*imagergb([-pi,-pi/2], [pi,-pi/2], "complex", (latlon_2, latlon_1), repeat->true)+.2*hue(.75+latlon_2/2/pi)
     );
     readspec(latlon) := 0;
   );
