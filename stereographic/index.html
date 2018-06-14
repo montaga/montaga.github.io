@@ -187,34 +187,37 @@ image = "tum";
 
 mode = -1;
 switchmode();
+
+
+action(k) := ( //keypress
+  if(k==65,//a
+    floorh = floorh + .1;
+  );
+  if(k==66,//b
+    floorh = floorh - .1;
+  );
+
+  if(k==67 % keycode()==77,//c or m
+    switchmode();
+  );
+
+  if(k==82,//r
+    showray = !showray;
+  );
+
+  if(k==73,//i -> invert
+    invert();
+  );
+
+  if(k==76,//l -> lines
+    lines = !lines;
+  );
+);
 </script>
 
 
 <script id="cskeydown" type="text/x-cindyscript">
-errc(keycode());
-if(keycode()==65,//a
-  floorh = floorh + .1;
-);
-if(keycode()==66,//b
-  floorh = floorh - .1;
-);
-
-if(keycode()==67 % keycode()==77,//c or m
-  switchmode();
-);
-
-if(keycode()==82,//r
-  showray = !showray;
-);
-
-if(keycode()==73,//i -> invert
-  invert();
-);
-
-if(keycode()==76,//l -> lines
-  lines = !lines;
-);
-
+action(keycode());
 </script>
 
 <script id="csdraw" type="text/x-cindyscript">
@@ -420,11 +423,11 @@ f(z) = <input type="text" id="inp" value="z"  onkeypress="if((event.which ? even
   <p>
     Controls:
     <table>
-      <tr><td>I:</td><td><b>I</b>nvert sphere.</td></tr>
-      <tr><td>R:</td><td>Show <b>R</b>ay.</td></tr>
-      <tr><td>C/M:</td><td><b>C</b>hange the input <b>m</b>ode. By pressing <b>C</b> once, you can map a spherical image to the sphere. A further <b>C</b> maps <a href="http://planetpixelemporium.com/earth.html">a texture of the earth</a> to the sphere. If you have a spherical camera (such as the Ricoh Theta), then you can use the spherical footage instead with pressing <b>C</b> multiple times. You can also drag and drop your spherical images to this applet and use them as texture.</td></tr>
-      <tr><td>L:</td><td>Show (<i>2 pi i</i>)-periodic <b>l</b>ines</td></tr>
-      <tr><td>A/B:</td><td>Increase or decrease height of sphere.</td></tr>
+      <tr onclick="cdy.evokeCS('action(73)')"><td>I:</td><td><b>I</b>nvert sphere.</td></tr>
+      <tr onclick="cdy.evokeCS('action(82)')"><td>R:</td><td>Show <b>R</b>ay.</td></tr>
+      <tr onclick="cdy.evokeCS('action(67)')"><td>C/M:</td><td><b>C</b>hange the input <b>m</b>ode. By pressing <b>C</b> once, you can map a spherical image to the sphere. A further <b>C</b> maps <a href="http://planetpixelemporium.com/earth.html">a texture of the earth</a> to the sphere. If you have a spherical camera (such as the Ricoh Theta), then you can use the spherical footage instead with pressing <b>C</b> multiple times. You can also drag and drop your spherical images to this applet and use them as texture.</td></tr>
+      <tr onclick="cdy.evokeCS('action(76)')"><td>L:</td><td>Show (<i>2 pi i</i>)-periodic <b>l</b>ines</td></tr>
+      <tr><td>A/B:</td><td><span onclick="cdy.evokeCS('action(65)')">Decrease</span> or <span onclick="cdy.evokeCS('action(66)')">increase</span> height of sphere.</td></tr>
     </table>
     <p>You can also view, <a href="../spherical">how the world looks like inside the sphere (spherical view)</a></p>
     <p>Applet made with <a href="https://cindyjs.org/">CindyJS</a>. Author: <a href="">Aaron Montag</a>.</p>
