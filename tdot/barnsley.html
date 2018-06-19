@@ -37,7 +37,7 @@
 T = map(B1, C, (-1,-1),(1,.9));
 forall([A, A1, A2, A3, A4, B, B1, B2, B3, B4, C, C1], #.xy = T*#.homog);
 
-camera = camera video();
+camera = camera video(resolution -> [1920, 1080]);
 calibrate = false;
 al = .0;
 pts = false;
