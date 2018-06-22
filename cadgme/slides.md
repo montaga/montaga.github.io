@@ -208,7 +208,7 @@ The intersection of the ray behind each pixel with the surface is computed.
 <div><a href="https://cindyjs.org/gallery/main/Jugglers/"><img src="outlook/spiral.png">Video-Deformations with Henry Segerman</a></div>
 <div><a href="https://interactive.app.tum.de/web/04_EI/2"><img src="outlook/lic.png">Vectorfields (LIC)</a></div>
 <div><a href="https://cindyjs.org/gallery/main/CoxeterTilings/"><img src="outlook/tiling.png">Hyperbolic Geometry</a></div>
-<div><a href="http://localhost/cindyjs/examples/cindygl/48_molecules.html"><img src="outlook/nbody.png">N-body Simulation</a></div>
+<div><a href="https://cindyjs.org/examples/cindygl/48_molecules.html"><img src="outlook/nbody.png">N-body Simulation</a></div>
 <div><a href="https://cindyjs.org/examples/cindygl/40_waveintersection.html"><img src="outlook/quasi.png">Quasicrystals</a></div>
 <!--<div><a href="http://cindyjs.org/examples/cindygl/17_images_blur.html"><img src="outlook/blur.png">Image Filters</a></div>-->
 <div><a href="https://interactive.app.tum.de/web/01_AR/2"><img src="outlook/montecarlo.png">Monte Carlo Raytracing</a></div>
