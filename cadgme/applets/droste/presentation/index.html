@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="author" content="Aaron Montag">
+  <meta name="author" content="Raitenhaslach, Germany">
+  <title>The Spherical Droste Effect</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="reveal.js/css/reveal.css">
+  <style type="text/css">code{white-space: pre;}</style>
+  <link rel="stylesheet" href="reveal.js/css/theme/siam.css" id="theme">
+  <!-- Printing and PDF exports -->
+  <script>
+    var link = document.createElement( 'link' );
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = window.location.search.match( /print-pdf/gi ) ? 'reveal.js/css/print/pdf.css' : 'reveal.js/css/print/paper.css';
+    document.getElementsByTagName( 'head' )[0].appendChild( link );
+  </script>
+  <!--[if lt IE 9]>
+  <script src="reveal.js/lib/js/html5shiv.js"></script>
+  <![endif]-->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+<section>
+  <h1 class="title">The Spherical Droste Effect</h1>
+  <h2 class="author">Aaron Montag</h2>
+  <h2 class="author">Raitenhaslach, Germany</h2>
+  <h3 class="date">DGD Days 04.10. - 06.10.2017</h3>
+</section>
+
+<section class="slide level1">
+
+<h2 id="spherical-images-and-videos">Spherical Images and Videos</h2>
+<style type="text/css">
+.reveal iframe {
+  border: 0px;
+  display: block;
+   margin-left: auto;
+   margin-right: auto;
+}
+
+
+.reveal .slides {
+  text-align: left;
+}
+
+.reveal ul {
+  display: inline;
+}
+
+.reveal ol ul {
+  display: inline;
+}
+
+.reveal .slides section {
+  padding: 0 0; !important
+  
+}
+.reveal section img {
+  border: 0px;
+}
+
+.references div {
+  font-size: 20px; !important
+}
+
+
+.showcase div a {
+  font-size: 15px; !important
+}
+
+
+img {
+  box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.2);
+}
+
+
+img:hover {
+  box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.5);
+}
+
+.reveal .slides {
+  height: 100%;
+  top: 0;
+  margin-top: 0;
+}
+
+.reveal .slides>section {
+  min-height: 90%;
+}
+
+.reveal .slides>section>section {
+  min-height: 100%;
+}
+
+.reveal ul {
+   margin: 0 0 0 0em;
+}
+
+
+.cindy {
+  width: 405px;
+  height: 405px;
+  float: right;
+}
+
+.center {
+  text-align: center; !important
+}
+
+code > span.ss {
+     color: #000000; !important
+}
+
+</style>
+<p>Let <span class="math inline">\(\mathcal{C}\)</span> be the RGB <em>color</em> space.</p>
+<div class="fragment">
+<p>Almost universally, spherical images and videos are stored and transmitted via equirectangular projection.</p>
+<span class="math display">\[c:(0, 2 \pi) \times (-\tfrac{\pi}{2},\tfrac{\pi}{2}) \to \mathcal{C}.\]</span>
+<div class="center">
+<img src="tum.jpg" width="800"></img>
+</div>
+</div>
+</section>
+<section class="slide level1">
+
+<h2 id="how-to-edit-these-images">How to edit these images?</h2>
+<p>Rotation of an image on vertical axis is simple: shift the image.</p>
+<iframe data-src="applets/51_tum_marquee.html" width="800" height="400">
+</iframe>
+<div class="fragment">
+<p><strong>Aim 1</strong>: How to rotate a spherical image about a non-vertical axis?</p>
+</div>
+<div class="fragment">
+<p><strong>Aim 2</strong>: Apply other <em>meaningful</em> transformations.</p>
+</div>
+</section>
+<section id="map-the-image-to-hatmathbbc-approx-mathbbc-p1" class="slide level1">
+<h1>Map the image to <span class="math inline">\(\hat{\mathbb{C}} \approx \mathbb{C P}^1\)</span>!</h1>
+<div class="fragment">
+<p>(First map the equirectangular projection to <span class="math inline">\(S^2\)</span> and then map it to <span class="math inline">\(\mathbb{C} \cup \{\infty \} = \hat{\mathbb{C}}\approx \mathbb{C P}^1\)</span> via the Stereographic projection)</p>
+</div>
+</section>
+<section id="conformity-matters" class="slide level1">
+<h1>Conformity matters</h1>
+<iframe data-src="applets/51_world_pullback.html" class="cindy">
+</iframe>
+<p><strong>Lemma:</strong> The Stereographic Projection <span class="math inline">\(SP: S^2 \to \hat{\mathbb{C}}\)</span>, <span class="math inline">\((u,v,w) \mapsto \tfrac{u}{1-w} + i \tfrac{v}{1-w}\)</span> is bi-conformal. <!--
+\begin{eqnarray}
+SP: &S^2 &\to& \hat{\mathbb{C}},\\
+&(u,v,w) &\mapsto& \tfrac{u}{1-w} + i \tfrac{v}{1-w}
+\end{eqnarray}--></p>
+<p><span class="math inline">\(\rightarrow\)</span> it is bijective and it and its inverse preserve all angles (and orientation).</p>
+</section>
+<section class="slide level1">
+
+<h2 id="pullbacks-of-f-hatmathbbc-to-hatmathbbc">Pullbacks of <span class="math inline">\(f : \hat{\mathbb{C}} \to \hat{\mathbb{C}}\)</span></h2>
+<iframe data-src="applets/51_world_pullback.html" class="cindy">
+</iframe>
+<p>Let <span class="math inline">\(f: \hat{\mathbb{C}} \to \hat{\mathbb{C}}\)</span> be a function.</p>
+<p>Then <span class="math inline">\(d = SP^{-1} \circ f \circ SP: S^2 \to S^2\)</span> is called the <em>pullback of <span class="math inline">\(f\)</span></em>.</p>
+<div class="fragment">
+<p><strong>Creating Images:</strong> Good images of a pullback are obtained by computing the following map for each pixel:</p>
+<p><span class="math display">\[\{1, \dots, 1024\} \times \{1, \dots, 768\} \hookrightarrow \mathbb{C} \hookrightarrow \hat{\mathbb{C}} \to^{f} \hat{\mathbb{C}} \\
+\to^{SP^{-1}} S^2 \to (0, 2 \pi) \times (-\tfrac{\pi}{2},\tfrac{\pi}{2}) \to^{c} \mathcal{C}\]</span></p>
+</div>
+</section>
+<section id="the-droste-effect" class="slide level1">
+<h1>The Droste Effect</h1>
+<div class="center">
+<img src="droste.jpg" height="500"></img>
+</div>
+</section>
+<section id="generation-of-the-droste-effects" class="slide level1">
+<h1>Generation of the Droste Effects</h1>
+<iframe data-src="applets/51_garching_pullback.html" class="cindy">
+</iframe>
+<ul>
+<li><p>Consider the image in polar-like coordinates by taking the <span class="math inline">\(\log\)</span> of the image.</p></li>
+<li><p>Replicate the annulus via taking the mod of the real part.</p></li>
+<li><p>Pull back this change in the modulus by taking the <span class="math inline">\(\exp\)</span> of the image.</p></li>
+</ul>
+<p><a href="applets/51_ricoh_moeb_pullback.html">Live demo</a></p>
+<p><a href="applets/51_ricoh_rect_droste.html">Droste on Rectangles</a></p>
+<p><a href="https://montaga.github.io/droste/" class="uri">https://montaga.github.io/droste/</a></p>
+</section>
+<section id="twisted-droste-effect" class="slide level1">
+<h1>Twisted Droste Effect</h1>
+<div class="center">
+<img src="printgallery.jpg" width="450"></img> <img src="printgallery2.jpg" width="450"></img>
+</div>
+<p>Eschers Print Gallery <a href="https://montaga.github.io/droste/" class="uri">https://montaga.github.io/droste/</a></p>
+</section>
+<section id="twist-spherical-images" class="slide level1">
+<h1>Twist spherical images!</h1>
+<iframe data-src="applets/51_garching_pullback_twist.html" class="cindy">
+</iframe>
+<ul>
+<li><strong>Idea:</strong> Rotate the replicated <span class="math inline">\(log\)</span>-deformed image. But how far such that this rotation is compatible with the consecutive <span class="math inline">\(exp\)</span>-deformation?</li>
+</ul>
+<div class="fragment">
+<ul>
+<li><strong>More formal:</strong> <span class="math inline">\(\sim\)</span> is the equivalence relation with <span class="math inline">\(z \sim w\)</span> if <span class="math inline">\(z\)</span> and <span class="math inline">\(w\)</span> show the same part of the image. Have <span class="math inline">\(z \sim z + 2 \pi i\)</span> and <span class="math inline">\(z \sim z + p\)</span> (<span class="math inline">\(p\)</span>: period of the repeated <span class="math inline">\(log\)</span>-deformed image). <strong>Which parameter <span class="math inline">\(\alpha \in \mathbb{C}\)</span> fulfills <span class="math inline">\(\alpha z \sim \alpha z + 2 \pi i\)</span>?</strong></li>
+</ul>
+</div>
+<div class="fragment">
+<p><span class="math inline">\(\alpha z \sim \alpha (z + p + 2 \pi i) = \alpha z + \alpha (p+2 \pi i)\)</span>. Hence for <span class="math inline">\(\alpha:=\tfrac{2 \pi i}{p+2 \pi i}\)</span> holds <span class="math inline">\(\alpha z \sim \alpha z + 2 \pi i\)</span>.</p>
+</div>
+</section>
+<section id="live-demo" class="slide level1">
+<h1>Live Demo</h1>
+<p><a href="applets/51_ricoh_moeb_pullback.html">Pullback of Functions</a></p>
+<p><a href="applets/51_ricoh_rect_droste.html">Droste on Rectangles</a></p>
+<p><a href="applets/51_ricoh_greenbox_droste_feather.html">Droste with a green-box</a></p>
+<p><a href="https://montaga.github.io/droste/" class="uri">https://montaga.github.io/droste/</a></p>
+</section>
+<section id="thank-you" class="slide level1">
+<h1>Thank you!</h1>
+<h3 id="references">References</h3>
+<p><span style="color:#ffffff; font-size: 0%; position: absolute;"> <!--[@stussak2009realsurf]--> <!--[@jobard2002lagrangian]--> <!--[@epstein]--> <!--[@montag]--> <span class="citation" data-cites="de2003mathematical">(Smit and Lenstra 2003)</span> <span class="citation" data-cites="cindygl">(Montag and Richter-Gebert 2016)</span> <span class="citation" data-cites="olsen2010geometry">(Olsen 2010)</span> <span class="citation" data-cites="schleimer2016squares">(Schleimer and Segerman 2016)</span> <span class="citation" data-cites="biederman1987recognition">(Biederman 1987)</span> </span></p>
+<div id="refs" class="references">
+<div id="ref-biederman1987recognition">
+<p>Biederman, Irving. 1987. “Recognition-by-Components: A Theory of Human Image Understanding.” <em>Psychological Review</em> 94 (2). American Psychological Association: 115.</p>
+</div>
+<div id="ref-cindygl">
+<p>Montag, Aaron, and Jürgen Richter-Gebert. 2016. “CindyGL: Authoring GPU-Based Interactive Mathematical Content.” In <em>International Congress on Mathematical Software</em>, 359–65. Springer.</p>
+</div>
+<div id="ref-olsen2010geometry">
+<p>Olsen, John. 2010. “The Geometry of Möbius Transformations.”</p>
+</div>
+<div id="ref-schleimer2016squares">
+<p>Schleimer, Saul, and Henry Segerman. 2016. “Squares That Look Round: Transforming Spherical Images.” <em>ArXiv Preprint ArXiv:1605.01396</em>.</p>
+</div>
+<div id="ref-de2003mathematical">
+<p>Smit, Bart de, and Hendrik W Lenstra. 2003. <em>The Mathematical Structure of Escher’s Print Gallery</em>. na.</p>
+</div>
+</div>
+</section>
+    </div>
+  </div>
+
+  <script src="reveal.js/lib/js/head.min.js"></script>
+  <script src="reveal.js/js/reveal.js"></script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        // Display controls in the bottom right corner
+        controls: false,
+        // Display a presentation progress bar
+        progress: false,
+        // Transition style
+        transition: 'fade', // none/fade/slide/convex/concave/zoom
+
+        // Optional reveal.js plugins
+        dependencies: [
+          { src: 'reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: 'reveal.js/plugin/zoom-js/zoom.js', async: true },
+          { src: 'reveal.js/plugin/notes/notes.js', async: true }
+        ]
+      });
+    </script>
+    </body>
+</html>
