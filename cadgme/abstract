@@ -1,14 +1,3 @@
-300 Wörter
-
- the preferred working group/workshop
-
-Ja, Portugal ist mir nicht zu weit, um dort in einem Vortrag CindyGL vorzustellen. Ich finde es spannend, auch mal in einem Education-Kontext über CindyGL zu sprechen.
-
-Der Workshop wäre ja "Mathematics Education for Students in Upper Secondary School and University First Grade using Cabri and Cinderella"?
-
-Als Erstentwurf für den Abstract schlage ich Folgendes vor:
-
-
 Title: GPU Accelerated Visualizations in Education.
 
 We present an approach to integrate graphical shaders into dynamic geometry software in order to enhance mathematics education. We have developed the plugin CindyGL for CindyJS, which translates the Cinderella inherent high-level programming language CindyScript into shader code. Shader code is then automatically used to accelerate content on the GPU via WebGL.
