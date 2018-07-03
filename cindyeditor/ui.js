@@ -1,14 +1,15 @@
 /*jshint esversion: 6 */
 
+var cm, modeselect, geometrymodeselect;
 function createUI() {
-  var modeselect = document.getElementById("mode-select");
-  var geometrymodeselect = document.getElementById("geometry-mode-select");
+  modeselect = document.getElementById("mode-select");
+  geometrymodeselect = document.getElementById("geometry-mode-select");
   
   //
   // Code editor
   //
   
-  var cm = CodeMirror.fromTextArea(document.getElementById("code"), {
+  cm = CodeMirror.fromTextArea(document.getElementById("code"), {
     autoCloseBrackets: true,
     matchBrackets: true,
     theme: "base16-dark",
@@ -34,7 +35,6 @@ function createUI() {
     option.text = `Edit ${s}-script`;
     option.value = s;
     modeselect.add(option);
-    cdy.evokeCS(`user${s}() := ()`);
   }
   
   //
