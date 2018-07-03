@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    
+    <title>CindyEditor</title>
+    <link rel="stylesheet" href="style.css">
+    <script type="text/javascript" src="Cindy.js"></script>
+    <script type="text/javascript" src="CindyGL.js"></script>
+    <script type="text/javascript" src="makepluginfromcscode.js"></script>
+    <script type="text/javascript" src="geometryeditor-plugin.js"></script>
+    <script type="text/javascript" src="import.js"></script>
+    <script type="text/javascript" src="export.js"></script>
+    
+    <script src="codemirror-5.38.0/lib/codemirror.js"></script>
+    <script src="codemirror-5.38.0/mode/clike/clike.js"></script>
+    <script src="codemirror-5.38.0/addon/edit/matchbrackets.js"></script>
+    <script src="codemirror-5.38.0/addon/edit/closebrackets.js"></script>
+    <link rel="stylesheet" href="codemirror-5.38.0/lib/codemirror.css">
+    <link rel="stylesheet" href="codemirror-5.38.0/theme/base16-dark.css">
+    
+    <script type="text/javascript" src="ui.js"></script>
+    
+    <script id="csinit" type="text/x-cindyscript">
+      geometryeditorinit();
+      exportplugininit();
+    </script>
+    
+    <script id="csmousedown" type="text/x-cindyscript">
+      usermousedown();
+      geometryeditormousedown();
+    </script>
+    
+    <script id="csmove" type="text/x-cindyscript">
+      usermove();
+      exportpluginmove();
+    </script>
+    
+    <script id="csmousedrag" type="text/x-cindyscript">
+      usermousedrag();
+      geometryeditormousedrag();
+    </script>
+
+    <script id="csmouseup" type="text/x-cindyscript">
+      usermouseup();
+      geometryeditormouseup();
+    </script>
+
+    <script id="csdraw" type="text/x-cindyscript">
+      userdraw();
+      geometryeditordraw();
+      exportplugindraw();
+    </script>
+</head>
+<body>
+  
+  <select id="mode-select">
+    <option value="geometry">Edit geometry</option>
+    <option value="export">Export</option>
+    <option value="import">Import</option>
+  </select>
+  
+  <div id="code-window">
+    <div id="code-window-header">code window header</div>  
+    <form><textarea id="code" name="code">
+    </textarea></form>
+  </div>
+  
+  <div id="geometry-window">
+    <!--div id="geometry-window-header">geometry</div>-->
+    <div id="geometry-mode-select">
+    </div>
+  </div>
+  
+  <div id="export-window">
+    <div id="export-window-header">Export widget</div>
+    <div>
+      <div>
+        <h5>Export to file</h5>
+        <!--<button type="button" id="button-export-pdf">PDF</button>
+        <button type="button" id="button-export-svg">SVG</button>
+        <button type="button" id="button-export-html">HTML</button>-->
+        <div>
+          <input id="export-fullscreen" type="checkbox" checked="true">
+          <label for="export-fullscreen">Export fullscreen</label>
+        </div>
+        <div id="export-resolution">
+          <div><b>Select the area to export</b></div>
+          <div>
+            <label for="export-width">width: </label><input type="text" id="export-width" name="export-width" value="800" size="3">
+          </div>
+          <div>
+            <label for="export-height">height: </label><input type="text" id="export-height" name="export-height" value="600" size="3">
+          </div>
+        </div>
+        <button type="button" id="button-export-html">Export HTML-File</button>
+      </div>
+      <h5>Export to URL</h5>
+      <div>
+        By clicking this button, the contents of the editor are encoded in the current URL. By opening the URL, the editing can be continued.<br/>
+        <b>Note:</b> This only works on all browsers if the URL has less than 2000 characters, i.e. the geometry and the programms are sufficiently simple.
+      </div>
+      <div>
+        <button type="button" id="button-export-url">Encode widget into URL</button>
+      </div>
+    </div>
+  </div>
+  
+  <div id="import-window">
+    <div id="import-window-header">Import widget</div>
+    <div>
+      <div>
+        <h5>Import a HTML-widget</h5>
+        <div>
+          <input type="file" id="file-input" onchange="importfile(this.files[0])"> 
+        </div>
+        <div>
+          If a file is uploaded, at least the scripts from the file are tried to be imported.
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div id="CSCanvas"></div>
+
+<script type="text/javascript">
+var scripts = {
+  "init":'',
+  "draw":'',
+  "move":'',
+  "mousedown":'',
+  "mouseup":'',
+  "mousedrag":''
+};
+
+var configuration = {
+  scripts: "cs*",
+  defaultAppearance: {
+    dimDependent: 0.7,
+    fontFamily: "sans-serif",
+    lineSize: 1,
+    pointSize: 5.0,
+    textsize: 12.0
+  },
+  angleUnit: "°",
+  exclusive: true,
+  geometry: [],
+  ports: [{
+    id: "CSCanvas",
+    //width: 900, in style.css: width: 100vw; height: 100vh; (fullscreen)
+    //height: 600,
+    transform: [{visibleRect: [-15, 18, 20, -5]}],
+    background: "rgb(168,176,192)"
+  }],
+  csconsole: false,
+  use: ["CindyGL", "geometryeditor", "exportplugin"],
+  autoplay: true,
+  cinderella: {build: 1901, version: [2, 9, 1901]}
+};
+
+importfromurl(new URL(document.location.href));
+
+var cdy;
+function makeCindyJS(configuration) {
+  cdy = CindyJS(configuration);
+  for(var s in scripts) {
+    cdy.evokeCS(`user${s}() := (${scripts[s]})`);
+  }
+  cdy.evokeCS(`userinit()`);
+}
+
+makeCindyJS(configuration);
+
+createUI();
+createExportUI();
+</script>
+
+</body>
+</html>

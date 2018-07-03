@@ -1,0 +1,85 @@
+body{
+     padding: 0;
+     margin: 0;
+     font-family: sans-serif;
+}
+
+#CSCanvas { /*fullscreen*/
+     width: 100vw;
+     height: 100vh;
+}
+ 
+#import-window, #export-window, #mode-select, #geometry-window, #code-window {
+  background: rgba(255,255,255,.4);
+  z-index: 100;
+  padding: 5px;
+  border-radius: 5px;
+  border: none;
+  position: absolute;
+  box-shadow: 0px 0px 8px rgba(0,0,0,.6);
+}
+
+#import-window-header, #export-window-header, #geometry-window-header, #code-window-header {
+    padding: 3px;
+    margin: 0px 0px 3px 0px;
+    cursor: move;
+    z-index: 10;
+    background: rgba(0,0,0,.6);
+    color: #fff;
+    border-radius: 3px;
+}
+
+#mode-select {
+  top:20px;
+  right: 20px;
+  font-size: 20px;
+}
+
+#import-window, #code-window, #export-window {
+  top: 80px;
+  right: 20px;
+  width: 30vw;
+}
+
+.CodeMirror {
+  background: rgba(0,0,0,0.8) !important;
+  height: auto !important;
+}
+
+.CodeMirror-scroll {
+  min-height: 200px;
+  max-height: 70vh;
+}
+#geometry-window {
+  top: 80px;
+  right: 20px;
+  width: 50px;
+}
+
+#geometry-mode-select {
+  overflow-y: hidden;
+  overflow: hidden;
+  margin:0;
+  border: none;
+  background: rgba(0,0,0,0);
+  display: flex;
+  flex-direction: column;
+}
+
+#geometry-mode-select div {
+  cursor:pointer;
+  background-size:contain;
+  background-repeat:no-repeat;
+  background-color:rgba(255,255,255,.5);
+  margin: 1px;
+  display:inline-block;
+  width:48px;
+  height:36px;
+  -webkit-transition: all 100ms ease-in;
+  -moz-transition: all 100ms ease-in;
+  transition: all 100ms ease-in;
+}
+
+#geometry-mode-select .selected{
+  background-color:rgba(255,100,100,.6);
+}
