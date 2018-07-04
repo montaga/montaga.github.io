@@ -110,13 +110,23 @@
     <div id="import-window-header">Import widget</div>
     <div>
       <div>
-        <h5>Import a HTML-widget</h5>
+        <h5>Import a CindyJS widget from HTML-file</h5>
         <div>
-          <input type="file" id="file-input" onchange="importfile(this.files[0])"> 
+          <input type="file" id="file-input"> 
         </div>
         <div>
-          If a file is uploaded, at least the scripts from the file are tried to be imported.
+          If a HTML-file is uploaded, the CindyJS widget is tried to be imported.
         </div>
+        <!-- Needs 'Access-Control-Allow-Origin' header on the requested resource :-/-->
+        <!--<h5>Import an external CindyJS from URL</h5>
+        <div>
+          <label for="import-url">URL: </label><input type="text" id="import-url" name="import-url" value="https://cindyjs.org/gallery/main/PythN-Eck/">
+          <button type="button" id="button-import-url">Load HTML from URL</button>
+        </div>
+        <div>
+          You can load an external HTML-File from a given URL. The editor will try to find and import a CindyJS widget.
+        </div>
+        -->
       </div>
     </div>
   </div>
@@ -174,6 +184,7 @@ makeCindyJS(configuration);
 
 createUI();
 createExportUI();
+createImportUI();
 highlightoptions();
 </script>
 

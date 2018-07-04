@@ -19,13 +19,8 @@ function importfromurl(url) {
 }
 
 
-function importfile(file) {  
-  var reader = new FileReader();
-  
-  //TODO: check whether file is plain HTML...
-  reader.readAsText(file);
-  reader.onloadend = function() {
-    var source = reader.result;
+function importhtml(source) {  
+
     
     for(var s in scripts) {
         scripts[s] = '';
@@ -109,6 +104,9 @@ function importfile(file) {
       };
     } else {
       configuration.ports[0].id = "CSCanvas";
+      delete configuration.ports[0].width;
+      delete configuration.ports[0].height;
+      
     }
     
     
@@ -117,6 +115,32 @@ function importfile(file) {
     entermode("geometry");
     document.getElementById('move').onclick();
     highlightoptions();
+}
+
+function createImportUI() {
+  document.getElementById("file-input").onchange = function () {
+    var reader = new FileReader();
+    
+    //TODO: check whether file is plain HTML...
+    reader.readAsText(this.files[0]);
+    reader.onloadend = function() {
+      importhtml(reader.result);
+    };
+      
   };
   
+  document.getElementById("button-import-url").onclick = function () {
+    var url = document.getElementById("import-url").value;
+    console.log(`Load content from ${url}`);
+    
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.withCredentials = true;
+    xmlHttp.onreadystatechange = function() { 
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+            importhtml(xmlHttp.responseText);
+    };
+    xmlHttp.open("GET", url, true); // true for asynchronous 
+    xmlHttp.send(null);
+    
+  };
 }

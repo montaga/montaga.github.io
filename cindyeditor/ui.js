@@ -85,6 +85,7 @@ function createUI() {
   dragElement(document.getElementById("code-window"));
   dragElement(document.getElementById("geometry-window"));
   dragElement(document.getElementById("export-window"));
+  dragElement(document.getElementById("import-window"));
 
   
   document.addEventListener('DOMContentLoaded', function() {
@@ -131,6 +132,8 @@ function entermode(m) {
   } else {
     document.getElementById('code-window').style.display = "none";
   }
+  
+  if(m=="geometry") modeselect.selectedIndex = 0; //TODO
 }
 
 
