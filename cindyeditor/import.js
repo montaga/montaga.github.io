@@ -51,12 +51,12 @@ function importhtml(source) {
         m = javascriptregex.exec(source);
         if(m && m[1]) {
             var jscode = m[1];
-            if(jscode.match(/CindyJS([^]*?)/g)) {              
+            if(jscode.match(/(CindyJS|createCindy)\([^]*?\)/g)) {              
               
               eval(`
-                
                 var backupCindyJS = CindyJS;
-                var CindyJS = function(config) {
+                var createCindy;
+                var CindyJS = createCindy = function(config) {
                   configuration = config;
                 };`+jscode+`
                 CindyJS = backupCindyJS;
