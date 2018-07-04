@@ -27,6 +27,7 @@ function createUI() {
       if(s=="init") {
         cdy.evokeCS(`userinit()`);
       }
+      highlightoptions();
     }
   });
 
@@ -34,6 +35,7 @@ function createUI() {
     var option = document.createElement("option");
     option.text = `Edit ${s}-script`;
     option.value = s;
+    option.id = `${s}-option`;
     modeselect.add(option);
   }
   
@@ -131,6 +133,17 @@ function entermode(m) {
   }
 }
 
+
+function highlightoptions() {
+  for(var s in scripts) {
+    let option = document.getElementById(`${s}-option`);
+    if(scripts[s]) {
+      option.classList.add('used-script');
+    } else {
+      option.classList.remove('used-script');
+    }
+  }
+}
 
 function dragElement(elmnt) {
   var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;

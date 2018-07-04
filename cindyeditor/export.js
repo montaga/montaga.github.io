@@ -86,10 +86,11 @@ makepluginfromcscode({
 var visibleRect, width, height;
 function updaterect(str) {
   visibleRect = JSON.parse(str);
+  
   var ratio = Math.abs(visibleRect[3]-visibleRect[1])/Math.abs(visibleRect[2]-visibleRect[0]);
   
-  var width = document.getElementById('export-width').value;
-  var height = Math.round(width*ratio);
+  width = document.getElementById('export-width').value;
+  height = Math.round(width*ratio);
   document.getElementById('export-height').value = height;
 }
 
@@ -125,9 +126,6 @@ function createExportUI() {
       //extract the area
       buildhtml({
         fullscreen: false,
-        width: document.getElementById('export-width').value,
-        height: document.getElementById('export-height').value,
-        visibleRect: visibleRect
       });
       document.getElementById('export-fullscreen').checked = true;
       document.getElementById('export-fullscreen').onchange();
@@ -164,8 +162,23 @@ function yieldgslp() {
 function buildhtml(config) {
   cdy.evokeCS('apply(allelements(),#.pinned=false); '); //TODO: change this if geometry-editor changes
   
+  if(config.fullscreen) {
+    delete configuration.ports[0].width;
+    delete configuration.ports[0].height;
+  } else {
+    configuration.ports[0].transform = [
+      {visibleRect: visibleRect}
+    ];
+    configuration.ports[0].width = width;
+    configuration.ports[0].height = height;
+  }
+  
   //yield gslp
-  var gslp = yieldgslp();
+  configuration.geometry = yieldgslp();
+  
+  //remove uneeded plugins
+  let plugins = ["geometryeditor", "exportplugin"];
+  configuration.use = configuration.use.filter(p => plugins.indexOf(p)==-1);
   
   //yield scripts
   
@@ -190,9 +203,11 @@ function buildhtml(config) {
               margin: 0px;
               padding: 0px;
           }
+          
+          ${config.fullscreen ? `
           #CSCanvas {
-            ${config.fullscreen ? 'width: 100vw; height: 100vh;' : ''}
-          }
+              width: 100vw; height: 100vh;
+          }` : ''}
       </style>
       <link rel="stylesheet" href="https://cindyjs.org/dist/v0.8/CindyJS.css">
       <script type="text/javascript" src="https://cindyjs.org/dist/v0.8/Cindy.js"></script>
@@ -200,30 +215,7 @@ function buildhtml(config) {
       ${csscripts}
   
       <script type="text/javascript">
-  var cdy = CindyJS({
-    scripts: "cs*",
-    defaultAppearance: {
-      dimDependent: 0.7,
-      fontFamily: "sans-serif",
-      lineSize: 1,
-      pointSize: 5.0,
-      textsize: 12.0
-    },
-    angleUnit: "°",
-    geometry: ${JSON.stringify(gslp)},
-    ports: [{
-      id: "CSCanvas",
-      ${config.width ? `width: ${config.width},`:''}
-      ${config.height ? `height: ${config.height},`:''}
-      transform: [{visibleRect: ${
-        config.visibleRect ? JSON.stringify(config.visibleRect) : '[-15, 18, 20, -5]'
-      }}],
-      background: "rgb(168,176,192)"
-    }],
-    csconsole: false,
-    autoplay: true,
-    cinderella: {build: 1901, version: [2, 9, 1901]}
-  });
+        var cdy = CindyJS(${JSON.stringify(configuration, null, "\t")});
       </script>
   </head>
   <body>

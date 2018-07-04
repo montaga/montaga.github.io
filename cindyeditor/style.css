@@ -10,7 +10,7 @@ body{
 }
  
 #import-window, #export-window, #mode-select, #geometry-window, #code-window {
-  background: rgba(255,255,255,.4);
+  background: rgba(230,230,230,.4);
   z-index: 100;
   padding: 5px;
   border-radius: 5px;
@@ -35,6 +35,10 @@ body{
   font-size: 20px;
 }
 
+.used-script {
+  font-weight: bold;
+}
+
 #import-window, #code-window, #export-window {
   top: 80px;
   right: 20px;
@@ -48,8 +52,9 @@ body{
 
 .CodeMirror-scroll {
   min-height: 200px;
-  max-height: 70vh;
+  max-height: 80vh;
 }
+
 #geometry-window {
   top: 80px;
   right: 20px;

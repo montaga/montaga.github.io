@@ -73,15 +73,50 @@ function importfile(file) {
         }
     } while (m);
 
+    
+    for(var s in scripts) {
+      let sname = s + "script";
+      if(configuration.hasOwnProperty(sname)) {
+        console.log("delete property " + sname);
+        delete configuration[sname];
+      }
+        
+    }
+    
     configuration.scripts = "cs*";
-    configuration.canvasname = "CSCanvas";
+    
+    if(configuration.canvasname)
+      delete configuration.canvasname;
+    
     
     configuration.exclusive = "true"; // shut down the previous instance
-    configuration.use = ["CindyGL", "geometryeditor", "exportplugin"];
+    
+    if(!configuration.use)
+      configuration.use = [];
+    
+    let plugins = ["geometryeditor", "exportplugin"];
+    for(var i in plugins) {
+      if(configuration.use.indexOf(plugins[i])==-1) {
+        configuration.use.push(plugins[i]);
+      }
+    }
+    
+    
+    if(!configuration.ports) configuration.ports = [];
+    if(!configuration.ports[0]) {
+      configuration.ports[0] = {
+        id: "CSCanvas"
+      };
+    } else {
+      configuration.ports[0].id = "CSCanvas";
+    }
+    
+    
+    console.log(configuration);
     makeCindyJS(configuration);
     entermode("geometry");
     document.getElementById('move').onclick();
-    
+    highlightoptions();
   };
   
 }
