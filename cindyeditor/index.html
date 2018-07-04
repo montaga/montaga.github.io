@@ -175,7 +175,9 @@ var cdy;
 function makeCindyJS(configuration) {
   cdy = CindyJS(configuration);
   for(var s in scripts) {
-    cdy.evokeCS(`user${s}() := (${scripts[s]})`);
+    cdy.evokeCS(`user${s}() := (
+      ${scripts[s]}
+    )`);
   }
   cdy.evokeCS(`userinit()`);
 }

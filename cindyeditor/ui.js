@@ -23,7 +23,9 @@ function createUI() {
     var s = modeselect.options[modeselect.selectedIndex].value;
     if(scripts.hasOwnProperty(s)) {
       scripts[s] = cm.getValue();
-      cdy.evokeCS(`user${s}() := (${scripts[s]})`);
+      cdy.evokeCS(`user${s}() := (
+        ${scripts[s]}
+      )`);
       if(s=="init") {
         cdy.evokeCS(`userinit()`);
       }
