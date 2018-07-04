@@ -97,6 +97,18 @@ function importhtml(source) {
     }
     
     
+    //load plugin CindyGL if required
+    //TODO: do the same for other plugins as well...
+    hascolorplot = false;
+    for(var s in scripts) {
+      if(scripts[s].match(/colorplot/g))
+        hascolorplot = true;
+    }
+    if(hascolorplot && configuration.use.indexOf("CindyGL")==-1)
+      configuration.use.push("CindyGL");
+    
+    
+    
     if(!configuration.ports) configuration.ports = [];
     if(!configuration.ports[0]) {
       configuration.ports[0] = {
