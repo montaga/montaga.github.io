@@ -116,10 +116,22 @@ function importhtml(source) {
       };
     } else {
       configuration.ports[0].id = "CSCanvas";
-      delete configuration.ports[0].width;
-      delete configuration.ports[0].height;
-      
+      //delete configuration.ports[0].width;
+      //delete configuration.ports[0].height;
+      /*if(configuration.ports[0].width) {
+        cdy.canvas.style.width = configuration.ports[0].width;
+      }
+      if(configuration.ports[0].height) {
+        cdy.canvas.style.height = configuration.ports[0].height;
+      }*/
+      if(configuration.ports[0].width && configuration.ports[0].height) {
+        console.log("enter finite mode");
+        document.getElementById("CSCanvas").classList.remove('fullscreen');
+        document.getElementById("CSCanvas").classList.add('finite');
+      }
     }
+
+    
     
     configuration.oninit = function () {
       entermode("geometry");

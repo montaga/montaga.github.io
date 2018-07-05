@@ -2,15 +2,26 @@ body{
      padding: 0;
      margin: 0;
      font-family: sans-serif;
+     /* checkerboard */
+     background-image: url('background.png');
+     background-size: 20px 20px;
+     background-repeat: repeat;
 }
 
-#CSCanvas { /*fullscreen*/
-     width: 100vw;
-     height: 100vh;
+#CSCanvas.fullscreen {
+    width: 100vw;
+    height: 100vh;
+}
+
+#CSCanvas.finite {
+  position: fixed !important;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
  
 #import-window, #export-window, #mode-select, #geometry-window, #code-window {
-  background: rgba(230,230,230,.4);
+  background: rgba(230,230,230,.7);
   z-index: 100;
   padding: 5px;
   border-radius: 5px;
