@@ -55,11 +55,15 @@ function importhtml(source) {
               
               eval(`
                 var backupCindyJS = CindyJS;
+                var backupcreateCindy = createCindy;
+                var backupcdy = cdy;
                 var createCindy;
                 var CindyJS = createCindy = function(config) {
                   configuration = config;
                 };`+jscode+`
                 CindyJS = backupCindyJS;
+                createCindy = backupcreateCindy;
+                cdy = backupcdy;
                 `);
               
               console.log(jscode);
