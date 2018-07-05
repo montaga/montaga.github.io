@@ -5,10 +5,10 @@ makepluginfromcscode({
     visiblerectactive = false;
     startvisiblerect() := (
       if(!visiblerectactive,
-        maxx = max(apply(allpoints(),p, p.x));
-        maxy = max(apply(allpoints(),p, p.y));
-        minx = min(apply(allpoints(),p, p.x));
-        miny = min(apply(allpoints(),p, p.y));
+        maxx = max(apply(allpoints(),p, p.x))+.5;
+        maxy = max(apply(allpoints(),p, p.y))+.5;
+        minx = min(apply(allpoints(),p, p.x))-.5;
+        miny = min(apply(allpoints(),p, p.y))-.5;
         if(isundefined(maxx) % isundefined(maxy) % isundefined(minx) % isundefined(miny),
           startvisiblerect(-1,-1,2,1);
           ,
@@ -105,11 +105,14 @@ function enterConfigurationUI() {
   document.getElementById('configuration-window').style.display = "block";
   document.getElementById('configuration-fullscreen').checked = configuration.fullscreenmode;
   document.getElementById('configuration-fullscreen').onchange();
-  visibleRect = configuration.ports[0].transform[0].visibleRect;
-  if(visibleRect) {
-      cdy.evokeCS(`startvisiblerect(${visibleRect[0]},${visibleRect[1]},${visibleRect[2]},${visibleRect[3]})`);
-  } else {
-      cdy.evokeCS(`startvisiblerect()`);
+  
+  try{
+      visibleRect = configuration.ports[0].transformconfiguration.ports[0].transform[0].visibleRect;
+      if(visibleRect) {
+        cdy.evokeCS(`startvisiblerect(${visibleRect[0]},${visibleRect[1]},${visibleRect[2]},${visibleRect[3]})`);
+      }
+  } catch(error) {
+    cdy.evokeCS(`startvisiblerect()`);
   }
 }
 

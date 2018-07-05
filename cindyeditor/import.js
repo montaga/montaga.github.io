@@ -130,20 +130,31 @@ function importhtml(source) {
       if(configuration.ports[0].height) {
         cdy.canvas.style.height = configuration.ports[0].height;
       }*/
-      if(configuration.ports[0].width && configuration.ports[0].height) {
-        configuration.fullscreenmode = false;
-      }
+      
+
     }
     
+    m = /<div.*?CSCanvas.*?width:.*?([0-9]*).*?>/g.exec(source);
+    if(m && m[1]) {
+      configuration.ports[0].width = m[1];
+    }
+    
+    m = /<div.*?CSCanvas.*?height:.*?([0-9]*).*?>/g.exec(source);
+    if(m && m[1]) {
+      configuration.ports[0].height = m[1];
+    }
+    
+    if(configuration.ports[0].width && configuration.ports[0].height) {
+      configuration.fullscreenmode = false;
+    }
     
     configuration.oninit = function () {
       entermode("geometry");
-      //document.getElementById('move').onclick();
-      //highlightoptions();
+      document.getElementById('move').onclick();
+      highlightoptions();
     };
     
     makeCindyJS();
-    //setTimeout(document.getElementById('move').onclick, 500); //I do not know why it does not work like above
 }
 
 function createImportUI() {
