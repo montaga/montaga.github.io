@@ -85,8 +85,9 @@ function buildhtml() {
               width: 100vw; height: 100vh;
           }` : ''}
       </style>
-      <link rel="stylesheet" href="https://cindyjs.org/dist/v0.8/CindyJS.css">
-      <script type="text/javascript" src="https://cindyjs.org/dist/v0.8/Cindy.js"></script>
+      <link rel="stylesheet" href="https://cindyjs.org/dist/latest/CindyJS.css">
+      <script type="text/javascript" src="https://cindyjs.org/dist/latest/Cindy.js"></script>
+      <script type="text/javascript" src="https://cindyjs.org/dist/latest/CindyGL.js"></script>
       
       ${csscripts}
   
