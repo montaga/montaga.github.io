@@ -138,11 +138,12 @@ function importhtml(source) {
     
     configuration.oninit = function () {
       entermode("geometry");
-      document.getElementById('move').onclick();
-      highlightoptions();
+      //document.getElementById('move').onclick();
+      //highlightoptions();
     };
     
     makeCindyJS();
+    //setTimeout(document.getElementById('move').onclick, 500); //I do not know why it does not work like above
 }
 
 function createImportUI() {

@@ -40,8 +40,8 @@ function yieldgslp() {
 }
 
 function buildhtml() {
-  //cdy.evokeCS('apply(allelements(),#.pinned=false); '); //TODO: change this if geometry-editor changes
-  document.getElementById('move').onclick();
+  cdy.evokeCS('apply(allelements(),#.pinned=false); '); //TODO: change this if geometry-editor changes
+  //document.getElementById('move').onclick();
   //yield copy of configuration
   var cconfiguration = JSON.parse(JSON.stringify(configuration));
   
