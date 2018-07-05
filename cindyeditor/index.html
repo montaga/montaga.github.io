@@ -5,6 +5,8 @@
     
     <title>CindyEditor</title>
     <link rel="stylesheet" href="style.css">
+    <script type="text/javascript" src="ui.js"></script>
+    
     <script type="text/javascript" src="cindyjs/Cindy.js"></script>
     <script type="text/javascript" src="cindyjs/CindyGL.js"></script>
     <script type="text/javascript" src="makepluginfromcscode.js"></script>
@@ -19,9 +21,8 @@
     <link rel="stylesheet" href="codemirror-5.38.0/lib/codemirror.css">
     <link rel="stylesheet" href="codemirror-5.38.0/theme/base16-dark.css">
     
-    <script type="text/javascript" src="ui.js"></script>
-    
     <script id="csinit" type="text/x-cindyscript">
+      userinit();
       geometryeditorinit();
       exportplugininit();
     </script>
@@ -144,6 +145,7 @@ var scripts = {
   "simulationstep":"", "simulationstart":"", "simulationstop":"", "ondrop":""  
 };
 
+
 var configuration = {
   scripts: "cs*",
   defaultAppearance: {
@@ -164,25 +166,23 @@ var configuration = {
     background: "rgb(168,176,192)"
   }],
   csconsole: false,
-  use: ["CindyGL", "geometryeditor", "exportplugin"],
+  use: ["CindyGL", "geometryeditor", "exportplugin", "user"],
   autoplay: true,
-  cinderella: {build: 1901, version: [2, 9, 1901]}
+  oninit: function() {
+    entermode("geometry");
+  }
 };
+
+var cdy;
 
 importfromurl(new URL(document.location.href));
 
-var cdy;
-function makeCindyJS(configuration) {
+function makeCindyJS() {
+  makepluginfromcscode(scripts, "user");
   cdy = CindyJS(configuration);
-  for(var s in scripts) {
-    cdy.evokeCS(`user${s}() := (
-      ${scripts[s]}
-    )`);
-  }
-  cdy.evokeCS(`userinit()`);
 }
 
-makeCindyJS(configuration);
+makeCindyJS();
 
 createUI();
 createExportUI();

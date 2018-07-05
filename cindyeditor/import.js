@@ -79,6 +79,8 @@ function importhtml(source) {
     }
     
     configuration.scripts = "cs*";
+    //configuration.initscript = scripts["init"]
+    //configuration.scripts = scripts;
     
     if(configuration.canvasname)
       delete configuration.canvasname;
@@ -89,13 +91,13 @@ function importhtml(source) {
     if(!configuration.use)
       configuration.use = [];
     
-    let plugins = ["geometryeditor", "exportplugin"];
+    let plugins = ["geometryeditor", "exportplugin", "user"];
+    
     for(var i in plugins) {
       if(configuration.use.indexOf(plugins[i])==-1) {
         configuration.use.push(plugins[i]);
       }
     }
-    
     
     //load plugin CindyGL if required
     //TODO: do the same for other plugins as well...
@@ -106,8 +108,6 @@ function importhtml(source) {
     }
     if(hascolorplot && configuration.use.indexOf("CindyGL")==-1)
       configuration.use.push("CindyGL");
-    
-    
     
     if(!configuration.ports) configuration.ports = [];
     if(!configuration.ports[0]) {
@@ -121,12 +121,15 @@ function importhtml(source) {
       
     }
     
+    configuration.oninit = function () {
+      entermode("geometry");
+      document.getElementById('move').onclick();
+      highlightoptions();  
+    };
     
-    console.log(configuration);
-    makeCindyJS(configuration);
-    entermode("geometry");
-    document.getElementById('move').onclick();
-    highlightoptions();
+    makeCindyJS();
+    
+
 }
 
 function createImportUI() {

@@ -177,8 +177,11 @@ function buildhtml(config) {
   configuration.geometry = yieldgslp();
   
   //remove uneeded plugins
-  let plugins = ["geometryeditor", "exportplugin"];
-  configuration.use = configuration.use.filter(p => plugins.indexOf(p)==-1);
+  let removeplugins = ["geometryeditor", "exportplugin", "user"];
+  configuration.use = configuration.use.filter(p => removeplugins.indexOf(p)==-1);
+  
+  //remove editor init stuff
+  delete configuration.oninit;
   
   //yield scripts
   
@@ -215,7 +218,7 @@ function buildhtml(config) {
       ${csscripts}
   
       <script type="text/javascript">
-        var cdy = CindyJS(${JSON.stringify(configuration, null, "\t")});
+        var cdy = CindyJS(${JSON.stringify(configuration, null, "  ")});
       </script>
   </head>
   <body>

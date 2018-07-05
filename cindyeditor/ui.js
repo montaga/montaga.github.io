@@ -91,7 +91,6 @@ function createUI() {
 
   
   document.addEventListener('DOMContentLoaded', function() {
-      entermode("geometry");
       document.getElementById('move').onclick();
   }, false);
 }
