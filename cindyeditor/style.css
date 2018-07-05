@@ -9,8 +9,8 @@ body{
 }
 
 #CSCanvas.fullscreen {
-    width: 100vw;
-    height: 100vh;
+    width: 100vw !important;
+    height: 100vh !important;
 }
 
 #CSCanvas.finite {
@@ -20,7 +20,7 @@ body{
   transform: translate(-50%, -50%);
 }
  
-#import-window, #export-window, #mode-select, #geometry-window, #code-window {
+#configuration-window, #import-window, #export-window, #mode-select, #geometry-window, #code-window {
   background: rgba(230,230,230,.7);
   z-index: 100;
   padding: 5px;
@@ -30,7 +30,7 @@ body{
   box-shadow: 0px 0px 8px rgba(0,0,0,.6);
 }
 
-#import-window-header, #export-window-header, #geometry-window-header, #code-window-header {
+#configuration-window-header, #import-window-header, #export-window-header, #geometry-window-header, #code-window-header {
     padding: 3px;
     margin: 0px 0px 3px 0px;
     cursor: move;
@@ -50,10 +50,13 @@ body{
   font-weight: bold;
 }
 
-#import-window, #code-window, #export-window {
+#configuration-window, #import-window, #code-window, #export-window {
   top: 80px;
   right: 20px;
   
+}
+#configuration-window, #import-window, #export-window {
+   width: 30vw;
 }
 
 #code-window {
@@ -61,9 +64,7 @@ body{
   max-width: 50vw;
 }
 
-#import-window, #export-window {
-   width: 30vw;
-}
+
 
 
 .CodeMirror {

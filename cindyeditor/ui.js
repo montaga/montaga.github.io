@@ -85,6 +85,7 @@ function createUI() {
   //
   
   dragElement(document.getElementById("code-window"));
+  dragElement(document.getElementById("configuration-window"));
   dragElement(document.getElementById("geometry-window"));
   dragElement(document.getElementById("export-window"));
   dragElement(document.getElementById("import-window"));
@@ -113,10 +114,13 @@ function entermode(m) {
   if(m=="export") {
     document.getElementById('export-window').style.display = "block";
   } else {
-    document.getElementById('export-fullscreen').checked = true;
-    document.getElementById('export-fullscreen').onchange();
-    //cdy.evokeCS('stopexport()');
     document.getElementById('export-window').style.display = "none";
+  }
+  
+  if(m=="configuration") {
+    enterConfigurationUI();
+  } else {
+    leaveConfigurationUI();
   }
   
   if(m=="import") {

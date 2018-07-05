@@ -9,8 +9,11 @@
     
     <script type="text/javascript" src="cindyjs/Cindy.js"></script>
     <script type="text/javascript" src="cindyjs/CindyGL.js"></script>
+    
     <script type="text/javascript" src="makepluginfromcscode.js"></script>
     <script type="text/javascript" src="geometryeditor-plugin.js"></script>
+    
+    <script type="text/javascript" src="configuration.js"></script>
     <script type="text/javascript" src="import.js"></script>
     <script type="text/javascript" src="export.js"></script>
     
@@ -24,7 +27,7 @@
     <script id="csinit" type="text/x-cindyscript">
       userinit();
       geometryeditorinit();
-      exportplugininit();
+      visiblerectinit();
     </script>
     
     <script id="csmousedown" type="text/x-cindyscript">
@@ -34,7 +37,7 @@
     
     <script id="csmove" type="text/x-cindyscript">
       usermove();
-      exportpluginmove();
+      visiblerectmove();
     </script>
     
     <script id="csmousedrag" type="text/x-cindyscript">
@@ -50,13 +53,14 @@
     <script id="csdraw" type="text/x-cindyscript">
       userdraw();
       geometryeditordraw();
-      exportplugindraw();
+      visiblerectdraw();
     </script>
 </head>
 <body>
   
   <select id="mode-select">
     <option value="geometry">Edit geometry</option>
+    <option value="configuration">Configuration</option>
     <option value="export">Export</option>
     <option value="import">Import</option>
   </select>
@@ -73,6 +77,29 @@
     </div>
   </div>
   
+  <div id="configuration-window">
+    <div id="configuration-window-header">Configuration</div>
+    <div>
+      <div>
+        <h5>Change the size of the widget</h5>
+        <div>
+          <input id="configuration-fullscreen" type="checkbox" checked="true">
+          <label for="configuration-fullscreen">Widget is fullscreen</label>
+        </div>
+        <div id="configuration-resolution">
+          <div><b>Select the area of the widget</b></div>
+          <div>
+            <label for="configuration-width">width: </label><input type="text" id="configuration-width" name="configuration-width" value="800" size="3">
+          </div>
+          <div>
+            <label for="configuration-height">height: </label><input type="text" id="configuration-height" name="configuration-height" value="600" size="3">
+          </div>
+        </div>
+        <button type="button" id="configuration-change-size-button">Apply new size of the widget</button>
+      </div>
+    </div>
+  </div>
+  
   <div id="export-window">
     <div id="export-window-header">Export widget</div>
     <div>
@@ -81,19 +108,6 @@
         <!--<button type="button" id="button-export-pdf">PDF</button>
         <button type="button" id="button-export-svg">SVG</button>
         <button type="button" id="button-export-html">HTML</button>-->
-        <div>
-          <input id="export-fullscreen" type="checkbox" checked="true">
-          <label for="export-fullscreen">Export fullscreen</label>
-        </div>
-        <div id="export-resolution">
-          <div><b>Select the area to export</b></div>
-          <div>
-            <label for="export-width">width: </label><input type="text" id="export-width" name="export-width" value="800" size="3">
-          </div>
-          <div>
-            <label for="export-height">height: </label><input type="text" id="export-height" name="export-height" value="600" size="3">
-          </div>
-        </div>
         <button type="button" id="button-export-html">Export HTML-File</button>
       </div>
       <h5>Export to URL</h5>
@@ -146,6 +160,7 @@ var scripts = {
 };
 
 
+
 var configuration = {
   scripts: "cs*",
   defaultAppearance: {
@@ -166,8 +181,9 @@ var configuration = {
     background: "rgb(168,176,192)"
   }],
   csconsole: false,
-  use: ["CindyGL", "geometryeditor", "exportplugin", "user"],
+  use: ["CindyGL", "geometryeditor", "visiblerect", "user"],
   autoplay: true,
+  fullscreenmode: true, //This is not a CindyJS-property
   oninit: function() {
     entermode("geometry");
   }
@@ -178,6 +194,13 @@ var cdy;
 importfromurl(new URL(document.location.href));
 
 function makeCindyJS() {
+  if(configuration.fullscreenmode) {
+    document.getElementById("CSCanvas").classList.remove('finite');
+    document.getElementById("CSCanvas").classList.add('fullscreen');
+  } else {
+    document.getElementById("CSCanvas").classList.remove('fullscreen');
+    document.getElementById("CSCanvas").classList.add('finite');
+  }
   makepluginfromcscode(scripts, "user");
   cdy = CindyJS(configuration);
 }
@@ -185,6 +208,7 @@ function makeCindyJS() {
 makeCindyJS();
 
 createUI();
+createConfigurationUI();
 createExportUI();
 createImportUI();
 highlightoptions();

@@ -91,7 +91,7 @@ function importhtml(source) {
     if(!configuration.use)
       configuration.use = [];
     
-    let plugins = ["geometryeditor", "exportplugin", "user"];
+    let plugins = ["geometryeditor", "visiblerect", "user"];
     
     for(var i in plugins) {
       if(configuration.use.indexOf(plugins[i])==-1) {
@@ -109,6 +109,8 @@ function importhtml(source) {
     if(hascolorplot && configuration.use.indexOf("CindyGL")==-1)
       configuration.use.push("CindyGL");
     
+    configuration.fullscreenmode = true; //This is not a CindyJS property
+    
     if(!configuration.ports) configuration.ports = [];
     if(!configuration.ports[0]) {
       configuration.ports[0] = {
@@ -125,23 +127,18 @@ function importhtml(source) {
         cdy.canvas.style.height = configuration.ports[0].height;
       }*/
       if(configuration.ports[0].width && configuration.ports[0].height) {
-        console.log("enter finite mode");
-        document.getElementById("CSCanvas").classList.remove('fullscreen');
-        document.getElementById("CSCanvas").classList.add('finite');
+        configuration.fullscreenmode = false;
       }
     }
-
     
     
     configuration.oninit = function () {
       entermode("geometry");
       document.getElementById('move').onclick();
-      highlightoptions();  
+      highlightoptions();
     };
     
     makeCindyJS();
-    
-
 }
 
 function createImportUI() {
@@ -155,8 +152,8 @@ function createImportUI() {
     };
       
   };
-  
-  document.getElementById("button-import-url").onclick = function () {
+  /*
+  document.getElementById("button-import-url").onclick = function() {
     var url = document.getElementById("import-url").value;
     console.log(`Load content from ${url}`);
     
@@ -170,4 +167,5 @@ function createImportUI() {
     xmlHttp.send(null);
     
   };
+  */
 }

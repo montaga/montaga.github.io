@@ -1,98 +1,5 @@
 /*jshint esversion: 6 */
 
-makepluginfromcscode({
-  'init': `
-    exportactive = false;
-    startexport() := (
-      if(!exportactive,
-        maxx = max(apply(allpoints(),p, p.x));
-        maxy = max(apply(allpoints(),p, p.y));
-        minx = min(apply(allpoints(),p, p.x));
-        miny = min(apply(allpoints(),p, p.y));
-        
-        TL = create("Free", [], pos->[minx,maxy]);
-        TR = create("Free", [], pos->[maxx,maxy]);
-        BL = create("Free", [], pos->[minx,miny]);
-        BR = create("Free", [], pos->[maxx,miny]);
-        
-        forall([TL,TR,BL,BR], P,
-          P.alpha = .5;
-          P.color = [1,1,1];
-          P.labeled = false;
-        );
-        
-        exportactive = true;
-      );
-    );
-    stopexport() := (
-      if(exportactive,
-        
-        //remove element is not implemented yet :-(
-        TL.alpha = 0; 
-        TR.alpha = 0;
-        BL.alpha = 0;
-        BR.alpha = 0;
-        //TODO: remove above lines once removeelement is implemented
-        removeelement("TL"); 
-        removeelement("TR");
-        removeelement("BL");
-        removeelement("BR");
-        
-        exportactive = false;
-      );
-    );
-    `,
-  'move': `
-    if(exportactive,
-      if(mover()==TL,
-        TR.y = TL.y;
-        BL.x = TL.x;
-      );
-      
-      if(mover()==TR,
-        TL.y = TR.y;
-        BR.x = TR.x;
-      );
-      
-      if(mover()==BL,
-        BR.y = BL.y;
-        TL.x = BL.x;
-      );
-      
-      if(mover()==BR,
-        BL.y = BR.y;
-        TR.x = BR.x;
-      );
-      visiblerect = [min(BL.x,TR.x),min(BL.y,TR.y),max(BL.x,TR.x),max(BL.y,TR.y)];
-      
-      //TODO: avoid javascript
-      javascript("updaterect('"+visiblerect+"')");
-      
-    );
-  `,
-  'draw': `
-    if(exportactive,
-      draw(TL,BL,color->[1,1,1], size->3);
-      draw(BL,BR,color->[1,1,1], size->3);
-      draw(BR,TR,color->[1,1,1], size->3);
-      draw(TR,TL,color->[1,1,1], size->3);
-    );
-  `
-  },
-  "exportplugin"
-);
-
-
-var visibleRect, width, height;
-function updaterect(str) {
-  visibleRect = JSON.parse(str);
-  
-  var ratio = Math.abs(visibleRect[3]-visibleRect[1])/Math.abs(visibleRect[2]-visibleRect[0]);
-  
-  width = document.getElementById('export-width').value;
-  height = Math.round(width*ratio);
-  document.getElementById('export-height').value = height;
-}
 
 function createExportUI() {
   /*
@@ -106,38 +13,11 @@ function createExportUI() {
   };
   */
   
-  var resolutionelement = document.getElementById('export-resolution');
-  document.getElementById('export-fullscreen').onchange = function() {
-    if(!this.checked) {
-      resolutionelement.style.display = "block";
-      cdy.evokeCS(`startexport()`);
-    } else {
-      resolutionelement.style.display = "none";
-      cdy.evokeCS(`stopexport()`);
-    }
-  };
-  resolutionelement.style.display = "none";
-  
-  
   document.getElementById('button-export-html').onclick = function() {
-    cdy.evokeCS(`stopexport()`);
-    var fullscreen = document.getElementById('export-fullscreen').checked;
-    if(!fullscreen) {
-      //extract the area
-      buildhtml({
-        fullscreen: false,
-      });
-      document.getElementById('export-fullscreen').checked = true;
-      document.getElementById('export-fullscreen').onchange();
-    } else {
-      buildhtml({
-        fullscreen: true
-      });
-    }    
+    buildhtml();   
   };
   
   document.getElementById('button-export-url').onclick = function() {
-    cdy.evokeCS(`stopexport()`);
     exporturl();
   };
 }
@@ -159,29 +39,22 @@ function yieldgslp() {
   return gslp;
 }
 
-function buildhtml(config) {
-  cdy.evokeCS('apply(allelements(),#.pinned=false); '); //TODO: change this if geometry-editor changes
-  
-  if(config.fullscreen) {
-    delete configuration.ports[0].width;
-    delete configuration.ports[0].height;
-  } else {
-    configuration.ports[0].transform = [
-      {visibleRect: visibleRect}
-    ];
-    configuration.ports[0].width = width;
-    configuration.ports[0].height = height;
-  }
+function buildhtml() {
+  //cdy.evokeCS('apply(allelements(),#.pinned=false); '); //TODO: change this if geometry-editor changes
+  document.getElementById('move').onclick();
+  //yield copy of configuration
+  var cconfiguration = JSON.parse(JSON.stringify(configuration));
   
   //yield gslp
-  configuration.geometry = yieldgslp();
+  cconfiguration.geometry = yieldgslp();
   
   //remove uneeded plugins
-  let removeplugins = ["geometryeditor", "exportplugin", "user"];
-  configuration.use = configuration.use.filter(p => removeplugins.indexOf(p)==-1);
+  let removeplugins = ["geometryeditor", "visiblerect", "user"];
+  cconfiguration.use = configuration.use.filter(p => removeplugins.indexOf(p)==-1);
   
-  //remove editor init stuff
-  delete configuration.oninit;
+  //remove editor stuff
+  delete cconfiguration.oninit;
+  delete cconfiguration.fullscreenmode;
   
   //yield scripts
   
@@ -207,7 +80,7 @@ function buildhtml(config) {
               padding: 0px;
           }
           
-          ${config.fullscreen ? `
+          ${configuration.fullscreenmode ? `
           #CSCanvas {
               width: 100vw; height: 100vh;
           }` : ''}
@@ -218,7 +91,7 @@ function buildhtml(config) {
       ${csscripts}
   
       <script type="text/javascript">
-        var cdy = CindyJS(${JSON.stringify(configuration, null, "  ")});
+        var cdy = CindyJS(${JSON.stringify(cconfiguration, null, "  ")});
       </script>
   </head>
   <body>
