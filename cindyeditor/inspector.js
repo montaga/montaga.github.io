@@ -33,9 +33,17 @@ function hex2cscolor(hex) {
     ] : [0,0,0];
 }
 
-createinput = function(key, value, name) {
+function modifygslp(elements, key, value) {
+  let cmd = elements.map(name => `${name}.${key} = ${value}`).join(';');
+  console.log(cmd);
+  cdy.evokeCS(cmd);
+}
+
+createinput = function(key, value, elements, allequal) {  
+  elstr = '[' + elements.map(name=>`'${name}'`).join(',') + ']';
+  keystr = `'${key}'`;
   if(typeof(value)=='boolean') {
-    return `<input type="checkbox" name="${name}.${key}" ${value ? 'checked' : ''} onchange="cdy.evokeCS('${name}.${key} = ' + this.checked)"></div>`;
+    return `<input type="checkbox" name="${key}" ${value ? 'checked' : ''} onchange="modifygslp(${elstr}, ${keystr}, this.checked)"></div>`;
   } else if(typeof(value)=='number') {
     var min = 0;
     var max = 20;
@@ -43,20 +51,20 @@ createinput = function(key, value, name) {
       min = 0;
       max = 1;
     }
-    return `<input type="range" name="${name}.${key}" value="${value}" step=".01"   min="${min}" max="${max}" onchange="cdy.evokeCS('${name}.${key} = ' + this.value); o${name}${key}.value = this.value"><output name="o${name}.${key}" id="o${name}${key}" for="${name}.${key}">${value}</output></div>`;
+    return `<input type="range" name="${name}.${key}" value="${value}" step=".01"   min="${min}" max="${max}" onchange="modifygslp(${elstr}, ${keystr}, this.value); o${key}.value = this.value"><output name="o${key}" id="o${key}" for="${key}">${value}</output></div>`;
   } else if(Array.isArray(value)) {
     if(key=="color") {
-      return `<input type="color" name="${name}.${key}" value="${cscolor2hex(value)}" onchange="cdy.evokeCS('${name}.${key} = [' + hex2cscolor(this.value) + ']'); o${name}${key}.value = '[' + niceprint(hex2cscolor(this.value)) + ']'"><output name="o${name}.${key}" id="o${name}${key}" for="${name}.${key}">[${niceprint(value)}]</output></div>`;
+      return `<input type="color" name="${key}" value="${cscolor2hex(value)}" onchange="modifygslp(${elstr}, ${keystr}, '[' + hex2cscolor(this.value) + ']'); o${key}.value = '[' + niceprint(hex2cscolor(this.value)) + ']'"><output name="o${key}" id="o${key}" for="${key}">[${niceprint(value)}]</output></div>`;
     } else if(key=="pos" && value[2]!=0) {
-        key = "xy";
+        keystr = "'xy'";
         value = [value[0]/value[2],value[1]/value[2]];
     }
     
-    return `<input type="text" name="${name}.${key}" value="[${niceprint(value)}]" onchange="cdy.evokeCS('${name}.${key} = ' + this.value)"></div>`;
+    return `<input type="text" name="${name}.${key}" value="[${niceprint(value)}]" onchange="modifygslp(${elstr}, ${keystr}, this.value)"></div>`;
     
     
   }
-  return `<input type="text" name="${name}.${key}" value="${value}" onchange="cdy.evokeCS('${name}.${key} = ' + this.value)"></div>`;
+  return `<input type="text" name="${name}.${key}" value="${value}" onchange="modifygslp(${elstr}, ${keystr}, this.value)"></div>`;
 };
 
 updateInspector = function(str) {
@@ -65,18 +73,36 @@ updateInspector = function(str) {
 
   var els = gslp.filter(el => selected.indexOf(el.name)!=-1);
   
-  innerhtml = "";
+  
+  let innerhtml = "";
+  if(els.length>0) {
+    document.getElementById("inspector-window-header").innerHTML = "Inspecting " + els.map(el => el.name).join(', ');
+  } else {
+    document.getElementById("inspector-window-header").innerHTML = "Inspector";
+    innerhtml = "Select an element for inspection by clicking on it.";
+  }
+  
+  let elementswithkey = {};
   for(var i in els) {
     var el = els[i];
-    innerhtml += `<div><b>${el.name}</b>`;
     for(var key in el) {
       if(key == "type" || key=="args" || key=="name") continue;
-      let name = `${el.name}.${key}`;
-      innerhtml += `<div><label for="${el.name}.${key}">${key}: </label>${createinput(key, el[key], el.name)}`;
+      if(!elementswithkey[key]) elementswithkey[key] = [];
+      elementswithkey[key].push(i);
     }
-    innerhtml += '</div>';
   }
-    
+  
+  for(let key in elementswithkey) {
+    if(elementswithkey[key].length==0) continue;
+    let firstel = els[elementswithkey[key][0]];  
+    let value = firstel[key];
+    let allequal = true;
+    for(let j = 1; allequal && j<elementswithkey[key].length; j++) {
+      if(JSON.stringify(els[elementswithkey[key][j]][key]) != JSON.stringify(value)) allequal = false;
+    }
+    let elnames = elementswithkey[key].map(i=>els[i].name);
+    innerhtml += `<div><span style="color:rgb(150,150,150)">${elnames}</span> <label for="${key}">${key}: </label>${createinput(key, value, elnames, allequal)}`;
+  }
   inspectorcontents.innerHTML = innerhtml;
 };
 
