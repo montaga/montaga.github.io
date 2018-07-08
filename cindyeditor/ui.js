@@ -89,6 +89,7 @@ function createUI() {
   dragElement(document.getElementById("geometry-window"));
   dragElement(document.getElementById("export-window"));
   dragElement(document.getElementById("import-window"));
+  dragElement(document.getElementById("inspector-window"));
 
   
   document.addEventListener('DOMContentLoaded', function() {
@@ -127,6 +128,12 @@ function entermode(m) {
     document.getElementById('import-window').style.display = "block";
   } else {
     document.getElementById('import-window').style.display = "none";
+  }
+  
+  if(m=="inspector") {
+    document.getElementById('inspector-window').style.display = "block";
+  } else {
+    document.getElementById('inspector-window').style.display = "none";
   }
   
   console.log(m);

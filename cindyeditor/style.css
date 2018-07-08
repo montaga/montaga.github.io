@@ -24,7 +24,7 @@ body{
   transform: translate(-50%, -50%);
 }
  
-#configuration-window, #import-window, #export-window, #mode-select, #geometry-window, #code-window {
+#inspector-window, #configuration-window, #import-window, #export-window, #mode-select, #geometry-window, #code-window {
   background: rgba(230,230,230,.7);
   z-index: 100;
   padding: 5px;
@@ -34,7 +34,7 @@ body{
   box-shadow: 0px 0px 8px rgba(0,0,0,.6);
 }
 
-#configuration-window-header, #import-window-header, #export-window-header, #geometry-window-header, #code-window-header {
+#inspector-window-header, #configuration-window-header, #import-window-header, #export-window-header, #geometry-window-header, #code-window-header {
     padding: 3px;
     margin: 0px 0px 3px 0px;
     cursor: move;
@@ -54,12 +54,12 @@ body{
   font-weight: bold;
 }
 
-#configuration-window, #import-window, #code-window, #export-window {
+#inspector-window, #configuration-window, #import-window, #code-window, #export-window {
   top: 80px;
   right: 20px;
-  
 }
-#configuration-window, #import-window, #export-window {
+
+#inspector-window, #configuration-window, #import-window, #export-window {
    width: 30vw;
 }
 

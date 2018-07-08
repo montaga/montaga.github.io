@@ -16,6 +16,7 @@
     <script type="text/javascript" src="configuration.js"></script>
     <script type="text/javascript" src="import.js"></script>
     <script type="text/javascript" src="export.js"></script>
+    <script type="text/javascript" src="inspector.js"></script>
     
     <script src="codemirror-5.38.0/lib/codemirror.js"></script>
     <script src="codemirror-5.38.0/mode/clike/clike.js"></script>
@@ -62,7 +63,8 @@
   
   <select id="mode-select">
     <option value="geometry">Edit geometry</option>
-    <option value="configuration">Configuration</option>
+    <option value="inspector">Inspector</option>
+    <option value="configuration">General configuration</option>
     <option value="export">Export</option>
     <option value="import">Import</option>
   </select>
@@ -148,6 +150,15 @@
     </div>
   </div>
   
+  <div id="inspector-window">
+    <div id="inspector-window-header">Inspetor</div>
+    <div>
+      <div id="inspector-contents">
+        Select an element for inspection by clicking on it.
+      </div>
+    </div>
+  </div>
+  
   <div id="CSCanvas" class="fullscreen"></div>
 
 <script type="text/javascript">
@@ -213,6 +224,7 @@ createUI();
 createConfigurationUI();
 createExportUI();
 createImportUI();
+createinspectorWindow();
 highlightoptions();
 </script>
 
