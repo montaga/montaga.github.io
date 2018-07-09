@@ -2185,7 +2185,7 @@ function cs_onDrop(lst, pos) {
 function cindy_cancelmove() {
     move = undefined;
 }
-var version = [0,8,7,207,"gda3a594"];
+var version = [0,8,7,216,"g7e942fc"];
 //==========================================
 //      Complex Numbers
 //==========================================
@@ -7078,6 +7078,23 @@ eval_helper.assigncolon = function(data, what) {
     } else {
         if (!key) console.log("Key is undefined");
         else console.log("User data can only be assigned to geo objects and lists.");
+    }
+
+    return nada;
+};
+
+
+evaluator.keys$1 = function(args, modifs) {
+    var obj = evaluate(args[0]);
+    var ctype = obj.ctype;
+    if (ctype === "geo" || ctype === "list") {
+        var keys = [];
+
+        var data = ctype === "geo" ? obj.value.userData : obj.userData;
+        if (data) {
+            keys = Object.keys(data).map(General.string);
+        }
+        return List.turnIntoCSList(keys);
     }
 
     return nada;
@@ -18352,7 +18369,8 @@ function addElementNoProof(el) {
     }
 
     // collect sets
-    var setsRe = new RegExp("^[P|L|S|C]s$"); // Ps, Ls, ...
+    var setsRe = /^[P|L|S|C]s$/; // Ps, Ls, ...
+
     if (setsRe.test(el.kind)) {
         var nameMap = {
             "P": "points",
@@ -19986,8 +20004,11 @@ guessDuplicate._helper.isSetEq = function(arrA, arrB, cmp) {
 };
 
 function guessIncidences(el) {
-    if (guessIncidences.hasOwnProperty(el.kind))
+    if (guessIncidences.hasOwnProperty(el.kind)) {
+        // reset incidences
+        el.incidences = [];
         guessIncidences[el.kind](el);
+    }
 }
 
 guessIncidences.P = function(p) {

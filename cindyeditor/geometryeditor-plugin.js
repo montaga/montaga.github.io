@@ -677,5 +677,4 @@ doup();
 `
 };
 
-
 makepluginfromcscode(geometrycodes, "geometryeditor");
