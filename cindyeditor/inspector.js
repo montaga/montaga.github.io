@@ -54,6 +54,10 @@ createinput = function(key, value, elements, allequal) {
     return `<input type="range" name="${name}.${key}" value="${value}" step=".01"   min="${min}" max="${max}" onchange="modifygslp(${elstr}, ${keystr}, this.value); o${key}.value = this.value"><output name="o${key}" id="o${key}" for="${key}">${value}</output></div>`;
   } else if(Array.isArray(value)) {
     if(key=="color") {
+      let mval = Math.max(value[0],value[1],value[2]);
+      if(mval>1) { // I do not undestand why this sometimes
+        value = [value[0]/mval, value[1]/mval, value[2]/mval];
+      }
       return `<input type="color" name="${key}" value="${cscolor2hex(value)}" onchange="modifygslp(${elstr}, ${keystr}, '[' + hex2cscolor(this.value) + ']'); o${key}.value = '[' + niceprint(hex2cscolor(this.value)) + ']'"><output name="o${key}" id="o${key}" for="${key}">[${niceprint(value)}]</output></div>`;
     } else if(key=="pos" && value[2]!=0) {
         keystr = "'xy'";
