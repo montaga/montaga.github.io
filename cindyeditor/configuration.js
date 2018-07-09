@@ -155,8 +155,6 @@ var Configuration = {
       configuration.ports[0].transform = [{visibleRect: Configuration.visibleRect}];
       configuration.oninit = function () {
         UI.entermode("geometry");
-        document.getElementById('move').onclick();
-        highlightoptions();
       };
       
       makeCindyJS();
