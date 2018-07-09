@@ -1,18 +1,5 @@
 /*jshint esversion: 6 */
 
-var geometrybuttons = [
-  ["move", 'images/move.png'],
-  ["singlepoint", 'images/single-add.png'],
-  ["middle", 'images/multi-add-middle.png'],
-  ["singleline", 'images/multi-add-line.png'],
-  ["singlesegment", 'images/segment.png'],
-  ["parallel", 'images/multi-add-parallel.png'],
-  ["perp", 'images/multi-add-perp.png'],
-  ["circlepp", 'images/multi-add-circle.png'],
-  ["circlepr", 'images/circle-by-radius.png'],
-];
-
-
 var geometrycodes = {
 "init": `
         //======CODE FOR BUTTONS==========

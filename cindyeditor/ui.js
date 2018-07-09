@@ -1,164 +1,63 @@
 /*jshint esversion: 6 */
 
-var cm, modeselect, geometrymodeselect;
-function createUI() {
-  modeselect = document.getElementById("mode-select");
-  geometrymodeselect = document.getElementById("geometry-mode-select");
-  
-  //
-  // Code editor
-  //
-  
-  cm = CodeMirror.fromTextArea(document.getElementById("code"), {
-    autoCloseBrackets: true,
-    matchBrackets: true,
-    theme: "base16-dark",
-    lineNumbers: true,
-    lineWrapping: true,
-    viewportMargin: Infinity
-  });
-  
-  cm.on("change", function(cm, change) {
-    console.log("something changed! (" + change.origin + ")");
-    var s = modeselect.options[modeselect.selectedIndex].value;
-    if(scripts.hasOwnProperty(s)) {
-      scripts[s] = cm.getValue();
-      cdy.evokeCS(`user${s}() := (
-        ${scripts[s]}
-      )`);
-      if(s=="init") {
-        cdy.evokeCS(`userinit()`);
-      }
-      highlightoptions();
-    }
-  });
-
-  for(var s in scripts) {
-    var option = document.createElement("option");
-    option.text = `Edit ${s}-script`;
-    option.value = s;
-    option.id = `${s}-option`;
-    modeselect.add(option);
-  }
-  
-  //
-  // Geometry
-  // 
-  
-  // Add elements to geometry toggle menu
-  for(var i in geometrybuttons) {
-    var option = document.createElement("div");
-
-    option.data = geometrybuttons[i][0];
-    option.id = geometrybuttons[i][0];
-    //option.value = geometrybuttons[i][0];
+var UI = {
+  modes: [],
+  modeselect: null,
+  lastmodeid: 'geometry',
+  create(modes) {
+    let windows = document.getElementById('windows');
+    this.modeselect = document.getElementById("mode-select");
     
-    option.onclick = function() {
-      cdy.evokeCS(`setmode("${this.data}")`);
-      var children = geometrymodeselect.children;
+    this.modes = modes;
+    
+    for(var i=0; i<modes.length; i++) {
+      let m = modes[i];
+      windows.innerHTML += m.html;
       
-      for (var i = 0; i < children.length; i++) {
-        children[i].classList.remove('selected');
-      }
-
-      this.classList.add('selected');
+      var option = document.createElement("option");
+      option.text = m.name;
+      option.value = m.id;
+      option.id = `${m.id}-option`;
+      this.modeselect.add(option);
     }
-    option.style.backgroundImage = `url('${geometrybuttons[i][1]}'`;
-    geometrymodeselect.appendChild(option);
-  }
-
-
+    
+    this.modeselect.addEventListener('change', function(event) {
+      UI.entermode(this.value);
+    }, false);
+  },
   
-  //
-  // General mode select
-  //
-
-  modeselect.addEventListener('change', function(event) {
-    entermode(this.value);
-  }, false);
-
-  
-
-  
-  //
-  // Make elements draggagle by moving the header:
-  //
-  
-  dragElement(document.getElementById("code-window"));
-  dragElement(document.getElementById("configuration-window"));
-  dragElement(document.getElementById("geometry-window"));
-  dragElement(document.getElementById("export-window"));
-  dragElement(document.getElementById("import-window"));
-  dragElement(document.getElementById("inspector-window"));
-
-  
-  document.addEventListener('DOMContentLoaded', function() {
-      document.getElementById('move').onclick();
-  }, false);
-}
-
-function entermode(m) {
-  if(m=="geometry") {
-    document.getElementById('geometry-window').style.display = "block";
-  } else {
-    document.getElementById('geometry-window').style.display = "none";
-    cdy.evokeCS(`selpts=[];
-    sellns=[];
-    selcns=[];
-    tmppts=[];
-    tmplns=[];
-    tmpcns=[];`);
-    cdy.evokeCS('setmode("move");');
-    document.getElementById('move').onclick();
-  }
-  
-  if(m=="export") {
-    document.getElementById('export-window').style.display = "block";
-  } else {
-    document.getElementById('export-window').style.display = "none";
-  }
-  
-  if(m=="configuration") {
-    enterConfigurationUI();
-  } else {
-    leaveConfigurationUI();
-  }
-  
-  if(m=="import") {
-    document.getElementById('import-window').style.display = "block";
-  } else {
-    document.getElementById('import-window').style.display = "none";
-  }
-  
-  if(m=="inspector") {
-    document.getElementById('inspector-window').style.display = "block";
-  } else {
-    document.getElementById('inspector-window').style.display = "none";
-  }
-  
-  console.log(m);
-  if(scripts.hasOwnProperty(m)) {
-    document.getElementById('code-window').style.display = "block";
-    var header = document.getElementById('code-window-header').innerHTML = `${m}-script`;
-    cm.setValue(scripts[m]);
-  } else {
-    document.getElementById('code-window').style.display = "none";
-  }
-  
-  if(m=="geometry") modeselect.selectedIndex = 0; //TODO
-}
-
-
-function highlightoptions() {
-  for(var s in scripts) {
-    let option = document.getElementById(`${s}-option`);
-    if(scripts[s]) {
-      option.classList.add('used-script');
-    } else {
-      option.classList.remove('used-script');
+  entermode: function(modeid) {
+    let mode = this.modes[0];
+    let lastmode = this.modes[0];
+    for(let i = 0; i<this.modes.length; i++) {
+      if(this.modes[i].id==modeid) mode = this.modes[i];
+      if(this.modes[i].id==this.lastmodeid) lastmode = this.modes[i];
     }
-  }
-}
+    
+    document.getElementById(`${modeid}-window`).style.display = "block";
+    if(this.lastmodeid!=modeid)
+      document.getElementById(`${this.lastmodeid}-window`).style.display = "none";
+    
+    if(lastmode.leave && this.lastmodeid!=modeid)
+      lastmode.leave();
+    
+    if(mode.enter)
+      mode.enter();
+        
+    this.lastmodeid = modeid;
+  },
+  
+  init: function() {
+    for(var i=0; i<this.modes.length; i++) {
+      let m = this.modes[i];
+      document.getElementById(`${m.id}-window`).style.display = "none";
+      dragElement(document.getElementById(`${m.id}-window`));
+      m.init();
+    }
+  },
+};
+
+
 
 function dragElement(elmnt) {
   var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;

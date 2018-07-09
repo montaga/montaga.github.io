@@ -13,10 +13,12 @@
     <script type="text/javascript" src="makepluginfromcscode.js"></script>
     <script type="text/javascript" src="geometryeditor-plugin.js"></script>
     
+    <script type="text/javascript" src="geometry.js"></script>
+    <script type="text/javascript" src="inspector.js"></script>
     <script type="text/javascript" src="configuration.js"></script>
     <script type="text/javascript" src="import.js"></script>
     <script type="text/javascript" src="export.js"></script>
-    <script type="text/javascript" src="inspector.js"></script>
+    <script type="text/javascript" src="code.js"></script>
     
     <script src="codemirror-5.38.0/lib/codemirror.js"></script>
     <script src="codemirror-5.38.0/mode/clike/clike.js"></script>
@@ -62,103 +64,8 @@
 <body>
   
   <select id="mode-select">
-    <option value="geometry">Edit geometry</option>
-    <option value="inspector">Inspector</option>
-    <option value="configuration">General configuration</option>
-    <option value="export">Export</option>
-    <option value="import">Import</option>
   </select>
-  
-  <div id="code-window">
-    <div id="code-window-header">code window header</div>  
-    <form><textarea id="code" name="code">
-    </textarea></form>
-  </div>
-  
-  <div id="geometry-window">
-    <!--div id="geometry-window-header">geometry</div>-->
-    <div id="geometry-mode-select">
-    </div>
-  </div>
-  
-  <div id="configuration-window">
-    <div id="configuration-window-header">Configuration</div>
-    <div>
-      <div>
-        <h5>Change the size of the widget</h5>
-        <div>
-          <input id="configuration-fullscreen" type="checkbox" checked="true">
-          <label for="configuration-fullscreen">Widget is fullscreen</label>
-        </div>
-        <div id="configuration-resolution">
-          <div><b>Select the area of the widget</b></div>
-          <div>
-            <label for="configuration-width">width: </label><input type="text" id="configuration-width" name="configuration-width" value="800" size="3">
-          </div>
-          <div>
-            <label for="configuration-height">height: </label><input type="text" id="configuration-height" name="configuration-height" value="600" size="3">
-          </div>
-        </div>
-        <button type="button" id="configuration-change-size-button">Apply new size of the widget</button>
-      </div>
-    </div>
-  </div>
-  
-  <div id="export-window">
-    <div id="export-window-header">Export widget</div>
-    <div>
-      <div>
-        <h5>Export to file</h5>
-        <!--<button type="button" id="button-export-pdf">PDF</button>
-        <button type="button" id="button-export-svg">SVG</button>
-        <button type="button" id="button-export-html">HTML</button>-->
-        <button type="button" id="button-export-html">Export HTML-File</button>
-      </div>
-      <h5>Export to URL</h5>
-      <div>
-        By clicking this button, the contents of the editor are encoded in the current URL. By opening the URL, the editing can be continued.<br/>
-        <b>Note:</b> This only works on all browsers if the URL has less than 2000 characters, i.e. the geometry and the programms are sufficiently simple.
-      </div>
-      <div>
-        <button type="button" id="button-export-url">Encode widget into URL</button>
-      </div>
-    </div>
-  </div>
-  
-  <div id="import-window">
-    <div id="import-window-header">Import widget</div>
-    <div>
-      <div>
-        <h5>Import a CindyJS widget from HTML-file</h5>
-        <div>
-          <input type="file" id="file-input"> 
-        </div>
-        <div>
-          If a HTML-file is uploaded, the CindyJS widget is tried to be imported.
-        </div>
-        <!-- Needs 'Access-Control-Allow-Origin' header on the requested resource :-/-->
-        <!--<h5>Import an external CindyJS from URL</h5>
-        <div>
-          <label for="import-url">URL: </label><input type="text" id="import-url" name="import-url" value="https://cindyjs.org/gallery/main/PythN-Eck/">
-          <button type="button" id="button-import-url">Load HTML from URL</button>
-        </div>
-        <div>
-          You can load an external HTML-File from a given URL. The editor will try to find and import a CindyJS widget.
-        </div>
-        -->
-      </div>
-    </div>
-  </div>
-  
-  <div id="inspector-window">
-    <div id="inspector-window-header">Inspector</div>
-    <div>
-      <div id="inspector-contents">
-        Select an element for inspection by clicking on it.
-      </div>
-    </div>
-  </div>
-  
+  <div id="windows"></div>
   <div id="CSCanvas" class="fullscreen"></div>
 
 <script type="text/javascript">
@@ -198,21 +105,22 @@ var configuration = {
   autoplay: true,
   fullscreenmode: true, //This is not a CindyJS-property
   oninit: function() {
-    entermode("geometry");
+    UI.entermode("geometry");
   }
 };
 
 var cdy;
 
-importfromurl(new URL(document.location.href));
+Import.fromurl(new URL(document.location.href));
 
 function makeCindyJS() {
+  var cscanvas = document.getElementById("CSCanvas");
   if(configuration.fullscreenmode) {
-    document.getElementById("CSCanvas").classList.remove('finite');
-    document.getElementById("CSCanvas").classList.add('fullscreen');
+    cscanvas.classList.remove('finite');
+    cscanvas.classList.add('fullscreen');
   } else {
-    document.getElementById("CSCanvas").classList.remove('fullscreen');
-    document.getElementById("CSCanvas").classList.add('finite');
+    cscanvas.classList.remove('fullscreen');
+    cscanvas.classList.add('finite');
   }
   makepluginfromcscode(scripts, "user");
   cdy = CindyJS(configuration);
@@ -220,12 +128,12 @@ function makeCindyJS() {
 
 makeCindyJS();
 
-createUI();
-createConfigurationUI();
-createExportUI();
-createImportUI();
-createinspectorWindow();
-highlightoptions();
+UI.create([Geometry, Inspector, Configuration, Import, Export, Code]);
+document.addEventListener('DOMContentLoaded', function() {
+  UI.init();
+  UI.entermode("geometry");
+}, false);
+
 </script>
 
 </body>
