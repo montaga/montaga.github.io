@@ -5,12 +5,30 @@ var geometrycodes = {
         //======CODE FOR BUTTONS==========
  
         setmode(m):=(
-           apply(allelements(),#.pinned=true);
            mode=m;
            print(mode);
+           dopinning();
         );
         ////////
+    
+    dopinning() := (
+      if(mode=="move",
+        //unpin everything in tmppinned
+        
+        apply(tmppinned, #.pinned=false);
+        tmppinned = [];
+        ,
+        
+        //else: pin everything and save pinned results into tmppinned
+        newpinned = select(allelements(), #.pinned==false);
+        tmppinned = tmppinned ++ newpinned;
+        apply(newpinned, #.pinned=true);
+      
+      );
+    );
 
+    mode = "geometry";
+    
     ptcnt=0;
     lncnt=0;
     cncnt=0;
@@ -22,6 +40,8 @@ var geometrycodes = {
     tmppts=[];
     tmplns=[];
     tmpcns=[];
+    
+    tmppinned = [];
 
     iscircle(c):=contains(circs,c);
     issegment(s):=contains(segments,s);
@@ -96,7 +116,6 @@ var geometrycodes = {
            pos=mouse().xy;
            inaction=true;
            parse(mode+"Down(pos)");
-
     );
 
     dodrag():=(
@@ -112,8 +131,8 @@ var geometrycodes = {
         parse(mode+"Up(pos)");
 
      );
-     apply(allelements(),#.pinned=true);
-
+     dopinning();
+     javascript("Inspector.update('" + (selpts++sellns++selcns) + "')");
     );
 
 adjoint(m):=(
@@ -229,7 +248,6 @@ toggleset(a,b):=(a--b)++(b--a);
 
 //=======  MOVE  ==============
     moveDown(pos):=(
-        apply(allelements(),#.pinned=false);    
         movedown=true;
         perhapsclick=true;
         movedownpos=mouse().xy;   

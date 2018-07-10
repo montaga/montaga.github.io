@@ -67,7 +67,6 @@ var Export = {
   },
   
   buildhtml: function() {
-    cdy.evokeCS('apply(allelements(),#.pinned=false); '); //TODO: change this if geometry-editor changes
     //document.getElementById('move').onclick();
     //yield copy of configuration
     var cconfiguration = JSON.parse(JSON.stringify(configuration));
@@ -83,6 +82,7 @@ var Export = {
     delete cconfiguration.oninit;
     delete cconfiguration.fullscreenmode;
     
+    csconfiguration.scripts = "cs*";
     //yield scripts
     
     var csscripts = '';
@@ -114,7 +114,7 @@ var Export = {
         </style>
         <link rel="stylesheet" href="https://cindyjs.org/dist/latest/CindyJS.css">
         <script type="text/javascript" src="https://cindyjs.org/dist/latest/Cindy.js"></script>
-        <script type="text/javascript" src="https://cindyjs.org/dist/latest/CindyGL.js"></script>
+        ${(configuration.use.indexOf("CindyGL")!=-1) ? '<script type="text/javascript" src="https://cindyjs.org/dist/latest/CindyGL.js"></script>' : ''}
         
         ${csscripts}
     

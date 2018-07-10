@@ -66,10 +66,12 @@ var Geometry = {
   },
   
   leave: function() {
-    cdy.evokeCS(`
+    /*cdy.evokeCS(`
       selpts=[];
       sellns=[];
-      selcns=[];
+      selcns=[];`);*/
+      
+    cdy.evokeCS(`
       tmppts=[];
       tmplns=[];
       tmpcns=[];`);

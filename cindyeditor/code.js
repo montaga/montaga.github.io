@@ -7,19 +7,17 @@ var Code = {
   <div id="code-window">
     <div id="code-window-header">code window header</div>
     <select id="code-select"></select>
-    <form><textarea id="code-area" name="code-area">
-    </textarea></form>
   </div>`,
   select: null,
   cm: null,
   init: function() {
     this.select = document.getElementById('code-select');
     
-    this.cm = CodeMirror.fromTextArea(document.getElementById("code-area"), {
+    this.cm = CodeMirror(document.getElementById("code-window"), {
       autoCloseBrackets: true,
       matchBrackets: true,
       theme: "base16-dark",
-      lineNumbers: true,
+      //lineNumbers: true,
       lineWrapping: true,
       viewportMargin: Infinity
     });

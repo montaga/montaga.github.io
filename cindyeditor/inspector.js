@@ -17,17 +17,19 @@ var Inspector = {
   init: function() {
     this.contents = document.getElementById('inspector-contents');
     
-    document.getElementById("CSCanvas").addEventListener("mousedown", function(){
+    /*
+    document.getElementById("CSCanvas").addEventListener("click", function(){
       if(UI.modeselect.selectedOptions && UI.modeselect.selectedOptions[0].value=="inspector") {
           cdy.evokeCS(`javascript("Inspector.update('" + (selpts++sellns++selcns) + "')")`);
       }
     }, false);
+    */
   },
-  
+  /*
   enter: function() {
     cdy.evokeCS(`javascript("Inspector.update('" + (selpts++sellns++selcns) + "')")`);
   },
-  
+  */
   update: function(str) {
     selected = str.slice(1,str.length-1).split(',').map(el => el.trim());
     var gslp = yieldgslp();

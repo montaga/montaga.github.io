@@ -26,40 +26,6 @@
     <script src="codemirror-5.38.0/addon/edit/closebrackets.js"></script>
     <link rel="stylesheet" href="codemirror-5.38.0/lib/codemirror.css">
     <link rel="stylesheet" href="codemirror-5.38.0/theme/base16-dark.css">
-    
-    <script id="csinit" type="text/x-cindyscript">
-      userinit();
-      geometryeditorinit();
-      visiblerectinit();
-      apply(allelements(),#.pinned=false);
-      mode = "move";
-    </script>
-    
-    <script id="csmousedown" type="text/x-cindyscript">
-      usermousedown();
-      geometryeditormousedown();
-    </script>
-    
-    <script id="csmove" type="text/x-cindyscript">
-      usermove();
-      visiblerectmove();
-    </script>
-    
-    <script id="csmousedrag" type="text/x-cindyscript">
-      usermousedrag();
-      geometryeditormousedrag();
-    </script>
-
-    <script id="csmouseup" type="text/x-cindyscript">
-      usermouseup();
-      geometryeditormouseup();
-    </script>
-
-    <script id="csdraw" type="text/x-cindyscript">
-      userdraw();
-      geometryeditordraw();
-      visiblerectdraw();
-    </script>
 </head>
 <body>
   
@@ -69,20 +35,9 @@
   <div id="CSCanvas" class="fullscreen"></div>
 
 <script type="text/javascript">
-var scripts = {
-  "init":"",
-  "draw":"",
-  "move":"",
-  "mousedown":"", "mouseup":"", "mousedrag":"", "mousemove":"", "mouseclick":"",
-  "keydown":"", "keyup":"", "keytyped":"", "keytype":"",      
-  "tick":"",
-  "simulationstep":"", "simulationstart":"", "simulationstop":"", "ondrop":""  
-};
-
-
 
 var configuration = {
-  scripts: "cs*",
+  scripts: {},
   defaultAppearance: {
     dimDependent: 0.7,
     fontFamily: "sans-serif",
@@ -97,7 +52,7 @@ var configuration = {
     id: "CSCanvas",
     //width: 900, in style.css: width: 100vw; height: 100vh; (fullscreen)
     //height: 600,
-    transform: [{visibleRect: [-15, 18, 20, -5]}],
+    transform: [{visibleRect: [-5, 5, 5, 5]}],
     background: "rgb(168,176,192)"
   }],
   csconsole: false,
@@ -108,6 +63,26 @@ var configuration = {
     UI.entermode("geometry");
   }
 };
+
+var scripts = {
+  "init":"",
+  "draw":"",
+  "move":"",
+  "mousedown":"", "mouseup":"", "mousedrag":"", "mousemove":"", "mouseclick":"",
+  "keydown":"", "keyup":"", "keytyped":"", "keytype":"",      
+  "tick":"",
+  "simulationstep":"", "simulationstart":"", "simulationstop":"", "ondrop":""  
+};
+
+for(let s in scripts) {
+  configuration.scripts[s] = `user${s}();`;
+  
+  if(["init", "mousedown", "mousedrag", "mouseup", "draw"].indexOf(s)!=-1)
+    configuration.scripts[s] += `geometryeditor${s}();`;
+    
+  if(["init", "move", "draw"].indexOf(s)!=-1)
+    configuration.scripts[s] += `visiblerect${s}();`;
+}
 
 var cdy;
 

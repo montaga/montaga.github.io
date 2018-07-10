@@ -2185,7 +2185,7 @@ function cs_onDrop(lst, pos) {
 function cindy_cancelmove() {
     move = undefined;
 }
-var version = [0,8,7,216,"g7e942fc"];
+var version = [0,8,7,216,"g7e942fc!"];
 //==========================================
 //      Complex Numbers
 //==========================================
@@ -6383,6 +6383,9 @@ Accessor.getField = function(geo, field) {
     }
     if (field === "trace") {
         return General.bool(!!geo.drawtrace);
+    }
+    if (field === "pinned") {
+        return General.bool(!!geo.pinned);
     }
     if (Accessor.generalFields[field]) { //must be defined as an actual string
         erg = geo[Accessor.generalFields[field]];
