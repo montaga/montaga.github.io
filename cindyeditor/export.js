@@ -82,7 +82,7 @@ var Export = {
     delete cconfiguration.oninit;
     delete cconfiguration.fullscreenmode;
     
-    csconfiguration.scripts = "cs*";
+    cconfiguration.scripts = "cs*";
     //yield scripts
     
     var csscripts = '';
