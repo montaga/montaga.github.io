@@ -27,7 +27,7 @@ var geometrycodes = {
       );
     );
 
-    mode = "geometry";
+    mode = "move";
     
     ptcnt=0;
     lncnt=0;
