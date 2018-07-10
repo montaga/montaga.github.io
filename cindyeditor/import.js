@@ -115,7 +115,7 @@ var Import = {
           
       }
       
-      configuration.scripts = "cs*";
+      configuration.scripts = editorscripts;
       //configuration.initscript = scripts["init"]
       //configuration.scripts = scripts;
       

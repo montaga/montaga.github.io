@@ -69,7 +69,7 @@ var Geometry = {
     /*cdy.evokeCS(`
       selpts=[];
       sellns=[];
-      selcns=[];`);*/
+      selcns=[];`);*/ 
       
     cdy.evokeCS(`
       tmppts=[];
