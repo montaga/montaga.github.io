@@ -17,11 +17,11 @@ var Inspector = {
   init: function() {
     this.contents = document.getElementById('inspector-contents');
     
-    document.getElementById("CSCanvas").addEventListener("click", function(){
+    document.getElementById("CSCanvas").addEventListener("mousedown", function(){
       if(UI.modeselect.selectedOptions && UI.modeselect.selectedOptions[0].value=="inspector") {
           cdy.evokeCS(`javascript("Inspector.update('" + (selpts++sellns++selcns) + "')")`);
       }
-    });
+    }, false);
   },
   
   enter: function() {
