@@ -50,9 +50,9 @@ var UI = {
   init: function() {
     for(var i=0; i<this.modes.length; i++) {
       let m = this.modes[i];
-      document.getElementById(`${m.id}-window`).style.display = "none";
       dragElement(document.getElementById(`${m.id}-window`));
       m.init();
+      document.getElementById(`${m.id}-window`).style.display = "none";
     }
   },
 };

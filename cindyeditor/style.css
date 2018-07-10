@@ -118,3 +118,10 @@ body{
 #import-url {
   width: 100%;
 }
+
+
+#colorwheelCanvas {
+  margin: auto;
+  width: 200px;
+  height: 200px;
+}
