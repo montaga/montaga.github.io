@@ -3,7 +3,7 @@ body{
      margin: 0;
      font-family: sans-serif;
     /* checkerboard */
-     background-image: url('background.png');
+     background-image: url('images/background.png');
      background-size: 20px 20px;
      background-repeat: repeat;
 }
