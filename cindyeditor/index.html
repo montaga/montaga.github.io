@@ -31,9 +31,7 @@
 </head>
 
 <body>
-
-  <select id="mode-select">
-  </select>
+  <select id="mode-select"></select>
   <div id="windows"></div>
   <div id="CSCanvas" class="fullscreen"></div>
 
@@ -57,17 +55,6 @@
       "simulationstop": "",
       "ondrop": ""
     };
-
-    var editorscripts = {};
-    for (let s in scripts) {
-      editorscripts[s] = `user${s}();`;
-
-      if (["init", "mousedown", "mousedrag", "mouseup", "draw"].indexOf(s) != -1)
-        editorscripts[s] += `geometryeditor${s}();`;
-
-      if (["init", "move", "draw"].indexOf(s) != -1)
-        editorscripts[s] += `visiblerect${s}();`;
-    }
 
     var configuration = {
       scripts: editorscripts,
