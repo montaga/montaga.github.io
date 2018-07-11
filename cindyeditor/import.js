@@ -1,5 +1,4 @@
 /*jshint esversion: 6 */
-
 var Import = {
   id: 'import',
   name: "Import",
@@ -28,7 +27,7 @@ var Import = {
     </div>
   </div>
   `,
-  init: function () {
+  init: function() {
     /*
     document.getElementById("button-import-url").onclick = function() {
       let url = document.getElementById("import-url").value;
@@ -46,170 +45,170 @@ var Import = {
     };
     */
   },
-  
+
   fromfile: function(file) {
     let reader = new FileReader();
-    
+
     //TODO: check whether file is plain HTML...
     reader.readAsText(file);
     reader.onloadend = function() {
       Import.fromsource(reader.result);
     };
   },
-  
-  fromsource: function(source) {  
-      for(let s in scripts) {
-          scripts[s] = '';
-      }
-      
-      for(let s in scripts) {
-        //var regex = /<script.*?(?:(?:cindyscript.*?move)|(?:move.*?cindyscript)).*?>([^]*?)<\/script>/g;
-        
-        var regex = new RegExp(`<script.*?(?:(?:cindyscript.*?${s})|(?:${s}.*?cindyscript)).*?>([^]*?)<\/script>`);
-        
-        var result = regex.exec(source);
-        if(result && result[1]) {
-          var code = result[1].trim();
-          if(code) {
-            scripts[s] = code;
-          }
+
+  fromsource: function(source) {
+    for (let s in scripts) {
+      scripts[s] = '';
+    }
+
+    for (let s in scripts) {
+      //var regex = /<script.*?(?:(?:cindyscript.*?move)|(?:move.*?cindyscript)).*?>([^]*?)<\/script>/g;
+
+      var regex = new RegExp(`<script.*?(?:(?:cindyscript.*?${s})|(?:${s}.*?cindyscript)).*?>([^]*?)<\/script>`);
+
+      var result = regex.exec(source);
+      if (result && result[1]) {
+        var code = result[1].trim();
+        if (code) {
+          scripts[s] = code;
         }
       }
-        
-      //extract CindyJS code and object
-      var javascriptregex = /<script.*?javascript.*?>([^]*?)<\/script>/g;
-      var m;
-      //var configuration = {};
-      do {
-          m = javascriptregex.exec(source);
-          if(m && m[1]) {
-              var jscode = m[1];
-              if(jscode.match(/(CindyJS|createCindy)\([^]*?\)/g)) {              
-                
-                eval(`
+    }
+
+    //extract CindyJS code and object
+    var javascriptregex = /<script.*?javascript.*?>([^]*?)<\/script>/g;
+    var m;
+    //var configuration = {};
+    do {
+      m = javascriptregex.exec(source);
+      if (m && m[1]) {
+        var jscode = m[1];
+        if (jscode.match(/(CindyJS|createCindy)\([^]*?\)/g)) {
+
+          eval(`
                   var backupCindyJS = CindyJS;
                   var backupcreateCindy = createCindy;
                   var backupcdy = cdy;
                   var createCindy;
                   var CindyJS = createCindy = function(config) {
                     configuration = config;
-                  };`+jscode+`
+                  };` + jscode + `
                   CindyJS = backupCindyJS;
                   createCindy = backupcreateCindy;
                   cdy = backupcdy;
                   `);
-                
-                console.log(jscode);
-                console.log(configuration);
-             }
-          }
-      } while (m);
 
-      
-      for(var s in scripts) {
-        let sname = s + "script";
-        if(configuration.hasOwnProperty(sname)) {
-          console.log("delete property " + sname);
-          delete configuration[sname];
-        }
-          
-      }
-      
-      configuration.scripts = editorscripts;
-      //configuration.initscript = scripts["init"]
-      //configuration.scripts = scripts;
-      
-      if(configuration.canvasname)
-        delete configuration.canvasname;
-      
-      
-      configuration.exclusive = "true"; // shut down the previous instance
-      
-      if(!configuration.use)
-        configuration.use = [];
-      
-      let plugins = ["geometryeditor", "visiblerect", "user"];
-      
-      for(var i in plugins) {
-        if(configuration.use.indexOf(plugins[i])==-1) {
-          configuration.use.push(plugins[i]);
+          console.log(jscode);
+          console.log(configuration);
         }
       }
-      
-      //load plugin CindyGL if required
-      //TODO: do the same for other plugins as well...
-      hascolorplot = false;
-      for(let s in scripts) {
-        if(scripts[s].match(/colorplot/g))
-          hascolorplot = true;
-      }
-      if(hascolorplot && configuration.use.indexOf("CindyGL")==-1)
-        configuration.use.push("CindyGL");
-      
-      configuration.fullscreenmode = true; //This is not a CindyJS property
-      
-      if(!configuration.ports) configuration.ports = [];
-      if(!configuration.ports[0]) {
-        configuration.ports[0] = {
-          id: "CSCanvas"
-        };
-      } else {
-        configuration.ports[0].id = "CSCanvas";
-        //delete configuration.ports[0].width;
-        //delete configuration.ports[0].height;
-        /*if(configuration.ports[0].width) {
-          cdy.canvas.style.width = configuration.ports[0].width;
-        }
-        if(configuration.ports[0].height) {
-          cdy.canvas.style.height = configuration.ports[0].height;
-        }*/
-        
+    } while (m);
 
+
+    for (var s in scripts) {
+      let sname = s + "script";
+      if (configuration.hasOwnProperty(sname)) {
+        console.log("delete property " + sname);
+        delete configuration[sname];
       }
-      
-      m = /<div.*?CSCanvas.*?width:.*?([0-9]*).*?>/g.exec(source);
-      if(m && m[1]) {
-        configuration.ports[0].width = m[1];
+
+    }
+
+    configuration.scripts = editorscripts;
+    //configuration.initscript = scripts["init"]
+    //configuration.scripts = scripts;
+
+    if (configuration.canvasname)
+      delete configuration.canvasname;
+
+
+    configuration.exclusive = "true"; // shut down the previous instance
+
+    if (!configuration.use)
+      configuration.use = [];
+
+    let plugins = ["geometryeditor", "visiblerect", "user"];
+
+    for (var i in plugins) {
+      if (configuration.use.indexOf(plugins[i]) == -1) {
+        configuration.use.push(plugins[i]);
       }
-      
-      m = /<div.*?CSCanvas.*?height:.*?([0-9]*).*?>/g.exec(source);
-      if(m && m[1]) {
-        configuration.ports[0].height = m[1];
-      }
-      
-      if(configuration.ports[0].width && configuration.ports[0].height) {
-        configuration.fullscreenmode = false;
-      }
-      
-      configuration.oninit = function () {
-        UI.entermode("geometry");
-        document.getElementById('move').onclick();
+    }
+
+    //load plugin CindyGL if required
+    //TODO: do the same for other plugins as well...
+    hascolorplot = false;
+    for (let s in scripts) {
+      if (scripts[s].match(/colorplot/g))
+        hascolorplot = true;
+    }
+    if (hascolorplot && configuration.use.indexOf("CindyGL") == -1)
+      configuration.use.push("CindyGL");
+
+    configuration.fullscreenmode = true; //This is not a CindyJS property
+
+    if (!configuration.ports) configuration.ports = [];
+    if (!configuration.ports[0]) {
+      configuration.ports[0] = {
+        id: "CSCanvas"
       };
-      
-      makeCindyJS();
+    } else {
+      configuration.ports[0].id = "CSCanvas";
+      //delete configuration.ports[0].width;
+      //delete configuration.ports[0].height;
+      /*if(configuration.ports[0].width) {
+        cdy.canvas.style.width = configuration.ports[0].width;
+      }
+      if(configuration.ports[0].height) {
+        cdy.canvas.style.height = configuration.ports[0].height;
+      }*/
+
+
+    }
+
+    m = /<div.*?CSCanvas.*?width:.*?([0-9]*).*?>/g.exec(source);
+    if (m && m[1]) {
+      configuration.ports[0].width = m[1];
+    }
+
+    m = /<div.*?CSCanvas.*?height:.*?([0-9]*).*?>/g.exec(source);
+    if (m && m[1]) {
+      configuration.ports[0].height = m[1];
+    }
+
+    if (configuration.ports[0].width && configuration.ports[0].height) {
+      configuration.fullscreenmode = false;
+    }
+
+    configuration.oninit = function() {
+      UI.entermode("geometry");
+      document.getElementById('move').onclick();
+    };
+
+    makeCindyJS();
   },
-  
+
   fromurl: function(url) {
     try {
-      for(let s in scripts) {
+      for (let s in scripts) {
         let urlpart = url.searchParams.get(s);
-        if(urlpart) {
+        if (urlpart) {
           scripts[s] = decodeURIComponent(urlpart);
         }
       }
-      
+
       let urlpart = url.searchParams.get("gslp");
-      if(urlpart) {
+      if (urlpart) {
         let gslpstr = decodeURIComponent(urlpart);
         let json = JSON.parse(gslpstr);
-        if(json) {
+        if (json) {
           configuration.geometry = json;
         }
       }
-    } catch(error) {
+    } catch (error) {
       console.error("Could not parse URL");
     }
   }
-  
+
 
 };

@@ -1,5 +1,4 @@
 /*jshint esversion: 6 */
-
 /*
 yields the current gslp. TODO: let CindyJS.dumpState() return this value
 */
@@ -8,13 +7,13 @@ function yieldgslp() {
   var str = "";
   var gslp = [];
   console.log = function(msg) {
-      str = msg;
+    str = msg;
   };
   CindyJS.dumpState();
-  console.log=backup;
+  console.log = backup;
 
   var json = JSON.parse(str);
-  if(json && json["geometry"]) {
+  if (json && json["geometry"]) {
     gslp = json["geometry"];
   }
   return gslp;
@@ -56,44 +55,45 @@ var Export = {
       cdy.exportSVG();
     };
     */
-    
+
     document.getElementById('button-export-html').onclick = function() {
-      Export.buildhtml();   
+      Export.buildhtml();
     };
-    
+
     document.getElementById('button-export-url').onclick = function() {
       Export.exporturl();
     };
   },
-  
+
   buildhtml: function() {
     //document.getElementById('move').onclick();
     //yield copy of configuration
     var cconfiguration = JSON.parse(JSON.stringify(configuration));
-    
+
     //yield gslp
     cconfiguration.geometry = yieldgslp();
-    
+
     //remove uneeded plugins
     let removeplugins = ["geometryeditor", "visiblerect", "user"];
-    cconfiguration.use = configuration.use.filter(p => removeplugins.indexOf(p)==-1);
-    
+    cconfiguration.use = configuration.use.filter(p => removeplugins.indexOf(p) == -1);
+
     //remove editor stuff
     delete cconfiguration.oninit;
     delete cconfiguration.fullscreenmode;
-    
+
     cconfiguration.scripts = "cs*";
     //yield scripts
-    
+
     var csscripts = '';
-    
-    for(var s in scripts) if(scripts[s]){
-      csscripts = csscripts + `
+
+    for (var s in scripts)
+      if (scripts[s]) {
+        csscripts = csscripts + `
       <script id="cs${s}" type="text/x-cindyscript">
       ${scripts[s]}
       </script>`;
-    }
-    
+      }
+
     //generate source
     var source = `<!DOCTYPE html>
     <html>
@@ -127,8 +127,8 @@ var Export = {
     </body>
     </html>
   `;
-    
-    
+
+
     var element = document.createElement('a');
     element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(source));
     element.setAttribute('download', "cindy.html");
@@ -140,16 +140,17 @@ var Export = {
 
     document.body.removeChild(element);
   },
-  
+
   exporturl() {
     let gslp = yieldgslp();
-    
+
     let csscripts = '';
-    
-    for(var s in scripts) if(scripts[s]){
-      csscripts = csscripts + `&${s}=${encodeURIComponent(scripts[s])}`;
-    }
-    
+
+    for (var s in scripts)
+      if (scripts[s]) {
+        csscripts = csscripts + `&${s}=${encodeURIComponent(scripts[s])}`;
+      }
+
     history.pushState(null, null, `?${csscripts}&gslp=${
       encodeURIComponent(JSON.stringify(gslp))
     }`);

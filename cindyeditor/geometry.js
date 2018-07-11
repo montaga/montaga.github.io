@@ -1,9 +1,7 @@
 /*jshint esversion: 6 */
-
 /*
   UI for the geometry editor
 */
-
 var Geometry = {
   name: "Edit geometry",
   id: "geometry",
@@ -28,10 +26,10 @@ var Geometry = {
   select: null,
   init: function() {
     this.select = document.getElementById("geometry-mode-select");
-    
-    
+
+
     // Add elements to geometry menu
-    for(var i in Geometry.buttons) {
+    for (var i in Geometry.buttons) {
       var option = document.createElement("div");
 
       option.data = Geometry.buttons[i][0];
@@ -45,32 +43,32 @@ var Geometry = {
     this.setmode('move');
 
   },
-  
+
   setmode: function(m) {
     cdy.evokeCS(`setmode("${m}")`);
-    
-    if(Geometry.select) {
+
+    if (Geometry.select) {
       let children = Geometry.select.children;
-      
+
       for (var i = 0; i < children.length; i++) {
-        if(children[i].data == m)
+        if (children[i].data == m)
           children[i].classList.add('selected');
         else
           children[i].classList.remove('selected');
       }
     }
-    
+
   },
   enter: function() {
     this.setmode('move');
   },
-  
+
   leave: function() {
     /*cdy.evokeCS(`
       selpts=[];
       sellns=[];
-      selcns=[];`);*/ 
-      
+      selcns=[];`);*/
+
     cdy.evokeCS(`
       tmppts=[];
       tmplns=[];

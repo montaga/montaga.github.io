@@ -1,115 +1,130 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <meta charset="UTF-8">
-    
-    <title>CindyEditor</title>
-    <link rel="stylesheet" href="style.css">
-    <script type="text/javascript" src="ui.js"></script>
-    
-    <script type="text/javascript" src="cindyjs/Cindy.js"></script>
-    <script type="text/javascript" src="cindyjs/CindyGL.js"></script>
-    
-    <script type="text/javascript" src="makepluginfromcscode.js"></script>
-    <script type="text/javascript" src="geometryeditor-plugin.js"></script>
-    
-    <script type="text/javascript" src="geometry.js"></script>
-    <script type="text/javascript" src="inspector.js"></script>
-    <script type="text/javascript" src="configuration.js"></script>
-    <script type="text/javascript" src="import.js"></script>
-    <script type="text/javascript" src="export.js"></script>
-    <script type="text/javascript" src="code.js"></script>
-    
-    <script src="codemirror-5.38.0/lib/codemirror.js"></script>
-    <script src="codemirror-5.38.0/mode/clike/clike.js"></script>
-    <script src="codemirror-5.38.0/addon/edit/matchbrackets.js"></script>
-    <script src="codemirror-5.38.0/addon/edit/closebrackets.js"></script>
-    <link rel="stylesheet" href="codemirror-5.38.0/lib/codemirror.css">
-    <link rel="stylesheet" href="codemirror-5.38.0/theme/base16-dark.css">
+  <meta charset="UTF-8">
+
+  <title>CindyEditor</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="text/javascript" src="ui.js"></script>
+
+  <script type="text/javascript" src="cindyjs/Cindy.js"></script>
+  <script type="text/javascript" src="cindyjs/CindyGL.js"></script>
+
+  <script type="text/javascript" src="makepluginfromcscode.js"></script>
+  <script type="text/javascript" src="geometryeditor-plugin.js"></script>
+
+  <script type="text/javascript" src="geometry.js"></script>
+  <script type="text/javascript" src="inspector.js"></script>
+  <script type="text/javascript" src="colorwheel.js"></script>
+  <script type="text/javascript" src="configuration.js"></script>
+  <script type="text/javascript" src="import.js"></script>
+  <script type="text/javascript" src="export.js"></script>
+  <script type="text/javascript" src="code.js"></script>
+
+  <script src="codemirror-5.38.0/lib/codemirror.js"></script>
+  <script src="codemirror-5.38.0/mode/clike/clike.js"></script>
+  <script src="codemirror-5.38.0/addon/edit/matchbrackets.js"></script>
+  <script src="codemirror-5.38.0/addon/edit/closebrackets.js"></script>
+  <link rel="stylesheet" href="codemirror-5.38.0/lib/codemirror.css">
+  <link rel="stylesheet" href="codemirror-5.38.0/theme/base16-dark.css">
 </head>
+
 <body>
-  
+
   <select id="mode-select">
   </select>
   <div id="windows"></div>
   <div id="CSCanvas" class="fullscreen"></div>
 
-<script type="text/javascript">
+  <script type="text/javascript">
+    var scripts = {
+      "init": "",
+      "draw": "",
+      "move": "",
+      "mousedown": "",
+      "mouseup": "",
+      "mousedrag": "",
+      "mousemove": "",
+      "mouseclick": "",
+      "keydown": "",
+      "keyup": "",
+      "keytyped": "",
+      "keytype": "",
+      "tick": "",
+      "simulationstep": "",
+      "simulationstart": "",
+      "simulationstop": "",
+      "ondrop": ""
+    };
 
-var scripts = {
-  "init":"",
-  "draw":"",
-  "move":"",
-  "mousedown":"", "mouseup":"", "mousedrag":"", "mousemove":"", "mouseclick":"",
-  "keydown":"", "keyup":"", "keytyped":"", "keytype":"",      
-  "tick":"",
-  "simulationstep":"", "simulationstart":"", "simulationstop":"", "ondrop":""  
-};
+    var editorscripts = {};
+    for (let s in scripts) {
+      editorscripts[s] = `user${s}();`;
 
-var editorscripts = {};
-for(let s in scripts) {
-  editorscripts[s] = `user${s}();`;
-  
-  if(["init", "mousedown", "mousedrag", "mouseup", "draw"].indexOf(s)!=-1)
-    editorscripts[s] += `geometryeditor${s}();`;
-    
-  if(["init", "move", "draw"].indexOf(s)!=-1)
-    editorscripts[s] += `visiblerect${s}();`;
-}
+      if (["init", "mousedown", "mousedrag", "mouseup", "draw"].indexOf(s) != -1)
+        editorscripts[s] += `geometryeditor${s}();`;
 
-var configuration = {
-  scripts: editorscripts,
-  defaultAppearance: {
-    dimDependent: 0.7,
-    fontFamily: "sans-serif",
-    lineSize: 1,
-    pointSize: 5.0,
-    textsize: 12.0
-  },
-  angleUnit: "°",
-  exclusive: false,
-  geometry: [],
-  ports: [{
-    id: "CSCanvas",
-    //width: 900, in style.css: width: 100vw; height: 100vh; (fullscreen)
-    //height: 600,
-    transform: [{visibleRect: [-5, -5, 5, 5]}],
-    background: "rgb(168,176,192)"
-  }],
-  csconsole: false,
-  use: ["CindyGL", "geometryeditor", "visiblerect", "user"],
-  autoplay: true,
-  fullscreenmode: true, //This is not a CindyJS-property
-  oninit: function() {
-    UI.entermode("geometry");
-  }
-};
+      if (["init", "move", "draw"].indexOf(s) != -1)
+        editorscripts[s] += `visiblerect${s}();`;
+    }
 
-var cdy;
+    var configuration = {
+      scripts: editorscripts,
+      defaultAppearance: {
+        dimDependent: 0.7,
+        fontFamily: "sans-serif",
+        lineSize: 1,
+        pointSize: 5.0,
+        textsize: 12.0
+      },
+      angleUnit: "°",
+      exclusive: false,
+      geometry: [],
+      ports: [{
+        id: "CSCanvas",
+        //width: 900, in style.css: width: 100vw; height: 100vh; (fullscreen)
+        //height: 600,
+        transform: [{
+          visibleRect: [-5, -5, 5, 5]
+        }],
+        background: "rgb(168,176,192)"
+      }],
+      csconsole: false,
+      use: ["CindyGL", "geometryeditor", "visiblerect", "user"],
+      autoplay: true,
+      fullscreenmode: true, //This is not a CindyJS-property
+      oninit: function() {
+        UI.entermode("geometry");
+      }
+    };
 
-Import.fromurl(new URL(document.location.href));
+    var cdy;
 
-function makeCindyJS() {
-  var cscanvas = document.getElementById("CSCanvas");
-  if(configuration.fullscreenmode) {
-    cscanvas.classList.remove('finite');
-    cscanvas.classList.add('fullscreen');
-  } else {
-    cscanvas.classList.remove('fullscreen');
-    cscanvas.classList.add('finite');
-  }
-  makepluginfromcscode(scripts, "user");
-  cdy = CindyJS(configuration);
-}
+    Import.fromurl(new URL(document.location.href));
 
-makeCindyJS();
+    function makeCindyJS() {
+      var cscanvas = document.getElementById("CSCanvas");
+      if (configuration.fullscreenmode) {
+        cscanvas.classList.remove('finite');
+        cscanvas.classList.add('fullscreen');
+      } else {
+        cscanvas.classList.remove('fullscreen');
+        cscanvas.classList.add('finite');
+      }
+      makepluginfromcscode(scripts, "user");
+      cdy = CindyJS(configuration);
+    }
 
-UI.create([Geometry, Inspector, Configuration, Import, Export, Code]);
-document.addEventListener('DOMContentLoaded', function() {
-  UI.init();
-  UI.entermode("geometry");
-}, false);
-</script>
+    makeCindyJS();
+
+    UI.create([Geometry, Inspector, Configuration, Import, Export, Code]);
+    document.addEventListener('DOMContentLoaded', function() {
+      UI.init();
+      UI.entermode("geometry");
+    }, false);
+  </script>
 
 </body>
+
 </html>
