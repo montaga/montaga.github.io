@@ -60,7 +60,8 @@ var Import = {
     for (let s in scripts) {
       scripts[s] = '';
     }
-
+    
+    //TODO: read scripts from configuration.scripts instead of using a general regex
     for (let s in scripts) {
       //var regex = /<script.*?(?:(?:cindyscript.*?move)|(?:move.*?cindyscript)).*?>([^]*?)<\/script>/g;
 
@@ -84,19 +85,17 @@ var Import = {
       if (m && m[1]) {
         var jscode = m[1];
         if (jscode.match(/(CindyJS|createCindy)\([^]*?\)/g)) {
-
-          eval(`
-                  var backupCindyJS = CindyJS;
-                  var backupcreateCindy = createCindy;
-                  var backupcdy = cdy;
-                  var createCindy;
-                  var CindyJS = createCindy = function(config) {
-                    configuration = config;
-                  };` + jscode + `
-                  CindyJS = backupCindyJS;
-                  createCindy = backupcreateCindy;
-                  cdy = backupcdy;
-                  `);
+          var backupCindyJS = CindyJS;
+          var backupcreateCindy = createCindy;
+          var backupcdy = cdy;
+          var createCindy;
+          var CindyJS = createCindy = function(config) {
+            configuration = config;
+          };
+          eval(jscode);
+          CindyJS = backupCindyJS;
+          createCindy = backupcreateCindy;
+          cdy = backupcdy;
 
           console.log(jscode);
           console.log(configuration);
