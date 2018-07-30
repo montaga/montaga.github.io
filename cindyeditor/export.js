@@ -1,23 +1,4 @@
 /*jshint esversion: 6 */
-/*
-yields the current gslp. TODO: let CindyJS.dumpState() return this value
-*/
-function yieldgslp() {
-  var backup = console.log;
-  var str = "";
-  var gslp = [];
-  console.log = function(msg) {
-    str = msg;
-  };
-  CindyJS.dumpState();
-  console.log = backup;
-
-  var json = JSON.parse(str);
-  if (json && json["geometry"]) {
-    gslp = json["geometry"];
-  }
-  return gslp;
-}
 
 var Export = {
   id: "export",
@@ -71,10 +52,10 @@ var Export = {
     var cconfiguration = JSON.parse(JSON.stringify(configuration));
 
     //yield gslp
-    cconfiguration.geometry = yieldgslp();
+    cconfiguration.geometry = cdy.saveState().geometry;
 
     //remove uneeded plugins
-    let removeplugins = ["geometryeditor", "visiblerect", "user"];
+    let removeplugins = ["geometryeditor", "dimensions", "visiblerect", "user"];
     cconfiguration.use = configuration.use.filter(p => removeplugins.indexOf(p) == -1);
 
     //remove editor stuff
@@ -142,7 +123,7 @@ var Export = {
   },
 
   exporturl() {
-    let gslp = yieldgslp();
+    let gslp = cdy.saveState().geometry;
 
     let csscripts = '';
 

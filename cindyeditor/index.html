@@ -11,6 +11,7 @@
   <script type="text/javascript" src="cindyjs/Cindy.js"></script>
   <script type="text/javascript" src="cindyjs/CindyGL.js"></script>
 
+  <script type="text/javascript" src="dimensions.js"></script>
   <script type="text/javascript" src="makepluginfromcscode.js"></script>
   <script type="text/javascript" src="geometryeditor-plugin.js"></script>
 
@@ -22,12 +23,12 @@
   <script type="text/javascript" src="export.js"></script>
   <script type="text/javascript" src="code.js"></script>
 
-  <script src="codemirror-5.38.0/lib/codemirror.js"></script>
-  <script src="codemirror-5.38.0/mode/clike/clike.js"></script>
-  <script src="codemirror-5.38.0/addon/edit/matchbrackets.js"></script>
-  <script src="codemirror-5.38.0/addon/edit/closebrackets.js"></script>
-  <link rel="stylesheet" href="codemirror-5.38.0/lib/codemirror.css">
-  <link rel="stylesheet" href="codemirror-5.38.0/theme/base16-dark.css">
+  <script src="https://codemirror.net/lib/codemirror.js"></script>
+  <script src="https://codemirror.net/mode/clike/clike.js"></script>
+  <script src="https://codemirror.net/addon/edit/matchbrackets.js"></script>
+  <script src="https://codemirror.net/addon/edit/closebrackets.js"></script>
+  <link rel="stylesheet" href="https://codemirror.net/lib/codemirror.css">
+  <link rel="stylesheet" href="https://codemirror.net/theme/base16-dark.css">
 </head>
 
 <body>
@@ -58,13 +59,6 @@
 
     var configuration = {
       scripts: editorscripts,
-      defaultAppearance: {
-        dimDependent: 0.7,
-        fontFamily: "sans-serif",
-        lineSize: 1,
-        pointSize: 5.0,
-        textsize: 12.0
-      },
       angleUnit: "°",
       exclusive: false,
       geometry: [],
@@ -78,7 +72,7 @@
         background: "rgb(168,176,192)"
       }],
       csconsole: false,
-      use: ["CindyGL", "geometryeditor", "visiblerect", "user"],
+      use: ["CindyGL", "dimensions", "geometryeditor", "visiblerect", "user"],
       autoplay: true,
       fullscreenmode: true, //This is not a CindyJS-property
       oninit: function() {

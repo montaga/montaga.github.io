@@ -1565,6 +1565,8 @@ function addAutoCleaningEventListener(target, type, listener, useCapture) {
 function setuplisteners(canvas, data) {
 
     var MO = null;
+    var mousedownevent = null;
+    var hasmoved = false;
     if (typeof MutationObserver !== "undefined")
         MO = MutationObserver;
     if (!MO && typeof WebKitMutationObserver !== "undefined")
@@ -1639,6 +1641,8 @@ function setuplisteners(canvas, data) {
     }
 
     addAutoCleaningEventListener(canvas, "mousedown", function(e) {
+        mousedownevent = e;
+        hasmoved = false;
         mouse.button = e.which;
         updatePosition(e);
         cs_mousedown();
@@ -1659,6 +1663,8 @@ function setuplisteners(canvas, data) {
     addAutoCleaningEventListener(canvas, "mousemove", function(e) {
         updatePosition(e);
         if (mouse.down) {
+            if (mousedownevent && (Math.abs(mousedownevent.clientX - e.clientX) > 2 || Math.abs(mousedownevent.clientY - e.clientY) > 2))
+                hasmoved = true;
             cs_mousedrag();
         } else {
             cs_mousemove();
@@ -1669,7 +1675,8 @@ function setuplisteners(canvas, data) {
 
     addAutoCleaningEventListener(canvas, "click", function(e) {
         updatePosition(e);
-        cs_mouseclick();
+        if (!hasmoved)
+            cs_mouseclick();
         e.preventDefault();
     });
 
@@ -1852,6 +1859,8 @@ function setuplisteners(canvas, data) {
 
         updatePosition(e.targetTouches[0]);
         if (mouse.down) {
+            if (mousedownevent && (Math.abs(mousedownevent.clientX - e.targetTouches[0].clientX) > 2 || Math.abs(mousedownevent.clientY - e.targetTouches[0].clientY) > 2))
+                hasmoved = true;
             cs_mousedrag();
         } else {
             cs_mousemove();
@@ -1877,6 +1886,8 @@ function setuplisteners(canvas, data) {
         updatePosition(e.targetTouches[0]);
         cs_mousedown();
         mouse.down = true;
+        mousedownevent = e.targetTouches[0];
+        hasmoved = false;
         //move = getmover(mouse);
         manage("mousedown");
         e.preventDefault();
@@ -1899,6 +1910,8 @@ function setuplisteners(canvas, data) {
         cindy_cancelmove();
         cs_mouseup();
         manage("mouseup");
+        if (!hasmoved)
+            cs_mouseclick();
         scheduleUpdate();
         e.preventDefault();
     }
@@ -2185,7 +2198,7 @@ function cs_onDrop(lst, pos) {
 function cindy_cancelmove() {
     move = undefined;
 }
-var version = [0,8,7,216,"g7e942fc!"];
+var version = [0,8,7,256,"g2ce7714!"];
 //==========================================
 //      Complex Numbers
 //==========================================
@@ -11646,6 +11659,12 @@ evaluator.load$3 = function(args, modifs) {
     }
 
 };
+
+evaluator.removeelement$1 = function(args, modifs) {
+    var arg = evaluate(args[0]);
+    if (arg.ctype === "geo") removeElement(arg.value.name);
+    else console.log("argument of removeelement is undefined or not of type <geo>");
+};
 //*******************************************************
 // and here are the definitions of the drawing operators
 //*******************************************************
@@ -18419,74 +18438,93 @@ function addElementNoProof(el) {
     return csgeo.csnames[el.name];
 }
 
-// TODO Remove dependencies also
 function removeElement(name) {
+    if (!csgeo.csnames.hasOwnProperty(name)) {
+        console.log("removeElement: name " + name + "does not exist.");
+        return;
+    }
+
+    // build dependency tree
+    var depTree = {};
+    var cskeys = Object.keys(csgeo.csnames);
+    cskeys.forEach(function(name) {
+        var el = csgeo.csnames[name];
+        if (!el.hasOwnProperty("args")) return;
+        var args = el.args;
+
+        args.forEach(function(argn) {
+            if (!depTree.hasOwnProperty(argn)) {
+                depTree[argn] = {};
+            }
+            depTree[argn][name] = true;
+        });
+    });
+
+    // recursively find all dependencies
+    var recFind = function(elname, map) {
+        map[elname] = true;
+        if (!depTree.hasOwnProperty(elname)) return map;
+
+        for (var dn in depTree[elname]) {
+            if (!map[dn]) {
+                recFind(dn, map);
+            }
+        }
+
+        return map;
+    };
+
+    // collect all objects to delete
+    var delArr = recFind(name, {});
+
+    removeAllElements(delArr);
+
+}
+
+function removeAllElements(nameMap) {
     var i, el, debug = false;
-    if (debug) console.log("Remove element " + name);
+    var keys = Object.keys(nameMap);
+    if (debug) console.log("Remove elements: " + String(keys));
 
-    // TODO Check if name exists
-    delete csgeo.csnames[name];
 
-    for (i = 0; i < csgeo.gslp.length; i++) {
-        el = csgeo.gslp[i];
-
-        if (el.name === name) {
-            if (debug) console.log("Removed element from gslp " + name);
-            csgeo.gslp.splice(i, 1);
-        }
-    }
-
-    for (i = 0; i < csgeo.free.length; i++) {
-        el = csgeo.free[i];
-
-        if (el.name === name) {
-            if (debug) console.log("Removed element from free " + name);
-            csgeo.free.splice(i, 1);
-        }
-    }
-
-    for (i = 0; i < csgeo.points.length; i++) {
-        el = csgeo.points[i];
-
-        if (el.name === name) {
-            if (debug) console.log("Removed element from points " + name);
-            csgeo.points.splice(i, 1);
-        }
-    }
-
-    for (i = 0; i < csgeo.lines.length; i++) {
-        el = csgeo.lines[i];
-
-        if (el.name === name) {
-            if (debug) console.log("Removed element from lines " + name);
-            csgeo.lines.splice(i, 1);
-        }
-    }
-
-    for (i = 0; i < csgeo.conics.length; i++) {
-        el = csgeo.conics[i];
-
-        if (el.name === name) {
-            if (debug) console.log("Removed element from conics " + name);
-            csgeo.conics.splice(i, 1);
-        }
-    }
-
-    // remove from sets
-    //
-    // define function with closure which compares the name
-    var nameCmp = function(cmpName) {
+    var nameCmp = function(cmpMap, arrn) {
         return function(setel) {
-            if (setel.name === cmpName) {
-                if (debug) console.log("Removed element " + name + " from set of " + sname);
+            if (cmpMap[setel.name]) {
+                if (debug) console.log("Removed element " + setel.name + " from " + arrn);
                 return false;
             } else return true;
         };
     };
 
+    // update incidences
+    var isFiltered = {}; // track filtered arrays
+    keys.forEach(function(name) {
+        var allIncis = csgeo.csnames[name].incidences;
+        allIncis.forEach(function(iname) {
+            if (isFiltered[iname]) return;
+            var incis = csgeo.csnames[iname].incidences;
+            csgeo.csnames[iname].incidences = incis.filter(function(n) {
+                return !(nameMap[n]);
+            });
+            isFiltered[iname] = true;
+        });
+    });
+
+    // process GeoArrays
+    var geoArrs = ["conics", "free", "gslp", "ifs", "lines", "points", "polygons", "texts"];
+    geoArrs.map(function(arrn) {
+        csgeo[arrn] = csgeo[arrn].filter(nameCmp(nameMap, arrn));
+    });
+
+    // remove from sets of geos -- PointSet (Ps), LineSet (Ls)...
     for (var sname in csgeo.sets) {
-        csgeo.sets[sname] = csgeo.sets[sname].filter(nameCmp(name));
+        csgeo.sets[sname] = csgeo.sets[sname].filter(nameCmp(nameMap, "set of " + sname));
     }
+
+
+    keys.forEach(function(name) {
+        delete csgeo.csnames[name];
+    });
 
     geoDependantsCache = {};
 }

@@ -41,7 +41,7 @@ var Inspector = {
       return;
 
     selected = str.slice(1, str.length - 1).split(',').map(el => el.trim());
-    var gslp = yieldgslp();
+    var gslp = cdy.saveState().geometry;
 
     var els = gslp.filter(el => selected.indexOf(el.name) != -1);
 
@@ -81,6 +81,15 @@ var Inspector = {
       let elnames = elementswithkey[key].map(i => els[i].name);
       if (key == "color") {
         this.colorelements = elnames;
+        
+        /* Reverse of StateIO.js
+        var undim = CSNumber.real(1 / defaultAppearance.dimDependent);
+        res.color = General.unwrap(List.scalmult(undim, el.color));
+        */
+        //let f = .7;
+        //if(configuration.defaultAppearance && configuration.defaultAppearance.dimDependent) f = configuration.defaultAppearance.dimDependent;
+        //value = [f*value[0], f*value[1], f*value[2]];
+        
         if (this.colorwheel) this.colorwheel.evokeCS(`activate([${value}])`);
       } else {
         innerhtml += `<div><span style="color:rgb(150,150,150)">${elnames}</span> <label for="${key}">${key}: </label>${this.createinput(key, value, elnames, allequal)}`;
@@ -125,20 +134,14 @@ var Inspector = {
         min = 0;
         max = 1;
       }
-      return `<input type="range" name="${name}.${key}" value="${value}" step=".01"   min="${min}" max="${max}" onchange="Inspector.modifygslp(${elstr}, ${keystr}, this.value); o${key}.value = this.value"><output name="o${key}" id="o${key}" for="${key}">${value}</output></div>`;
+      return `<input type="range" name="${key}" value="${value}" step=".01"   min="${min}" max="${max}" onchange="Inspector.modifygslp(${elstr}, ${keystr}, this.value); o${key}.value = this.value"><output name="o${key}" id="o${key}" for="${key}">${value}</output></div>`;
     } else if (Array.isArray(value)) {
-      if (key == "color") {
-        let mval = Math.max(value[0], value[1], value[2]);
-        if (mval > 1) { // I do not undestand why this happens sometimes
-          value = [value[0] / mval, value[1] / mval, value[2] / mval];
-        }
-        return `<input type="color" name="${key}" value="${this.cscolor2hex(value)}" onchange="Inspector.modifygslp(${elstr}, ${keystr}, '[' + Inspector.hex2cscolor(this.value) + ']'); o${key}.value = '[' + Inspector.niceprint(Inspector.hex2cscolor(this.value)) + ']'"><output name="o${key}" id="o${key}" for="${key}">[${this.niceprint(value)}]</output></div>`;
-      } else if (key == "pos" && value[2] != 0) {
+      if (key == "pos" && value[2] != 0) {
         keystr = "'xy'";
         value = [value[0] / value[2], value[1] / value[2]];
       }
-      return `<input type="text" name="${name}.${key}" value="[${this.niceprint(value)}]" onchange="Inspector.modifygslp(${elstr}, ${keystr}, this.value)"></div>`;
+      return `<input type="text" name="${key}" value="[${this.niceprint(value)}]" onchange="Inspector.modifygslp(${elstr}, ${keystr}, this.value)"></div>`;
     }
-    return `<input type="text" name="${name}.${key}" value="${value}" onchange="Inspector.modifygslp(${elstr}, ${keystr}, this.value)"></div>`;
+    return `<input type="text" name="${key}" value="${value}" onchange="Inspector.modifygslp(${elstr}, ${keystr}, this.value)"></div>`;
   }
 };
