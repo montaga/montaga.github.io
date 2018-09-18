@@ -1,0 +1,126 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>TensorFlow.js in CindyJS: An IFS with PoseNet</title>
+<meta charset="UTF-8">
+<script type="text/javascript" src="Cindy.js"></script>
+<script type="text/javascript" src="CindyGL.js"></script>
+<!-- Load TensorFlow.js -->
+<script src="https://unpkg.com/@tensorflow/tfjs"></script>
+<!-- Load Posenet -->
+<script src="https://unpkg.com/@tensorflow-models/posenet"></script>
+<script type="text/javascript" src="posenet-plugin.js"></script>
+<script id="csinit" type="text/x-cindyscript">
+video = camera video();
+createimage("julia", 1024, 1024);
+
+//corners of camera
+LL=(-1.5,-9/16*1.5);
+LR=(1.5,-9/16*1.5);
+</script>
+<script id="csdraw" type="text/x-cindyscript">
+if (imageready(video),
+  estimateSinglePose(LL,LR, video, imagescalefactor->.35, multiplier->1.01,
+    pose=#;
+    errc(pose);
+  );
+  
+  if(!isundefined(pose),
+    /*
+    1: nose
+    2: leftEye
+    3: rightEye
+    4: leftEar
+    5: rightEar
+    6: leftShoulder
+    7: rightShoulder
+    8: leftElbow
+    9: rightElbow
+    10: leftWrist
+    11: rightWrist
+    12: leftHip
+    13: rightHip
+    14: leftKnee
+    15: rightKnee
+    16: leftAnkle
+    17: rightAnkle
+    */
+    if(isundefined(coords),
+      coords = apply(pose, p, p_3);
+    );
+    //smooth pose
+    target = apply(pose, p, p_3);
+    if(pose_11_2>.2 & pose_10_2>.2,
+      coords = .95*coords + .05*target;
+    );
+		A = complex(coords_11); // Right wrist
+		B = complex(coords_10); // Left wrist
+    m = (A+B)/2;
+    z1 = A;
+    c=z1-(z1-m)^2; //(z1-m)^2+c=z1
+    //f has z1 as fixed point. z1 is attractive iff |z1-m|<1. The other FP of f is always repulsive.
+    f(z) := (z-m)^2+c;
+    
+    colorplot([-2,-2], [2,-2], "julia", 
+      z = f(complex(#));
+      if(abs(z)<2,
+         imagergb([-2,-2], [2,-2], "julia", z) + (.02,0.01,0)
+        //+imagergb(LL, LR, video, z)/50
+          
+        ,
+        (0,0,0)
+      )
+      
+    );
+    //drawimage((-1,-9/16),(1,-9/16), "julia");
+
+    //drawimage((0,0),(1,0), "ifs");
+    //clamp(v):= apply(v,c,max(min(c,1),0));
+    
+    reflect(p) :=(-p.x, p.y);
+    
+    colorplot(
+      color = imagergb(LL,LR,video,reflect(#));
+      jcolor = imagergb([-2,-2], [2,-2],"julia",reflect(#));
+      .7*color + jcolor
+    );
+    draw(reflect(gauss(A)), color->[1,0,0]);
+    draw(reflect(gauss(B)), color->[.7,0,0]);
+    ,
+    drawimage(LL,LR, video);
+    drawtext((0,0), "PoseNet not initialized yet...");
+  );
+);
+</script>
+
+<script id="csmouseclick" type="text/x-cindyscript">
+flipped = !flipped;
+</script>
+<script type="text/javascript">
+var cdy = CindyJS({
+  ports: [{id: "CSCanvas", 
+    width: 800,
+    height: 800,
+    transform:[{visibleRect:[-1.5,-1.5,1.5,1.5]}]}],
+  scripts: "cs*",
+  language: "en",
+  defaultAppearance: {
+  },
+  geometry: [],
+  use: ["CindyGL", "posenet"]
+});
+</script>
+</head>
+
+<body style="font-family:Arial;">
+  <h1>TensorFlow.js in CindyJS: The Julia set with PoseNet</h1>
+  <div id="CSCanvas"></div>
+  <div>Poses are detected with the <a href="https://github.com/tensorflow/tfjs-models/tree/master/posenet">PoseNet Model using TensorFlow.js</a></div>
+  <div>Due to WebGL precision problems, TensorFlow.js works less accurate in Safari. Currently, best results are obtained with Firefox or Chrome.</div>
+  <div>The applet shows an IFS with two similarities based (each mapping the segment shoulder-elbow to the trunk) on the pose of the pose of a person. A Feedback loop-approach renders a Julia set in CindyGL.</div>
+  <div>Idea from <a href="https://momath.org/">MoMath</a></div>
+</body>
+
+</html>
