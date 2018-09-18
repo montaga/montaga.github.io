@@ -52,7 +52,7 @@ if (imageready(video),
     );
     //smooth pose
     target = apply(pose, p, p_3);
-    if(pose_11_2>.2 & pose_10_2>.2,
+    if(pose_11_2>.3 & pose_10_2>.3,
       coords = .95*coords + .05*target;
     );
 		A = complex(coords_11); // Right wrist
