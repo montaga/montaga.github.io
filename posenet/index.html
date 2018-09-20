@@ -12,6 +12,11 @@
 <!-- Load Posenet -->
 <script src="https://unpkg.com/@tensorflow-models/posenet"></script>
 <script type="text/javascript" src="posenet-plugin.js"></script>
+<style type="text/css">
+  #outer { width: 1280px; height: 720px;}
+  #applet { width: 100%; height: 100%; }
+  #CSCanvas { width: 100%; height: 100%; }
+</style>
 <script id="csinit" type="text/x-cindyscript">
 video = camera video();
 createimage("ifs", 1280, 720);
@@ -54,8 +59,10 @@ if (imageready(video),
       coords = apply(pose, p, p_3);
     );
     //smooth pose
-    target = apply(pose, p, p_3);
-    coords = .9*coords + .1*target;
+    coords = apply(1..length(coords), k, 
+      alpha = pose_k_2/5; //significance
+      (1-alpha)*coords_k + alpha*pose_k_3;
+    );
     
     T = (coords_6+coords_7)/2;
     B = (coords_12+coords_13)/2;
@@ -81,31 +88,45 @@ if (imageready(video),
     drawimage((0,0),(1,0), "ifs");
     ,
     drawimage((0,0),(1,0), video);
+    drawtext((0,0), "PoseNet not initialized yet...");
   );
 );
-</script>
-<script type="text/javascript">
-var cdy = CindyJS({
-  ports: [{id: "CSCanvas", 
-    width: 1280,
-    height: 720,
-    transform:[{visibleRect:[0,0,1,9/16]}]}],
-  scripts: "cs*",
-  language: "en",
-  defaultAppearance: {
-  },
-  geometry: [],
-  use: ["CindyGL", "posenet"]
-});
 </script>
 </head>
 
 <body style="font-family:Arial;">
   <h1>TensorFlow.js in CindyJS: An IFS with PoseNet</h1>
-  <div id="CSCanvas"></div>
+  <div id="outer">
+    <div id="applet">
+      <div id="CSCanvas"></div>
+    </div>
+  </div>
+  <button id="fs">Fullscreen</button>
+  <script type="text/javascript">
+  var cdy = CindyJS({
+    ports: [{id: "CSCanvas", 
+      transform:[{visibleRect:[0,0,1,9/16]}]}],
+    scripts: "cs*",
+    language: "en",
+    defaultAppearance: {
+    },
+    geometry: [],
+    use: ["CindyGL", "posenet"]
+  });
+
+  var btn = document.getElementById("fs");
+  var div = document.getElementById("applet");
+  btn.onclick = function() {
+    (div.requestFullscreen ||
+     div.webkitRequestFullscreen ||
+     div.mozRequestFullScreen ||
+     div.msRequestFullscreen ||
+     function(){}).call(div);
+  };
+  </script>
   <div>Poses are detected with the <a href="https://github.com/tensorflow/tfjs-models/tree/master/posenet">PoseNet Model using TensorFlow.js</a></div>
   <div>Due to WebGL precision problems, TensorFlow.js works less accurate in Safari. Currently, best results are obtained with Firefox or Chrome.</div>
-  <div>The applet shows an IFS with two similarities based (each mapping the segment shoulder-elbow to the trunk) on the pose of the pose of a person. A Feedback loop-approach renders the IFS in CindyGL.</div>
+  <div>The applet shows an IFS with two similarities based (each mapping the segment shoulder-elbow to the trunk) on the pose of the pose of a person. A Feedback loop-approach renders the IFS in <a href="https://cindyjs.org/gallery/cindygl/">CindyGL</a>.</div>
   <div>Idea from <a href="https://momath.org/">MoMath</a>.</div>
   <div><img src="image.png"></img></div>
   <div>Author: <a href="https://aaron.montag.info/">Aaron Montag</a>. (<a href="https://creativecommons.org/licenses/by-sa/4.0/">CC-BY-SA 4.0 License</a>)</div>

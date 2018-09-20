@@ -3,7 +3,7 @@
 <html>
 
 <head>
-<title>TensorFlow.js in CindyJS: An IFS with PoseNet</title>
+<title>TensorFlow.js in CindyJS: The Julia set with PoseNet</title>
 <meta charset="UTF-8">
 <script type="text/javascript" src="Cindy.js"></script>
 <script type="text/javascript" src="CindyGL.js"></script>
@@ -12,9 +12,14 @@
 <!-- Load Posenet -->
 <script src="https://unpkg.com/@tensorflow-models/posenet"></script>
 <script type="text/javascript" src="posenet-plugin.js"></script>
+<style type="text/css">
+  #outer { width: 1280px; height: 720px;}
+  #applet { width: 100%; height: 100%; }
+  #CSCanvas { width: 100%; height: 100%; }
+</style>
 <script id="csinit" type="text/x-cindyscript">
 video = camera video();
-createimage("julia", 1024, 1024);
+createimage("julia", 2048, 2048);
 
 //corners of camera
 LL=(-1.5,-9/16*1.5);
@@ -51,17 +56,18 @@ if (imageready(video),
       coords = apply(pose, p, p_3);
     );
     //smooth pose
-    target = apply(pose, p, p_3);
-    if(pose_11_2>.3 & pose_10_2>.3,
-      coords = .95*coords + .05*target;
+    coords = apply(1..length(coords), k, 
+      alpha = pose_k_2/5; //significance
+      (1-alpha)*coords_k + alpha*pose_k_3;
     );
+
 		A = complex(coords_11); // Right wrist
 		B = complex(coords_10); // Left wrist
     m = (A+B)/2;
-    z1 = A;
-    c=z1-(z1-m)^2; //(z1-m)^2+c=z1
-    //f has z1 as fixed point. z1 is attractive iff |z1-m|<1. The other FP of f is always repulsive.
-    f(z) := (z-m)^2+c;
+    z1 = A-m;
+    c=z1-z1^2; //z1^2+c=z1
+    //f has z1 as fixed point. z1 is attractive iff |z1|<1.
+    f(z) := z*z+c;
     
     colorplot([-2,-2], [2,-2], "julia", 
       z = f(complex(#));
@@ -74,16 +80,12 @@ if (imageready(video),
       )
       
     );
-    //drawimage((-1,-9/16),(1,-9/16), "julia");
 
-    //drawimage((0,0),(1,0), "ifs");
-    //clamp(v):= apply(v,c,max(min(c,1),0));
-    
     reflect(p) :=(-p.x, p.y);
     
     colorplot(
-      color = imagergb(LL,LR,video,reflect(#));
-      jcolor = imagergb([-2,-2], [2,-2],"julia",reflect(#));
+      color = imagergb(LL,LR,video, reflect(#));
+      jcolor = imagergb([-2,-2]+gauss(m), [2,-2]+gauss(m),"julia", reflect(#));
       .7*color + jcolor
     );
     draw(reflect(gauss(A)), color->[1,0,0]);
@@ -98,28 +100,41 @@ if (imageready(video),
 <script id="csmouseclick" type="text/x-cindyscript">
 flipped = !flipped;
 </script>
-<script type="text/javascript">
-var cdy = CindyJS({
-  ports: [{id: "CSCanvas", 
-    width: 800,
-    height: 800,
-    transform:[{visibleRect:[-1.5,-1.5,1.5,1.5]}]}],
-  scripts: "cs*",
-  language: "en",
-  defaultAppearance: {
-  },
-  geometry: [],
-  use: ["CindyGL", "posenet"]
-});
-</script>
 </head>
 
 <body style="font-family:Arial;">
   <h1>TensorFlow.js in CindyJS: The Julia set with PoseNet</h1>
-  <div id="CSCanvas"></div>
-  <div>Poses are detected with the <a href="https://github.com/tensorflow/tfjs-models/tree/master/posenet">PoseNet Model using TensorFlow.js</a></div>
+  <div id="outer">
+    <div id="applet">
+      <div id="CSCanvas"></div>
+    </div>
+  </div>
+  <button id="fs">Fullscreen</button>
+
+  <script type="text/javascript">
+  var cdy = CindyJS({
+    ports: [{id: "CSCanvas",
+      transform:[{visibleRect:[-1.5,-1.5*9/16,1.5,1.5*9/16]}]}],
+    scripts: "cs*",
+    language: "en",
+    defaultAppearance: {
+    },
+    geometry: [],
+    use: ["CindyGL", "posenet"]
+  });
+  var btn = document.getElementById("fs");
+  var div = document.getElementById("applet");
+  btn.onclick = function() {
+    (div.requestFullscreen ||
+     div.webkitRequestFullscreen ||
+     div.mozRequestFullScreen ||
+     div.msRequestFullscreen ||
+     function(){}).call(div);
+  };
+  </script>
+  <div>Poses are detected with the <a href="https://github.com/tensorflow/tfjs-models/tree/master/posenet">PoseNet Model using TensorFlow.js</a>.</div>
   <div>Due to WebGL precision problems, TensorFlow.js works less accurate in Safari. Currently, best results are obtained with Firefox or Chrome.</div>
-  <div>The applet shows an IFS with two similarities based (each mapping the segment shoulder-elbow to the trunk) on the pose of the pose of a person. A Feedback loop-approach renders a Julia set in CindyGL.</div>
+  <div>Use your left and right hand to control the fractal. A Feedback loop-approach renders a Julia set in <a href="https://cindyjs.org/gallery/cindygl/">CindyGL</a>.</div>
   <div>Author: <a href="https://aaron.montag.info/">Aaron Montag</a>. (<a href="https://creativecommons.org/licenses/by-sa/4.0/">CC-BY-SA 4.0 License</a>)</div>
 </body>
 
