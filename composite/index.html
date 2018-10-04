@@ -25,9 +25,16 @@ add(fun) := (
   addfun = fun;
   errc(fun);
   nargs = 1; //TODO 2 for add
+  if(fun=="add" % fun=="phase1" % fun=="phase2" % fun=="phaseswitch",
+    nargs = 2;
+  );
   if(nargs == 1,
     msg = "click on input for " + fun;
   );
+  if(nargs == 2,
+    msg = "select two inputs for " + fun;
+  );
+  curinputs = [];
 );
 
 imgwidth = .5;
@@ -87,7 +94,7 @@ flip(in, out) := (
 );
 
 
-fft(in, out) := (
+fft(in, out, rot) := (
   colorplot("re", imagergb(in_2, #));
   colorplot("im", imagergb(in_3, #));
 
@@ -142,8 +149,8 @@ fft(in, out) := (
     step = step/2;
   );
   
-  colorplot(out_2, imagergb("re", #, interpolate->false, repeat->true));
-  colorplot(out_3, imagergb("im", #, interpolate->false, repeat->true));
+  colorplot((0,0), (N,0), out_2, imagergb((0,0), (N,0),"re", if(rot,(N+1,N+2)-#,#), interpolate->false, repeat->true));
+  colorplot((-N/2,-N/2),(N/2,-N/2), out_3, imagergb((-N/2,-N/2),(N/2,-N/2),"im", if(rot,-#,#), interpolate->false, repeat->true));
 
   
 );
@@ -153,6 +160,25 @@ add(in1, in2, out) := (
     imagergb(in1_2, #)+imagergb(in2_2, #)
   );
 );
+
+phase1(in1, in2, out) := (
+  //out: in1 with phase from in2
+  colorplot(out_2,
+    z1 = imagergb(in1_2, #)+i*imagergb(in1_3, #);
+    z2 = imagergb(in2_2, #)+i*imagergb(in2_3, #);
+    apply(1..3, k, |z1_k|*re(z2_k/|z2_k|))
+  );
+  colorplot(out_3,
+    z1 = imagergb(in1_2, #)+i*imagergb(in1_3, #);
+    z2 = imagergb(in2_2, #)+i*imagergb(in2_3, #);
+    apply(1..3, k, |z1_k|*im(z2_k/|z2_k|))
+  );
+);
+
+phase2(in1, in2, out) := (
+  phase1(in2, in1, out);
+);
+
 
 
 drawobj(obj) := (
@@ -165,22 +191,15 @@ drawobj(obj) := (
 );
 
 
-nodes =
-[
+nodes0 = [
   [
       [(-1.2,.7), "camera", "black"],
       [(-1.2,.1), "pic2", "black"],
       [(-1.2,-.5), "pic1", "black"]
-  ],
-  [
-    //[( -.5,0), "tmp1", "tmp1", ["inv", (1,1)]],
-    //[( .5,0), "tmp2", "tmp1", ["flip", (1,2)]]
-  ],
-  [
-    //[( -.5,-.6), "tmp3", "tmp1", ["add", (2,1), (1,3)]],
-    //[( .5,-.6), "tmp4", "tmp1"]
   ]
 ];
+nodes = nodes0;
+
 /*
 nodes_2 = nodes_2 ++ [
   [( -.5,0), "tmp1", "tmp1", ["inv", nodes_1_1]]
@@ -217,7 +236,11 @@ addnode(addfun, inputs, line) := (
   errc(addfun);
   errc(inputs);
   errc(line);
-  pos = sum(inputs, #, #_1)/length(inputs)+(imgwidth*1.2,0);
+  pos0 = sum(inputs, #, #_1)/length(inputs);
+  if(addfun=="phase1", pos0 = inputs_1_1);
+  if(addfun=="phase2", pos0 = inputs_2_1);
+  
+  pos = pos0+(imgwidth*1.3,0);
   while(length(free)<2,
     createtmp();
   );
@@ -259,11 +282,20 @@ forall(nodes, line, forall(line, node,
     if(gen_1=="flip",
       flip(org, node);
     );
-    if(gen_1=="FFT",
-      fft(org, node);
+    if(gen_1=="DFT",
+      fft(org, node, false);
+    );
+    if(gen_1=="iDFT",
+      fft(org, node, true);
     );
     if(gen_1=="add",
       add(org, org2, node);
+    );
+    if(gen_1=="phase1",
+      phase1(org, org2, node);
+    );
+    if(gen_1=="phase2",
+      phase2(org, org2, node);
     );
     
   );
@@ -304,7 +336,16 @@ forall(nodes, line, cline = cline+1; forall(line, node,
       delete(node);
     );
     if(mode=="add",
-      addnode(addfun, [node], cline+1);
+      curinputs = curinputs :> node;
+      if(length(curinputs)==nargs,
+        if(addfun=="phaseswitch",
+          addnode("phase1", curinputs, cline+1);
+          addnode("phase2", curinputs, cline+1);
+          ,
+          addnode(addfun, curinputs, cline+1);
+        )
+        
+      );
     );
     
   )
@@ -328,10 +369,13 @@ var cdy = CindyJS({
     "pic2": "pic2.jpg"
   },
   geometry: [
+    {name: "reset", type: "Button", pos: [-1.3,-.9], color: [0.0, 0.0, 0.0], text: "reset", script: 'nodes = nodes0;'},
     {name: "Binv", type: "Button", pos: [-1,-.9], color: [0.0, 0.0, 0.0], text: "inv", script: 'add("inv")'},
     {name: "Bflip", type: "Button", pos: [-.8,-.9], color: [0.0, 0.0, 0.0], text: "flip", script: 'add("flip")'},
-    {name: "BFFT", type: "Button", pos: [-.6,-.9], color: [0.0, 0.0, 0.0], text: "FFT", script: 'add("FFT")'},
-    {name: "Badd", type: "Button", pos: [-.4,-.9], color: [0.0, 0.0, 0.0], text: "add", script: 'add("add")'},
+    {name: "BDFT", type: "Button", pos: [-.6,-.9], color: [0.0, 0.0, 0.0], text: "DFT", script: 'add("DFT")'},
+    {name: "BiDFT", type: "Button", pos: [-.4,-.9], color: [0.0, 0.0, 0.0], text: "iDFT", script: 'add("iDFT")'},
+    {name: "Badd", type: "Button", pos: [-.2,-.9], color: [0.0, 0.0, 0.0], text: "add", script: 'add("add")'},
+    {name: "Bphaseswitch", type: "Button", pos: [0,-.9], color: [0.0, 0.0, 0.0], text: "phaseswitch", script: 'add("phaseswitch")'},
     /*{name:"A", type:"Free", pos:[0,0]},
     {name:"B", type:"Free", pos:[0.7071,0.7071]},
     {name:"C", type:"CircleMP", args:["A","B"]}*/
