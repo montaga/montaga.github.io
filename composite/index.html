@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>Widget filling whole window</title>
+<meta charset="UTF-8">
+<script type="text/javascript" src="Cindy.js"></script>
+<script type="text/javascript" src="CindyGL.js"></script>
+<link rel="stylesheet" href="CindyJS.css">
+<style type="text/css">
+  html,body { margin: 0px; padding: 0px; }
+  html,body,#CSCanvas { width: 100%; height: 100%; }
+</style>
+
+<script id="csinit" type="text/x-cindyscript">
+
+video = camera video();
+
+mode = "delete";
+addfun = "inv";
+nargs = 0;
+msg = "";
+add(fun) := (
+  mode = "add";
+  addfun = fun;
+  errc(fun);
+  nargs = 1; //TODO 2 for add
+  if(nargs == 1,
+    msg = "click on input for " + fun;
+  );
+);
+
+imgwidth = .5;
+// 1: pos
+// 2: re
+// 3: im
+
+free = [];
+
+createtmp() := (
+  ctmpcnt = ctmpcnt+1;
+  createimage("tmp"+ctmpcnt, 256, 256);
+  colorplot("tmp"+ctmpcnt, [0,0,0]);
+  free = free :> ("tmp"+ctmpcnt);
+);
+
+createimage("camera", 256, 256);
+colorplot("camera", [0,0,0]);
+
+N = 256;
+createimage("re", N, N);
+createimage("retmp", N, N);
+createimage("im", N, N);
+createimage("black", 1,1);
+
+colorplot("re", [0,0,0]);
+colorplot("retmp", [0,0,0]);
+colorplot("im", [0,0,0]);
+colorplot("black", [0,0,0]);
+
+ctmpcnt = 0;
+forall(1..20,
+  createtmp();
+);
+
+
+
+
+
+
+inv(in, out) := (
+  colorplot(out_2,
+    [1,1,1] - imagergb(in_2, #)
+  );
+  colorplot(out_3,
+    [1,1,1] - imagergb(in_3, #)
+  );
+);
+
+flip(in, out) := (
+  colorplot(out_2,
+    imagergb(in_2, (-#.x,#.y))
+  );
+  colorplot(out_3,
+    imagergb(in_3, (-#.x,#.y))
+  );
+);
+
+
+fft(in, out) := (
+  colorplot("re", imagergb(in_2, #));
+  colorplot("im", imagergb(in_3, #));
+
+  readcomplex(p) := (
+    re = imagergb((-N/2,-N/2),(N/2,-N/2), "re", p, interpolate->false, repeat->true); //circular domain
+    im = imagergb((-N/2,-N/2),(N/2,-N/2), "im", p, interpolate->false, repeat->true); //circular domain
+    re+i*im
+  );
+
+  step = N/2;
+
+  while(step>=1,
+    colorplot((-N/2,-N/2),(N/2,-N/2),"retmp",
+    
+      l = #; //global index
+      delta = (mod(l.x,step),mod(l.y,step)); //shift
+      k = (l-delta)/step; //local index (within recursion)
+      x00 = readcomplex(2*l - delta + (0,0));
+      x10 = readcomplex(2*l - delta + (step,0));
+      x01 = readcomplex(2*l - delta + (0,step));
+      x11 = readcomplex(2*l - delta + (step,step));
+      
+      apply(sqrt(1/4)*(
+          x00
+          + exp((-2*pi*i/N*step)*k.x)*x10
+          + exp((-2*pi*i/N*step)*k.y)*x01
+          + exp((-2*pi*i/N*step)*(k.x+k.y))*x11
+        ), z, re(z)
+      )
+    );
+    
+    colorplot((-N/2,-N/2),(N/2,-N/2),"im",
+    
+      l = #; //global index
+      delta = (mod(l.x,step),mod(l.y,step)); //shift
+      k = (l-delta)/step; //local index (within recursion)
+      x00 = readcomplex(2*l - delta + (0,0));
+      x10 = readcomplex(2*l - delta + (step,0));
+      x01 = readcomplex(2*l - delta + (0,step));
+      x11 = readcomplex(2*l - delta + (step,step));
+      
+      apply(sqrt(1/4)*(
+          x00
+          + exp((-2*pi*i/N*step)*k.x)*x10
+          + exp((-2*pi*i/N*step)*k.y)*x01
+          + exp((-2*pi*i/N*step)*(k.x+k.y))*x11
+        ), z, im(z)
+      )
+    );
+    colorplot("re", imagergb("retmp", #, interpolate->false, repeat->true));
+    
+    step = step/2;
+  );
+  
+  colorplot(out_2, imagergb("re", #, interpolate->false, repeat->true));
+  colorplot(out_3, imagergb("im", #, interpolate->false, repeat->true));
+
+  
+);
+
+add(in1, in2, out) := (
+  colorplot(out_2,
+    imagergb(in1_2, #)+imagergb(in2_2, #)
+  );
+);
+
+
+drawobj(obj) := (
+  A = 1.05;
+  fillpoly([
+    obj_1+A*[-imgwidth/2,-imgwidth/2], obj_1+A*[imgwidth/2,-imgwidth/2],
+    obj_1+A*[imgwidth/2,imgwidth/2], obj_1+A*[-imgwidth/2,imgwidth/2]
+  ], color->[1,1,1], alpha->.6);
+  drawimage(obj_1+[-imgwidth/2,-imgwidth/2], obj_1+[imgwidth/2,-imgwidth/2], obj_2);
+);
+
+
+nodes =
+[
+  [
+      [(-1.2,.7), "camera", "black"],
+      [(-1.2,.1), "pic2", "black"],
+      [(-1.2,-.5), "pic1", "black"]
+  ],
+  [
+    //[( -.5,0), "tmp1", "tmp1", ["inv", (1,1)]],
+    //[( .5,0), "tmp2", "tmp1", ["flip", (1,2)]]
+  ],
+  [
+    //[( -.5,-.6), "tmp3", "tmp1", ["add", (2,1), (1,3)]],
+    //[( .5,-.6), "tmp4", "tmp1"]
+  ]
+];
+/*
+nodes_2 = nodes_2 ++ [
+  [( -.5,0), "tmp1", "tmp1", ["inv", nodes_1_1]]
+];*/
+
+delete(node) := (
+  todelete = [node];
+  
+  grow = true;
+  while(grow,
+    grow = false;
+    forall(nodes, line, forall(line, node,
+      if(length(node)>=4 & !contains(todelete, node),
+        gen = node_4;
+        org = gen_2;
+        if(contains(todelete, org), todelete = todelete++[node]; grow = true;);
+        if(length(gen)>=3,
+          org2 = gen_3;
+          if(contains(todelete, org2), todelete = todelete++[node]; grow = true;);
+        );
+      );
+    ));
+  );
+  errc(todelete);
+  free = free ++ flatten(apply(todelete, d, [d_2, d_3]));
+  errc(nodes);
+  nodes = apply(nodes, line, line -- todelete);
+  
+  errc(nodes);
+);
+
+
+addnode(addfun, inputs, line) := (
+  errc(addfun);
+  errc(inputs);
+  errc(line);
+  pos = sum(inputs, #, #_1)/length(inputs)+(imgwidth*1.2,0);
+  while(length(free)<2,
+    createtmp();
+  );
+  t1 = free_1;
+  t2 = free_2;
+  free = free_(3..length(free));
+  
+  nnode = [pos, t1, t2, [addfun] ++ inputs];
+  while(length(nodes)<line,
+    nodes = nodes:>[];
+  );
+  nodes_line = nodes_line :> nnode;
+  mode = "delete";
+  msg = "";
+);
+
+</script>
+
+<script id="csdraw" type="text/x-cindyscript">
+if (image ready(video),
+  colorplot([-1,-1],[1,-1],"camera", imagergb([-2,-1],[2,-1],video, #));
+);
+
+forall(nodes, line, forall(line, node,
+  if(length(node)>=4,
+    gen = node_4;
+    org = gen_2;
+    if(length(gen)>=3,
+      org2 = gen_3;
+      draw(org2_1, node_1);
+      drawtext((org2_1+node_1)/2, gen_1);
+    );
+    draw(org_1, node_1);
+    drawtext((org_1+node_1)/2, gen_1);
+    
+    if(gen_1=="inv",
+      inv(org, node);
+    );
+    if(gen_1=="flip",
+      flip(org, node);
+    );
+    if(gen_1=="FFT",
+      fft(org, node);
+    );
+    if(gen_1=="add",
+      add(org, org2, node);
+    );
+    
+  );
+));
+
+
+forall(nodes, line, forall(line, node,
+  drawobj(node);
+));
+
+
+
+forall(nodes, line, forall(line, node,
+  v = mouse() - node_1;
+  if(|v.x|<imgwidth/2 & |v.y|<imgwidth/2,
+    drawimage(mouse()+(-.6,-0.3), mouse()+(.6,-.3), node_2);
+    if(mode=="delete",
+      if(!contains(nodes_1, node),
+        drawtext(mouse(), "click to delete", color->[1,1,1]);
+      );
+    );
+    
+  )
+));
+
+drawtext((-1,-.98), msg);
+</script>
+
+
+<script id="csmouseclick" type="text/x-cindyscript">
+errc("click");
+cline = 0;
+forall(nodes, line, cline = cline+1; forall(line, node,
+  v = mouse() - node_1;
+  if(|v.x|<imgwidth/2 & |v.y|<imgwidth/2,
+    //drawimage(mouse()+(-1,-0.5), mouse()+(1,-.5), node_2);
+    if(mode=="delete" & cline>=2,
+      delete(node);
+    );
+    if(mode=="add",
+      addnode(addfun, [node], cline+1);
+    );
+    
+  )
+));
+
+</script>
+
+<script type="text/javascript">
+
+var cdy = CindyJS({
+  ports: [{
+    id: "CSCanvas",
+    grid: .1,
+    background: "rgb(200,200,200)",
+    transform:[{visibleRect:[-1.5,1,1.5,-1]}]
+  }],
+  scripts: "cs*",
+  language: "en",
+  images: {
+    "pic1": "pic1.jpg",
+    "pic2": "pic2.jpg"
+  },
+  geometry: [
+    {name: "Binv", type: "Button", pos: [-1,-.9], color: [0.0, 0.0, 0.0], text: "inv", script: 'add("inv")'},
+    {name: "Bflip", type: "Button", pos: [-.8,-.9], color: [0.0, 0.0, 0.0], text: "flip", script: 'add("flip")'},
+    {name: "BFFT", type: "Button", pos: [-.6,-.9], color: [0.0, 0.0, 0.0], text: "FFT", script: 'add("FFT")'},
+    {name: "Badd", type: "Button", pos: [-.4,-.9], color: [0.0, 0.0, 0.0], text: "add", script: 'add("add")'},
+    /*{name:"A", type:"Free", pos:[0,0]},
+    {name:"B", type:"Free", pos:[0.7071,0.7071]},
+    {name:"C", type:"CircleMP", args:["A","B"]}*/
+  ]
+});
+
+</script>
+</head>
+
+<body style="font-family:Arial; ">
+  <div id="CSCanvas"></div>
+</body>
+
+</html>
