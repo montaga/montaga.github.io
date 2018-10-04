@@ -37,7 +37,7 @@ add(fun) := (
   curinputs = [];
 );
 
-imgwidth = .5;
+imgwidth = .4;
 // 1: pos
 // 2: re
 // 3: im
@@ -93,6 +93,67 @@ flip(in, out) := (
   );
 );
 
+strange(in, out) := (
+  colorplot((0,0),(pi,0), out_2,
+    if(im(log(complex(#)^32))>0,
+      [1,1,1]-imagergb((0,0),(pi,0), in_2, #, interpolate->false),
+      imagergb((0,0),(pi,0), in_2, #, interpolate->false)
+    );  
+  );
+);
+blur(in, out) := (
+  
+  read(p) := imagergb((-N/2,-N/2),(N/2,-N/2), in_2, p, interpolate->false);
+  colorplot((-N/2,-N/2),(N/2,-N/2), out_2,
+    1/9*(
+      read(#) +
+      read(# + (-1, 1)) +
+      read(# + (0,  1)) +
+      read(# + (1,  1)) +
+      read(# + (-1, 0)) +
+      read(# + (1,  0)) +
+      read(# + (-1,-1)) +
+      read(# + (0, -1)) +
+      read(# + (1, -1))
+    )
+  );
+
+/*
+  colorplot((-N/2,-N/2),(N/2,-N/2), out_2,
+    s = imagergb((-N/2,-N/2),(N/2,-N/2), in_2, (#.x,#.y), interpolate->false, repeat->true);
+    s = s+imagergb((-N/2,-N/2),(N/2,-N/2), in_2, (#.x-4,#.y+1), interpolate->false, repeat->true);
+    s = s+imagergb((-N/2,-N/2),(N/2,-N/2), in_2, (#.x+10,#.y), interpolate->false, repeat->true);
+    s = s+imagergb((-N/2,-N/2),(N/2,-N/2), in_2, (#.x,#.y+5), interpolate->false, repeat->true);
+    s/4
+  );
+  colorplot(out_3, [0,0,0]);*/
+);
+
+sharpen(in, out) := (
+  read(p) := imagergb((-N/2,-N/2),(N/2,-N/2), in_2, p, interpolate->false);
+  colorplot((-N/2,-N/2),(N/2,-N/2), out_2,
+    1/2*(
+      10*read(#) -
+      read(# + (-1, 1)) -
+      read(# + (0,  1)) -
+      read(# + (1,  1)) -
+      read(# + (-1, 0)) -
+      read(# + (1,  0)) -
+      read(# + (-1,-1)) -
+      read(# + (0, -1)) -
+      read(# + (1, -1))
+    )
+  );
+  /*
+  colorplot((-N/2,-N/2),(N/2,-N/2), out_2,
+    s = 5*imagergb((-N/2,-N/2),(N/2,-N/2), in_2, (#.x,#.y), interpolate->false, repeat->true);
+    s = s-imagergb((-N/2,-N/2),(N/2,-N/2), in_2, (#.x-4,#.y+1), interpolate->false, repeat->true);
+    s = s-imagergb((-N/2,-N/2),(N/2,-N/2), in_2, (#.x+10,#.y), interpolate->false, repeat->true);
+    s = s-imagergb((-N/2,-N/2),(N/2,-N/2), in_2, (#.x,#.y+5), interpolate->false, repeat->true);
+    s/2
+  );
+  colorplot(out_3, [0,0,0]);*/
+);
 
 fft(in, out, rot) := (
   colorplot("re", imagergb(in_2, #));
@@ -149,8 +210,8 @@ fft(in, out, rot) := (
     step = step/2;
   );
   
-  colorplot((0,0), (N,0), out_2, imagergb((0,0), (N,0),"re", if(rot,(N+1,N+2)-#,#), interpolate->false, repeat->true));
-  colorplot((-N/2,-N/2),(N/2,-N/2), out_3, imagergb((-N/2,-N/2),(N/2,-N/2),"im", if(rot,-#,#), interpolate->false, repeat->true));
+  colorplot((0,0), (N,0), out_2, imagergb((0,0), (N,0),"re", if(rot,(N+1,N+1)-#,#), interpolate->false, repeat->true));
+  colorplot((0,0), (N,0), out_3, imagergb((0,0), (N,0),"im", if(rot,(N+1,N+1)-#,#), interpolate->false, repeat->true));
 
   
 );
@@ -158,6 +219,9 @@ fft(in, out, rot) := (
 add(in1, in2, out) := (
   colorplot(out_2,
     imagergb(in1_2, #)+imagergb(in2_2, #)
+  );
+  colorplot(out_3,
+    imagergb(in1_3, #)+imagergb(in2_3, #)
   );
 );
 
@@ -180,13 +244,15 @@ phase2(in1, in2, out) := (
 );
 
 
-
-drawobj(obj) := (
-  A = 1.05;
-  fillpoly([
+box(obj,A) := (
+  [
     obj_1+A*[-imgwidth/2,-imgwidth/2], obj_1+A*[imgwidth/2,-imgwidth/2],
     obj_1+A*[imgwidth/2,imgwidth/2], obj_1+A*[-imgwidth/2,imgwidth/2]
-  ], color->[1,1,1], alpha->.6);
+  ]
+);
+
+drawobj(obj) := (
+  fillpoly(box(obj, 1.05), color->[1,1,1], alpha->.6);
   drawimage(obj_1+[-imgwidth/2,-imgwidth/2], obj_1+[imgwidth/2,-imgwidth/2], obj_2);
 );
 
@@ -194,8 +260,9 @@ drawobj(obj) := (
 nodes0 = [
   [
       [(-1.2,.7), "camera", "black"],
-      [(-1.2,.1), "pic2", "black"],
-      [(-1.2,-.5), "pic1", "black"]
+      [(-1.2,.233), "pic1", "black"],
+      [(-1.2,-.233), "pic2", "black"],
+      [(-1.2,-.7), "pic3", "black"]
   ]
 ];
 nodes = nodes0;
@@ -270,10 +337,10 @@ forall(nodes, line, forall(line, node,
     org = gen_2;
     if(length(gen)>=3,
       org2 = gen_3;
-      draw(org2_1, node_1);
+      draw(org2_1, node_1, color->[0,0,0]);
       drawtext((org2_1+node_1)/2, gen_1);
     );
-    draw(org_1, node_1);
+    draw(org_1, node_1, color->[0,0,0]);
     drawtext((org_1+node_1)/2, gen_1);
     
     if(gen_1=="inv",
@@ -281,6 +348,18 @@ forall(nodes, line, forall(line, node,
     );
     if(gen_1=="flip",
       flip(org, node);
+    );
+    if(gen_1=="blur",
+      blur(org, node);
+    );
+    if(gen_1=="sharpen",
+      sharpen(org, node);
+    );
+    if(gen_1=="strange",
+      strange(org, node);
+    );
+    if(gen_1=="perm2",
+      perm2(org, node);
     );
     if(gen_1=="DFT",
       fft(org, node, false);
@@ -302,6 +381,11 @@ forall(nodes, line, forall(line, node,
 ));
 
 
+forall(curinputs, node,
+  fillpoly(box(node, 1.1), color->[1,.5,0], alpha->.5);
+);
+
+
 forall(nodes, line, forall(line, node,
   drawobj(node);
 ));
@@ -311,17 +395,22 @@ forall(nodes, line, forall(line, node,
 forall(nodes, line, forall(line, node,
   v = mouse() - node_1;
   if(|v.x|<imgwidth/2 & |v.y|<imgwidth/2,
-    drawimage(mouse()+(-.6,-0.3), mouse()+(.6,-.3), node_2);
+    fillpoly(box(node, 1.1), color->[1,.5,0], alpha->.3);
+    
     if(mode=="delete",
+      drawimage(mouse()+(-.6,-0.3), mouse()+(.6,-.3), node_2);
       if(!contains(nodes_1, node),
         drawtext(mouse(), "click to delete", color->[1,1,1]);
       );
     );
     
+    
   )
 ));
 
 drawtext((-1,-.98), msg);
+
+
 </script>
 
 
@@ -334,6 +423,9 @@ forall(nodes, line, cline = cline+1; forall(line, node,
     //drawimage(mouse()+(-1,-0.5), mouse()+(1,-.5), node_2);
     if(mode=="delete" & cline>=2,
       delete(node);
+      canvas((0,0),(1,0),"tmp20",
+        drawimage((0,0),(1,0),node_2);
+      );
     );
     if(mode=="add",
       curinputs = curinputs :> node;
@@ -343,8 +435,8 @@ forall(nodes, line, cline = cline+1; forall(line, node,
           addnode("phase2", curinputs, cline+1);
           ,
           addnode(addfun, curinputs, cline+1);
-        )
-        
+        );
+        curinputs = [];  
       );
     );
     
@@ -365,17 +457,21 @@ var cdy = CindyJS({
   scripts: "cs*",
   language: "en",
   images: {
-    "pic1": "pic1.jpg",
-    "pic2": "pic2.jpg"
+    "pic1": "pic1.png",
+    "pic2": "pic2.png",
+    "pic3": "pic3.png"
   },
   geometry: [
-    {name: "reset", type: "Button", pos: [-1.3,-.9], color: [0.0, 0.0, 0.0], text: "reset", script: 'nodes = nodes0;'},
+    {name: "reset", type: "Button", pos: [-1.3,-.9], color: [0.0, 0.0, 0.0], text: "reset", script: 'javascript("location.reload();")'},
     {name: "Binv", type: "Button", pos: [-1,-.9], color: [0.0, 0.0, 0.0], text: "inv", script: 'add("inv")'},
     {name: "Bflip", type: "Button", pos: [-.8,-.9], color: [0.0, 0.0, 0.0], text: "flip", script: 'add("flip")'},
     {name: "BDFT", type: "Button", pos: [-.6,-.9], color: [0.0, 0.0, 0.0], text: "DFT", script: 'add("DFT")'},
     {name: "BiDFT", type: "Button", pos: [-.4,-.9], color: [0.0, 0.0, 0.0], text: "iDFT", script: 'add("iDFT")'},
     {name: "Badd", type: "Button", pos: [-.2,-.9], color: [0.0, 0.0, 0.0], text: "add", script: 'add("add")'},
     {name: "Bphaseswitch", type: "Button", pos: [0,-.9], color: [0.0, 0.0, 0.0], text: "phaseswitch", script: 'add("phaseswitch")'},
+    {name: "Bblur", type: "Button", pos: [.3,-.9], color: [0.0, 0.0, 0.0], text: "blur", script: 'add("blur")'},
+    {name: "Bsharpen", type: "Button", pos: [.5,-.9], color: [0.0, 0.0, 0.0], text: "sharpen", script: 'add("sharpen")'},
+    {name: "Bstrange", type: "Button", pos: [.7,-.9], color: [0.0, 0.0, 0.0], text: "strange", script: 'add("strange")'},
     /*{name:"A", type:"Free", pos:[0,0]},
     {name:"B", type:"Free", pos:[0.7071,0.7071]},
     {name:"C", type:"CircleMP", args:["A","B"]}*/
