@@ -13,10 +13,11 @@
 </style>
 
 <script id="csinit" type="text/x-cindyscript">
+functions = ["delete", "inv", "flip", "strange", "DFT", "iDFT", "add", "phaseswitch", "blur", "sharpen"];
 
 video = camera video();
 
-mode = "delete";
+mode = "free";
 addfun = "inv";
 nargs = 0;
 msg = "";
@@ -32,7 +33,7 @@ add(fun) := (
     msg = "click on input for " + fun;
   );
   if(nargs == 2,
-    msg = "select two inputs for " + fun;
+    msg = "click on second input for " + fun;
   );
   curinputs = [];
 );
@@ -306,6 +307,7 @@ addnode(addfun, inputs, line) := (
   pos0 = sum(inputs, #, #_1)/length(inputs);
   if(addfun=="phase1", pos0 = inputs_1_1);
   if(addfun=="phase2", pos0 = inputs_2_1);
+  pos0_1 = max(apply(inputs, k, (k_1)_1));
   
   pos = pos0+(imgwidth*1.3,0);
   while(length(free)<2,
@@ -320,7 +322,7 @@ addnode(addfun, inputs, line) := (
     nodes = nodes:>[];
   );
   nodes_line = nodes_line :> nnode;
-  mode = "delete";
+  mode = "free";
   msg = "";
 );
 
@@ -397,12 +399,21 @@ forall(nodes, line, forall(line, node,
   if(|v.x|<imgwidth/2 & |v.y|<imgwidth/2,
     fillpoly(box(node, 1.1), color->[1,.5,0], alpha->.3);
     
-    if(mode=="delete",
-      drawimage(mouse()+(-.6,-0.3), mouse()+(.6,-.3), node_2);
-      if(!contains(nodes_1, node),
-        drawtext(mouse(), "click to delete", color->[1,1,1]);
+    if(mode=="free",
+      drawimage(node_1+(-.6,-.6), node_1+(.6,-.6), node_2);
+      mk = mod(round(arctan2(mouse()-node_1)*length(functions)/(2*pi))-1,length(functions))+1;
+      forall(1..length(functions),k,
+        c = node_1+1.5*imgwidth/3*gauss(exp(k*2*pi*i/length(functions)));
+          
+          drawtext(c+(.01,0)/5, functions_k, color->[1,1,1]);
+          drawtext(c+(-.01,0)/5, functions_k, color->[1,1,1]);
+          drawtext(c+(0,.01)/5, functions_k, color->[1,1,1]);
+          drawtext(c+(0,-.01)/5, functions_k, color->[1,1,1]);
+          drawtext(c, functions_k, color->  if(round(mk)==k,[.3,0.5,0],[0,0,0]));
       );
     );
+    
+    
     
     
   )
@@ -421,12 +432,18 @@ forall(nodes, line, cline = cline+1; forall(line, node,
   v = mouse() - node_1;
   if(|v.x|<imgwidth/2 & |v.y|<imgwidth/2,
     //drawimage(mouse()+(-1,-0.5), mouse()+(1,-.5), node_2);
-    if(mode=="delete" & cline>=2,
-      delete(node);
-      canvas((0,0),(1,0),"tmp20",
-        drawimage((0,0),(1,0),node_2);
+    
+    if(mode=="free",
+      mk = mod(round(arctan2(mouse()-node_1)*length(functions)/(2*pi))-1,length(functions))+1;
+      if(functions_mk=="delete" & cline>=2,
+        delete(node)
+        ,
+        add(functions_mk);  
       );
     );
+    
+    
+
     if(mode=="add",
       curinputs = curinputs :> node;
       if(length(curinputs)==nargs,
@@ -462,8 +479,8 @@ var cdy = CindyJS({
     "pic3": "pic3.png"
   },
   geometry: [
-    {name: "reset", type: "Button", pos: [-1.3,-.9], color: [0.0, 0.0, 0.0], text: "reset", script: 'javascript("location.reload();")'},
-    {name: "Binv", type: "Button", pos: [-1,-.9], color: [0.0, 0.0, 0.0], text: "inv", script: 'add("inv")'},
+    {name: "reset", type: "Button", pos: [1.3,0.9], color: [0.0, 0.0, 0.0], text: "reset", script: 'javascript("location.reload();")'},
+/*    {name: "Binv", type: "Button", pos: [-1,-.9], color: [0.0, 0.0, 0.0], text: "inv", script: 'add("inv")'},
     {name: "Bflip", type: "Button", pos: [-.8,-.9], color: [0.0, 0.0, 0.0], text: "flip", script: 'add("flip")'},
     {name: "BDFT", type: "Button", pos: [-.6,-.9], color: [0.0, 0.0, 0.0], text: "DFT", script: 'add("DFT")'},
     {name: "BiDFT", type: "Button", pos: [-.4,-.9], color: [0.0, 0.0, 0.0], text: "iDFT", script: 'add("iDFT")'},
@@ -471,7 +488,7 @@ var cdy = CindyJS({
     {name: "Bphaseswitch", type: "Button", pos: [0,-.9], color: [0.0, 0.0, 0.0], text: "phaseswitch", script: 'add("phaseswitch")'},
     {name: "Bblur", type: "Button", pos: [.3,-.9], color: [0.0, 0.0, 0.0], text: "blur", script: 'add("blur")'},
     {name: "Bsharpen", type: "Button", pos: [.5,-.9], color: [0.0, 0.0, 0.0], text: "sharpen", script: 'add("sharpen")'},
-    {name: "Bstrange", type: "Button", pos: [.7,-.9], color: [0.0, 0.0, 0.0], text: "strange", script: 'add("strange")'},
+    {name: "Bstrange", type: "Button", pos: [.7,-.9], color: [0.0, 0.0, 0.0], text: "strange", script: 'add("strange")'},*/
     /*{name:"A", type:"Free", pos:[0,0]},
     {name:"B", type:"Free", pos:[0.7071,0.7071]},
     {name:"C", type:"CircleMP", args:["A","B"]}*/
