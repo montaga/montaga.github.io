@@ -2,26 +2,26 @@
 <html>
 
 <head>
-<title>Widget filling whole window</title>
+<title>Compose operations on images</title>
 <meta charset="UTF-8">
 <script type="text/javascript" src="Cindy.js"></script>
 <script type="text/javascript" src="CindyGL.js"></script>
-<link rel="stylesheet" href="CindyJS.css">
 <style type="text/css">
-  html,body { margin: 0px; padding: 0px; }
-  html,body,#CSCanvas { width: 100%; height: 100%; }
+* {
+    margin: 0px;
+    padding: 0px;
+}
 </style>
-
 <script id="csinit" type="text/x-cindyscript">
 //⧑ ⧒
-functions = ["✖", "◪", "↔", "▨", "⧑", "⧒", "+", "⧖", "◎", "◈"];
+functions = ["◪", "↔", "▨", "⧑", "⧒", "⧖", "◎", "◈","✖"];
 
 video = camera video();
 
 mode = "free";
 addfun = "◪";
 nargs = 0;
-msg = "";
+msg = "move the mouse to images and apply transformations by clicking.";
 add(fun) := (
   mode = "+";
   addfun = fun;
@@ -39,7 +39,7 @@ add(fun) := (
   curinputs = [];
 );
 
-imgwidth = .4;
+imgwidth = .9;
 // 1: pos
 // 2: re
 // 3: im
@@ -55,6 +55,9 @@ createtmp() := (
 
 createimage("camera", 256, 256);
 colorplot("camera", [0,0,0]);
+
+createimage("phase", 256, 256);
+colorplot("phase", [0,0,0]);
 
 N = 256;
 createimage("re", N, N);
@@ -72,11 +75,6 @@ forall(1..20,
   createtmp();
 );
 
-
-
-
-
-
 inv(in, out) := (
   colorplot(out_2,
     [1,1,1] - imagergb(in_2, #)
@@ -87,11 +85,11 @@ inv(in, out) := (
 );
 
 flip(in, out) := (
-  colorplot(out_2,
-    imagergb(in_2, (-#.x,#.y))
+  colorplot((-1,-1),(1,-1),out_2,
+    imagergb((-1,-1),(1,-1),in_2, (-#.x,#.y))
   );
-  colorplot(out_3,
-    imagergb(in_3, (-#.x,#.y))
+  colorplot((-1,-1),(1,-1),out_3,
+    imagergb((-1,-1),(1,-1),in_3, (-#.x,#.y))
   );
 );
 
@@ -104,8 +102,7 @@ strange(in, out) := (
   );
 );
 blur(in, out) := (
-  
-  read(p) := imagergb((-N/2,-N/2),(N/2,-N/2), in_2, p, interpolate->false);
+  rin = in_2;
   colorplot((-N/2,-N/2),(N/2,-N/2), out_2,
     1/9*(
       read(#) +
@@ -131,8 +128,10 @@ blur(in, out) := (
   colorplot(out_3, [0,0,0]);*/
 );
 
+rin;
+read(p) := imagergb((-N/2,-N/2),(N/2,-N/2), rin, p, interpolate->false);
 sharpen(in, out) := (
-  read(p) := imagergb((-N/2,-N/2),(N/2,-N/2), in_2, p, interpolate->false);
+  rin = in_2;
   colorplot((-N/2,-N/2),(N/2,-N/2), out_2,
     1/2*(
       10*read(#) -
@@ -220,10 +219,10 @@ fft(in, out, rot) := (
 
 add(in1, in2, out) := (
   colorplot(out_2,
-    imagergb(in1_2, #)+imagergb(in2_2, #)
+    imagergb(in1_2, #)/2+imagergb(in2_2, #)/2
   );
   colorplot(out_3,
-    imagergb(in1_3, #)+imagergb(in2_3, #)
+    imagergb(in1_3, #)/2+imagergb(in2_3, #)/2
   );
 );
 
@@ -255,16 +254,17 @@ box(obj,A) := (
 
 drawobj(obj) := (
   fillpoly(box(obj, 1.05), color->[1,1,1], alpha->.6);
-  drawimage(obj_1+[-imgwidth/2,-imgwidth/2], obj_1+[imgwidth/2,-imgwidth/2], obj_2);
+  drawimage(obj_1+[-imgwidth/2,-imgwidth/2], obj_1+[imgwidth/2,-imgwidth/2], (obj_2));
 );
 
 
 nodes0 = [
   [
-      [(-1.2,.7), "camera", "black"],
-      [(-1.2,.233), "pic1", "black"],
-      [(-1.2,-.233), "pic2", "black"],
-      [(-1.2,-.7), "pic3", "black"]
+      [(1,5), "camera", "black"],
+      [(1,4), "pic1", "black"],
+      [(1,3), "pic2", "black"],
+      [(1,2), "pic4", "black"],
+      [(1,1), "pic3", "black"]
   ]
 ];
 nodes = nodes0;
@@ -302,6 +302,17 @@ delete(node) := (
 
 
 addnode(addfun, inputs, line) := (
+  //delete all former childs of inputs
+  forall(nodes, line, forall(line, node, if(length(node)>=4,
+    forall(inputs, in,
+      if(contains(node_4, in) & !(node_4_1_1=="⧖" & addfun_1=="⧖"),
+        errc("do delete");
+        delete(node);
+      );
+    );
+    
+  )));
+  
   errc(addfun);
   errc(inputs);
   errc(line);
@@ -325,63 +336,68 @@ addnode(addfun, inputs, line) := (
   nodes_line = nodes_line :> nnode;
   mode = "free";
   msg = "";
+  
+
 );
 
+compute():=(
+  
+  forall(nodes, line, forall(line, node,
+    if(length(node)>=4,
+      gen = node_4;
+      org = gen_2;
+      if(length(gen)>=3,
+        org2 = gen_3;
+        draw(org2_1, node_1, color->[0,0,0]);
+        drawtext(size->35,align->"mid",(org2_1+node_1)/2, gen_1_1);
+      );
+      draw(org_1, node_1, color->[0,0,0]);
+      drawtext(size->35,align->"mid",(org_1+node_1)/2, gen_1_1);
+      
+      if(gen_1=="◪",
+        inv(org, node);
+      );
+      if(gen_1=="↔",
+        flip(org, node);
+      );
+      if(gen_1=="◎",
+        blur(org, node);
+      );
+      if(gen_1=="◈",
+        sharpen(org, node);
+      );
+      if(gen_1=="▨",
+        strange(org, node);
+      );
+      if(gen_1=="perm2",
+        perm2(org, node);
+      );
+      if(gen_1=="⧑",
+        fft(org, node, false);
+      );
+      if(gen_1=="⧒",
+        fft(org, node, true);
+      );
+      if(gen_1=="+",
+        add(org, org2, node);
+      );
+      if(gen_1=="⧖1",
+        phase1(org, org2, node);
+      );
+      if(gen_1=="⧖2",
+        phase2(org, org2, node);
+      );
+      
+    );
+  ));
+);
 </script>
 
 <script id="csdraw" type="text/x-cindyscript">
 if (image ready(video),
   colorplot([-1,-1],[1,-1],"camera", imagergb([-2,-1],[2,-1],video, #));
 );
-
-forall(nodes, line, forall(line, node,
-  if(length(node)>=4,
-    gen = node_4;
-    org = gen_2;
-    if(length(gen)>=3,
-      org2 = gen_3;
-      draw(org2_1, node_1, color->[0,0,0]);
-      drawtext((org2_1+node_1)/2, gen_1);
-    );
-    draw(org_1, node_1, color->[0,0,0]);
-    drawtext((org_1+node_1)/2, gen_1);
-    
-    if(gen_1=="◪",
-      inv(org, node);
-    );
-    if(gen_1=="↔",
-      flip(org, node);
-    );
-    if(gen_1=="◎",
-      blur(org, node);
-    );
-    if(gen_1=="◈",
-      sharpen(org, node);
-    );
-    if(gen_1=="▨",
-      strange(org, node);
-    );
-    if(gen_1=="perm2",
-      perm2(org, node);
-    );
-    if(gen_1=="⧑",
-      fft(org, node, false);
-    );
-    if(gen_1=="⧒",
-      fft(org, node, true);
-    );
-    if(gen_1=="+",
-      add(org, org2, node);
-    );
-    if(gen_1=="⧖1",
-      phase1(org, org2, node);
-    );
-    if(gen_1=="⧖2",
-      phase2(org, org2, node);
-    );
-    
-  );
-));
+compute();
 
 
 forall(curinputs, node,
@@ -401,27 +417,23 @@ forall(nodes, line, forall(line, node,
     fillpoly(box(node, 1.1), color->[1,.5,0], alpha->.3);
     
     if(mode=="free",
-      drawimage(node_1+(-.6,-.6), node_1+(.6,-.6), node_2);
+      drawimage(node_1+(-1,-1), node_1+(1,-1), node_2);
       mk = mod(round(arctan2(mouse()-node_1)*length(functions)/(2*pi))-1,length(functions))+1;
       forall(1..length(functions),k,
-        c = node_1+1.5*imgwidth/3*gauss(exp(k*2*pi*i/length(functions)));
+        c = node_1+imgwidth*.4*gauss(exp(k*2*pi*i/length(functions)));
           
-          S=40;
-          drawtext(size->S,c+(.01,0)/5, functions_k, color->[1,1,1]);
-          drawtext(size->S,c+(-.01,0)/5, functions_k, color->[1,1,1]);
-          drawtext(size->S,c+(0,.01)/5, functions_k, color->[1,1,1]);
-          drawtext(size->S,c+(0,-.01)/5, functions_k, color->[1,1,1]);
-          drawtext(size->S,c, functions_k, color->  if(round(mk)==k,[.3,0.5,0],[0,0,0]));
+          S=35;
+          drawtext(size->S,align->"mid",c+(.01,0)/5, functions_k, color->[1,1,1]);
+          drawtext(size->S,align->"mid",c+(-.01,0)/5, functions_k, color->[1,1,1]);
+          drawtext(size->S,align->"mid",c+(0,.01)/5, functions_k, color->[1,1,1]);
+          drawtext(size->S,align->"mid",c+(0,-.01)/5, functions_k, color->[1,1,1]);
+          drawtext(size->S,align->"mid",c, functions_k, color->  if(round(mk)==k,[.8,0.5,0],[0,0,0]));
       );
-    );
-    
-    
-    
-    
-  )
+    );    
+  );
 ));
 
-drawtext((-1,-.98), msg);
+drawtext((.25,.25), msg);
 
 
 </script>
@@ -473,38 +485,27 @@ var cdy = CindyJS({
   ports: [{
     id: "CSCanvas",
     grid: .1,
+    fill: "window",
     background: "rgb(200,200,200)",
-    transform:[{visibleRect:[-1.5,1,1.5,-1]}]
+    transform:[{visibleRect:[0.2,0.2,10.5,5.8]}]
   }],
   scripts: "cs*",
   language: "en",
   images: {
     "pic1": "pic1.png",
     "pic2": "pic2.png",
-    "pic3": "pic3.png"
+    "pic3": "pic3.png",
+    "pic4": "pic4.png"
   },
-  geometry: [
-    {name: "reset", type: "Button", pos: [1.3,0.9], color: [0.0, 0.0, 0.0], text: "reset", script: 'javascript("location.reload();")'},
-/*    {name: "Binv", type: "Button", pos: [-1,-.9], color: [0.0, 0.0, 0.0], text: "◪", script: 'add("◪")'},
-    {name: "Bflip", type: "Button", pos: [-.8,-.9], color: [0.0, 0.0, 0.0], text: "↔", script: 'add("↔")'},
-    {name: "BDFT", type: "Button", pos: [-.6,-.9], color: [0.0, 0.0, 0.0], text: "⧑", script: 'add("⧑")'},
-    {name: "BiDFT", type: "Button", pos: [-.4,-.9], color: [0.0, 0.0, 0.0], text: "⧒", script: 'add("⧒")'},
-    {name: "Badd", type: "Button", pos: [-.2,-.9], color: [0.0, 0.0, 0.0], text: "+", script: 'add("+")'},
-    {name: "Bphaseswitch", type: "Button", pos: [0,-.9], color: [0.0, 0.0, 0.0], text: "⧖", script: 'add("⧖")'},
-    {name: "Bblur", type: "Button", pos: [.3,-.9], color: [0.0, 0.0, 0.0], text: "◎", script: 'add("◎")'},
-    {name: "Bsharpen", type: "Button", pos: [.5,-.9], color: [0.0, 0.0, 0.0], text: "◈", script: 'add("◈")'},
-    {name: "Bstrange", type: "Button", pos: [.7,-.9], color: [0.0, 0.0, 0.0], text: "▨", script: 'add("▨")'},*/
-    /*{name:"A", type:"Free", pos:[0,0]},
-    {name:"B", type:"Free", pos:[0.7071,0.7071]},
-    {name:"C", type:"CircleMP", args:["A","B"]}*/
-  ]
+  geometry: []
 });
 
 </script>
 </head>
 
-<body style="font-family:Arial; ">
+<body>
   <div id="CSCanvas"></div>
+  <button style="position: absolute; top:10px; right: 10px;" onclick="location.reload()">reset</button>
 </body>
 
 </html>

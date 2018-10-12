@@ -1,0 +1,10 @@
+
+[camera]
+
+[strange] ⧑ [ ] ⧖ [ ] ⧒ [ ] ▨ [Take the digit sum (Quersumme) of the displayed number ]
+                 ⧖ 
+[strange] ⧑ [ ] ⧖ [ ] ⧒ [ ]
+
+[faculty]
+
+[inverted beer]
