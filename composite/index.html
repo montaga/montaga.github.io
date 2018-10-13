@@ -353,11 +353,11 @@ compute():=(
       org = gen_2;
       if(length(gen)>=3,
         org2 = gen_3;
-        draw(org2_1, node_1, color->[0,0,0]);
-        drawtext(size->35,align->"mid",(org2_1+node_1)/2, gen_1_1);
+    //    draw(org2_1, node_1, color->[0,0,0]);
+    //    drawtext(size->35,align->"mid",(org2_1+node_1)/2, gen_1_1);
       );
-      draw(org_1, node_1, color->[0,0,0]);
-      drawtext(size->35,align->"mid",(org_1+node_1)/2, gen_1_1);
+    //  draw(org_1, node_1, color->[0,0,0]);
+    //  drawtext(size->35,align->"mid",(org_1+node_1)/2, gen_1_1);
       
       if(gen_1=="◪",
         inv(org, node);
@@ -402,6 +402,20 @@ compute();
 
 <script id="csdraw" type="text/x-cindyscript">
 
+
+
+  forall(nodes, line, forall(line, node,
+    if(length(node)>=4,
+      gen = node_4;
+      org = gen_2;
+      if(length(gen)>=3,
+        org2 = gen_3;
+        draw(org2_1, node_1, color->[0,0,0]);
+        drawtext(size->35,align->"mid",(org2_1+node_1)/2, gen_1_1);
+      );
+      draw(org_1, node_1, color->[0,0,0]);
+      drawtext(size->35,align->"mid",(org_1+node_1)/2, gen_1_1);
+    )));
 
 
 forall(curinputs, node,
