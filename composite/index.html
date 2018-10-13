@@ -435,7 +435,8 @@ forall(nodes, line, forall(line, node,
     fillpoly(box(node, 1.1), color->[1,.5,0], alpha->.3);
     
     if(mode=="free",
-      if(node_2=="camera", compute());
+
+      if(contains(flatten(node, levels->"all"),"camera"), compute());
       drawimage(node_1+(-1,-1), node_1+(1,-1), node_2);
       mk = mod(round(arctan2(mouse()-node_1)*length(functions)/(2*pi))-1,length(functions))+1;
       forall(1..length(functions),k,
