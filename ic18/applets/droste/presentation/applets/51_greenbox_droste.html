@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>Webcam in Cindy JS</title>
+<meta charset="UTF-8">
+<script type="text/javascript" src="Cindy.js"></script>
+<script type="text/javascript" src="CindyGL.js"></script>
+<style type="text/css">
+  html,body { margin: 0px; padding: 0px; }
+  html,body { width: 100%; height: 100%; }
+  #overlay{
+    position: absolute;
+    left:10px;
+    top:10px;
+    background:rgba(200,200,200,0.5);
+    border-radius: 25px;
+    padding: 10px; 
+  }
+  #inp {
+    background: rgba(255, 255, 255, 0.3);
+    border: none;
+  }
+  
+  #sel {
+    background: rgba(255, 255, 255, 0.3);
+    border: none;
+  }
+</style>
+<script id="csinit" type="text/x-cindyscript">
+video = camera video();
+
+//M = [[1,1],[1,-1]];
+Z = [[1,0],[0,1]];
+
+M = [[1,0],[0,1]];
+//M = [[-1,0],[0,1]] * [[1,1],[1,-1]];
+
+
+//f(z) := z;
+
+
+project2square(z) :=  z/max(|re(z)|,|im(z)|);
+
+project2rectangle(z) := (
+  p = complex2sphere(1e3*z); //works only for points that are outside of the rectangle
+  forall(1..4, j,
+    v = p-scenter;
+    //if(((p*mid_j)/(v*mid_j))>0, 
+    if((p*mid_j)>0, 
+      p = p - ((p*mid_j)/(v*mid_j))*v;
+    );
+  );
+  sphere2complex(p)
+);
+
+
+f(z) := (z);
+
+//0 -> a, oo -> b, 1 -> c
+moebhelp(a, b, c) := (
+  alpha = (c-b)/(a-b);
+  beta = (c-a)/(b-a);
+  [[alpha*a, beta*b],[alpha, beta]]
+);
+
+genmoeb(v0, v1, v2, w0, w1, w2) := (
+  moebhelp(w0, w1, w2)*inverse(moebhelp(v0, v1, v2))
+);
+
+anti(z) := (-1/conjugate(z));
+
+complex2sphere(z) := (
+  l2 = |z|*|z|;
+  (2*re(z)/(1+l2), 2*im(z)/(1+l2), (-1+l2)/(1+l2))
+);
+
+sphere2complex(s) := (
+  s = s/|s|;
+  (s_1 + i*s_2)/(1-s_3)
+);
+
+latlon2complex(latlon) := (
+  //phi = latlon_1;
+  //alpha = phi/2+pi/4
+  tan(latlon_1/2+pi/4)*(cos(latlon_2) + i *sin(latlon_2))
+);
+
+moeb(M, z) := (
+  regional(w);
+  w = M*[z, 1];
+  w_1/w_2
+);
+
+screen2complex(M, pixel) := (
+  //moeb(M, latlon2complex(1.5*[pixel_2, pixel_1]))
+  moeb(M, (exp(azoom)*(pixel_1 + i*pixel_2)))
+);
+
+complex2screen(M, z) := (
+  gauss(moeb(inverse(M), z)/exp(azoom))
+);
+
+complex2latlon(z) := (
+  //lambda = arctan2(re(z), im(z));
+  //alpha = arctan(|z|);
+  //2*alpha + pi/2-phi = pi
+  //phi = 2*alpha - pi/2;
+  (2*arctan(|z|)-pi/2, arctan2(re(z), im(z)))
+);
+
+readcamera(z) := (
+  imagergb([-1,-1], [1,-1], video, (re(z),im(z)), repeat->true)
+);
+
+
+
+setcenter() := (
+  Z = inverse(M);
+);
+
+onScroll(delta) := (
+  errc(delta);
+  azoom = azoom-delta/1000
+);
+
+azoom = 0;
+
+dragging = false;
+m0 = [0,1];
+
+ptselect = true;
+tolerance = 0.2;
+
+color = [1,0,0];
+
+zoom = exp(1);
+doffset = 0;
+goffset = 0;
+lasttick = seconds();
+
+islikecolor(c):=(
+  //|c,color|+|c/(c*(1,1,1)), color/(color*(1,1,1))|<tolerance
+  //|c,color|+|c_3,color_3|<tolerance
+  
+  |(c_1+c_3-2*c_2)-(color_1+color_3-2*color_2)|<tolerance
+)
+</script>
+
+<script id="cskeydown" type="text/x-cindyscript">
+print("pressed key" + keycode());
+if(keycode()==13,  //ENTER
+  ptselect = false;
+  
+  p0 = 0;
+  p1 = center;
+
+  a1 = sphere2complex(cross(complex2sphere(p0), complex2sphere(p1)));
+  a2 = sphere2complex(-cross(complex2sphere(p0), complex2sphere(p1)));
+
+  T = genmoeb(
+    p1, a1, a2,
+    p0, a1, a2
+  );
+  
+    f(z) := (
+      z = moeb(T, z);    
+      z = z/exp(5*zoom+mod(goffset,zoom)); //zoom in
+      run = true;
+      repeat(10, //and walk out as long as required
+        if(run & islikecolor(readcamera(moeb(inverse(T),z)))), z = z*exp(zoom), run = false); 
+      );
+      moeb(inverse(T),z);
+    );
+
+);
+</script>
+<script id="csmousedown" type="text/x-cindyscript">
+if(ptselect,
+  //ptselect = false;
+  center = (screen2complex(M, mouse()));
+  color = readcamera(center);
+  errc(color);
+);
+M0 = M;
+m0 = mouse();
+p0 = screen2complex(M, m0);
+
+dragging = true;
+</script>
+
+<script id="csmouseup" type="text/x-cindyscript">
+dragging = false;
+</script>
+
+<script id="csdraw" type="text/x-cindyscript">
+now = seconds();
+goffset = goffset+doffset*(now-lasttick);
+
+lasttick = now;
+
+if(dragging & |mouse()-m0|>.01,
+  p1 = screen2complex(M0, mouse());
+  a1 = sphere2complex(cross(complex2sphere(p0), complex2sphere(p1)));
+  a2 = sphere2complex(-cross(complex2sphere(p0), complex2sphere(p1)));
+
+  M = genmoeb(
+    p1, a1, a2,
+    p0, a1, a2
+  )*M0;
+
+);
+
+
+if(ptselect,f(z):=z;);
+
+if (image ready(video),
+  //draw image (A, B, video);
+  
+  colorplot(
+    z = screen2complex(M, #);
+    z = f(z);
+    c = readcamera(z);
+    if(ptselect & islikecolor(c), [1,0,0], c)
+  );
+  
+
+);
+if(ptselect,
+
+  drawtext((0,0), "select the center and tolerance of the greenbox for the Droste-area and press ENTER when you are done", size->30, align->"mid");
+  
+  forall(pts, p,
+    draw(complex2screen(M, sphere2complex(p)));
+  );
+
+  ,
+  
+);
+
+
+
+//draw(circle(A,.48));
+//errc(A.xy);
+</script>
+<script type="text/javascript">
+var cdy = CindyJS({
+  ports: [{id: "CSCanvas", transform:[{visibleRect:[-1,-1,1,1]}]}],
+  scripts: "cs*",
+  language: "en",
+  autoplay: true,
+  defaultAppearance: {
+  },
+  geometry: [
+    //{name:"A", type:"Free", pos:[0,0], visible:true},
+  ],
+  use: ["CindyGL"]
+});
+</script>
+</head>
+
+<body style="font-family:Arial;">
+  <div id="CSCanvas" style="width:100vw; height:100vh; border:0px;" onwheel="cdy.evokeCS('onScroll(' + event.wheelDelta + ')');"></div>
+  <div id="overlay">
+  <div>
+    <p>
+  After entering the points, select a pullback function from the list
+</p>
+  <p><!--
+  f(z) = <textarea type="text" id="inp" value="z"  onkeypress="if((event.which ? event.which : event.keyCode)==13) { cdy.evokeCS('f(z) := (' + this.value + ');'); }" size="24">z</textarea>
+-->
+  <select id="sel" style="width:8em;" size="2">
+    <option value="z = moeb(T, z);    
+    z = z/exp(5*zoom+mod(goffset,zoom)); //zoom in
+    run = true;
+    repeat(10, //and walk out as long as required
+      if(run & islikecolor(readcamera(moeb(inverse(T),z))), z = z*exp(zoom), run = false); 
+    );
+    moeb(inverse(T),z);
+  " selected>Droste</option>
+    <option value="
+    z = moeb(T, z);
+    modulus = (zoom+2*pi*i);
+    alpha = (2*pi*i)/modulus;
+    z = exp(log(z)/alpha);
+    z = z/exp(5*zoom+mod(goffset,zoom)); //zoom in
+    run = true;
+    repeat(10, //and walk out as long as required
+      if(run & islikecolor(readcamera(moeb(inverse(T),z))), z = z*exp(zoom), run = false); 
+    );
+    moeb(inverse(T),z);
+  ">twisted Droste</option>
+  </select>
+</p>
+<p>
+  zoom: <input type="range" id="zoom" min="-1" max="2.1" step="0.01" value="1"></input>
+  speed: <input type="range" id="doffset" min="-1.1" max="1.1" step="0.1" value="0"></input>
+  tolerance: <input type="range" id="tolerance" min="0.0001" max="0.5" step="0.001" value="0.2"></input>
+</p>
+<!--<p><button onclick="cdy.evokeCS('setcenter()')">set current center to 0</button></p>-->
+  <script type="text/javascript">
+  document.getElementById("sel").addEventListener('change', function(event) {
+  //  document.getElementById('inp').value = this.value;
+    cdy.evokeCS('f(z) := (' + this.value + ');');
+  }, false);
+  
+  document.getElementById("zoom").addEventListener('mousemove', function(event) {
+  //  document.getElementById('inp').value = this.value;
+    cdy.evokeCS('zoom = exp(' + this.value + ');');
+  }, false);
+  
+  document.getElementById("doffset").addEventListener('mousemove', function(event) {
+  //  document.getElementById('inp').value = this.value;
+    cdy.evokeCS('doffset = (' + this.value + ');');
+  }, false);
+  
+  document.getElementById("tolerance").addEventListener('mousemove', function(event) {
+  //  document.getElementById('inp').value = this.value;
+    cdy.evokeCS('tolerance = (' + this.value + ');');
+  }, false);
+  
+  
+  </script>
+  
+  <div>
+</body>
+
+</html>

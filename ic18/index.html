@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="author" content="Aaron Montag">
+  <meta name="author" content="Technical University of Munich, Germany">
+  <title>Rapid creation of GPU accelerated mathematical content</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="reveal.js/css/reveal.css">
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <link rel="stylesheet" href="reveal.js/css/theme/siam.css" id="theme">
+  <link rel="stylesheet" href="applets/katex/katex.min.css"/>
+  <!-- Printing and PDF exports -->
+  <script>
+    var link = document.createElement( 'link' );
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = window.location.search.match( /print-pdf/gi ) ? 'reveal.js/css/print/pdf.css' : 'reveal.js/css/print/paper.css';
+    document.getElementsByTagName( 'head' )[0].appendChild( link );
+  </script>
+  <!--[if lt IE 9]>
+  <script src="reveal.js/lib/js/html5shiv.js"></script>
+  <![endif]-->
+  <script src="applets/katex/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+    var mathElements = document.getElementsByClassName("math");
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") { katex.render(texText.data, mathElements[i], { displayMode: mathElements[i].classList.contains("display"), throwOnError: false } );
+    }}});</script>
+  <link rel="stylesheet" href="applets/katex/katex.min.css" />
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide">
+  <h1 class="title">Rapid creation of GPU accelerated mathematical content</h1>
+  <p class="author">Aaron Montag<br /></p>
+  <p class="author">Technical University of Munich, Germany</p>
+  <p class="date">Montevideo, December 6 <br /> <img src="TUM.png" width="30%" style="margin:30px; box-shadow: none; !important"></img><img src="m10-logo.png" width="30%" style="margin:30px; box-shadow: none; !important"></img></p>
+</section>
+
+<section id="ingredients-of-modern-mathematics-communication" class="slide level1">
+<h1>Ingredients of modern mathematics communication</h1>
+<!--{data-background-image="ipadfluid.jpg" style="color:white; background: rgba(0,0,0,.3); text-align: center !important;"}-->
+<div class="columns">
+<div class="column" style="width:50%;">
+<dl>
+<dt>real-time visualizations</dt>
+<dd>GPU, “edutainment” <!--edutainment, GPU accelerated-->
+</dd>
+</dl>
+<p><img data-src="ipadfluid.jpg" /></p>
+<dl>
+<dt>interactivity</dt>
+<dd>more than a movie
+</dd>
+</dl>
+</div><div class="column" style="width:50%;">
+<dl>
+<dt>adaption to the audience</dt>
+<dd>modern devices, web <!--no installation of software. Available in the web and on modern devices.-->
+</dd>
+</dl>
+<p><img data-src="phones.jpg" /></p>
+<dl>
+<dt>versatility in content</dt>
+<dd><em>easy</em> creation <!--: The process to contribute should be *easy*.--> <!--involve the public in creation of content.-->
+</dd>
+</dl>
+</div>
+</div>
+</section>
+<section id="technical-background" class="slide level1">
+<h1>Technical background</h1>
+<p>Tasks that initially were done on the CPU can now be <em>accelerated on the GPU</em>.</p>
+<div class="fragment">
+<p><strong>However</strong>: The <em>programming concepts</em> in conventional programming are quite difficult:</p>
+</div>
+<div class="fragment">
+<ul>
+<li>Shaders/kernels are in separate language (GLSL, CUDA C…).</li>
+</ul>
+</div>
+<div class="fragment">
+<ul>
+<li>The number of <em>lines of code</em> drastically increases.</li>
+</ul>
+</div>
+<div class="fragment">
+<ul>
+<li>GPU specific code often causes platform dependency.</li>
+</ul>
+</div>
+<div class="fragment">
+<p><span class="math inline">\Rightarrow</span> <strong>additional development effort</strong> is enormous and contents are hard to distribute.</p>
+</div>
+</section>
+<section id="our-answer-cindygl" class="slide level1">
+<h1>Our answer: CindyGL</h1>
+<ul>
+<li>a plug-in for <code>CindyJS</code>, a <code>Cinderella</code> compatible framework for the web.</li>
+</ul>
+<div class="fragment">
+<ul>
+<li><p>Brings easy <em>shader programming</em> via <code>WebGL</code> into dynamic geometry software.</p></li>
+<li><p><code>WebGL</code>: a JavaScript API for interactive 3D and 2D graphics without the use of plug-ins.</p></li>
+</ul>
+</div>
+<div class="fragment">
+<ul>
+<li>CindyGL translates a subset of CindyScript to GLSL <span class="math inline">\rightarrow</span> One programming language for <em>both the CPU and GPU</em>.</li>
+</ul>
+</div>
+<div class="fragment">
+<ul>
+<li>Aim: Making <code>WebGL</code> <strong>easy</strong> for <em>mathematics communicators</em>.</li>
+</ul>
+</div>
+</section>
+<section id="a-small-example" class="slide level1">
+<h1>A small example</h1>
+<iframe data-src="applets/cindyeditor.html?draw=colorplot(%0A%20%20x%5E2%2By%5E2-1%0A)%3B%0A%0A%0A%0A%0A%0A%0A%0A%0A%0A%0A%0A%0A%0A%0A%0A%0A%0A%0A%0A%0A%0A%0A%0A%0A%0A%0A%0A%0Astr%20%3D%20%22(%22%20%2B%20mouse().x%2B%22)%5E2%2B(%22%2Bmouse().y%2B%22)%5E2-1%22%3B%20%20%0Aval%20%3D%20parse(str)%3B%0A%0Adraw(mouse()%2C%20color-%3Egrey(val)%2C%20size-%3E20)%3B%0Adrawtext(mouse()%2B(-1.5%2C0)%2C%20%0A%20%20%20%20%20%20%20%20%20%22x%20%3D%20%22%20%2B%20%20mouse().x%20%2B%20%22%2C%0Ay%20%3D%20%22%20%2B%20mouse().y%2B%22%0A%22%2Bstr%2B%22%20%3D%20%22%20%2B%20val%2C%20color-%3E%5B1%2C0%2C0%5D%2C%20size-%3E25)%3B%0A%0A%20%20%20%20%20%20%20%20%20&amp;init=resetclock()%3B&amp;gslp=%5B%5D" class="cindyweb">
+</iframe>
+<div class="fragment">
+<p>For each pixel with coordinates <span class="math inline">x</span> and <span class="math inline">y</span> a grayscale-value is computed.</p>
+</div>
+</section>
+<section class="slide level1">
+
+<!---
+# Interactivity
+
+<iframe
+data-src="applets/cindyeditor.html?draw=%2F%2F%20a%20single%20circular%20sinusoidal%20wave%20with%20point%20source%20A%0A%0Acolorplot(%0A%20%20%20sin(10*%7C(x%2Cy)-A%7C)%2F2%2B1%2F2%0A)%3B&init=resetclock()%3B%0A&gslp=%5B%7B%22alpha%22%3A1%2C%22color%22%3A%5B1%2C0%2C0%5D%2C%22labeled%22%3Atrue%2C%22name%22%3A%22A%22%2C%22size%22%3A5%2C%22type%22%3A%22Free%22%2C%22pos%22%3A%5B-0.42842590571441796%2C0.15715145622077145%2C1%5D%7D%5D" class="cindyweb"></iframe>
+
+--------------
+
+-->
+</section>
+<section id="interactivity-animation-colors" class="slide level1">
+<h1>Interactivity + Animation + Colors</h1>
+<iframe data-src="applets/cindyeditor.html?draw=colorplot(%0A%20%20%20sin(10*%7C(x%2Cy)-A%7C-seconds())%0A%20%2B%20sin(10*%7C(x%2Cy)-B%7C-seconds())%0A)%3B&amp;init=resetclock()%3B%0A&amp;gslp=%5B%7B%22alpha%22%3A1%2C%22color%22%3A%5B1%2C0%2C0%5D%2C%22labeled%22%3Atrue%2C%22name%22%3A%22A%22%2C%22size%22%3A5%2C%22type%22%3A%22Free%22%2C%22pos%22%3A%5B1%2C0.2616039195461578%2C-0.8474729241877257%5D%7D%2C%7B%22alpha%22%3A1%2C%22color%22%3A%5B1%2C0%2C0%5D%2C%22labeled%22%3Atrue%2C%22name%22%3A%22B%22%2C%22size%22%3A5%2C%22type%22%3A%22Free%22%2C%22pos%22%3A%5B0.40468583599574026%2C0.1618743343982961%2C1%5D%7D%5D" class="cindyweb">
+</iframe>
+<div class="fragment">
+<p><em>seconds()</em> returns the exact time <span class="math inline">\rightarrow</span> enables animations.</p>
+</div>
+<div class="fragment">
+<p>If <em>colorplot</em> outputs a three component-vector, the color is obtained by additive mixing of <em>red</em>, <em>green</em> and <em>blue</em>.</p>
+</div>
+</section>
+<section id="deformation-of-images" class="slide level1">
+<h1>Deformation of images</h1>
+<iframe data-src="applets/cindyeditor.html?draw=colorplot(%0A%20%20%20%20imagergb(%22image%22%2C%0A%20%20%20%20%09(x%2Cy)%20%20%20%20%20%20%20%20%0A%20%20%20%20)%0A)%3B&amp;init=resetclock()%3B&amp;gslp=%5B%5D" class="cindyweb">
+</iframe>
+<p>For each pixel we look up a color in a texture at the given coordinates.</p>
+</section>
+<section id="deformation-of-images-complex" class="slide level1">
+<h1>Deformation of images (complex)</h1>
+<iframe data-src="applets/cindyeditor.html?draw=colorplot(%0A%20%20%20%20imagergb(%22image%22%2C%0A%20%20%20%20%09z%0A%20%20%20%20)%0A)%3B&amp;init=resetclock()%3B%0A%0Acamera%20%3D%20cameravideo()%3B&amp;gslp=%5B%7B%22alpha%22%3A1%2C%22color%22%3A%5B1%2C0%2C0%5D%2C%22labeled%22%3Atrue%2C%22name%22%3A%22A%22%2C%22size%22%3A5%2C%22type%22%3A%22Free%22%2C%22pos%22%3A%5B1%2C0.7514970059880242%2C0.7193113772455091%5D%7D%5D" class="cindyweb">
+</iframe>
+<div class="fragment">
+<p>Also access to the webcam is possible</p>
+</div>
+</section>
+<section id="raycasting" class="slide level1">
+<h1>Raycasting</h1>
+<p>Aim: render the surface <span class="math inline">x^2+y^2+z^2 - 1 = 0</span></p>
+<iframe data-src="applets/cindyeditor.html?draw=lightnormal%20%3D%20%5BA.x%2CA.y%2C-1%5D%3B%0Alightnormal%20%3D%20%20lightnormal%2F%7Clightnormal%7C%3B%0Alightcolor%20%3D%20%5B1.2%2C1%2C.8%5D%3B%0Abackground%20%3D%20%5B.4%2C.4%2C.4%5D%3B%0A%0Acolorplot(%0A%20if(%7Cx%5E2%2By%5E2%7C%3C1%2C%20%20%20%20%0A%20%20s%3D(x%2Cy%2C-%7Csqrt(1-x%5E2-y%5E2)%7C)%3B%20%0A%20%20(s*lightnormal)*lightcolor%2C%0A%20%20background%0A%20)%0A)%3B&amp;init=resetclock()%3B&amp;gslp=%5B%7B%22alpha%22%3A1%2C%22color%22%3A%5B1%2C0%2C0%5D%2C%22labeled%22%3Atrue%2C%22name%22%3A%22A%22%2C%22size%22%3A5%2C%22type%22%3A%22Free%22%2C%22pos%22%3A%5B-0.7053627237916317%2C0.522846461941697%2C1%5D%7D%5D" class="cindyweb">
+</iframe>
+<p>The intersection of the ray behind each pixel with the surface is computed.</p>
+</section>
+<section id="the-stereographic-projection" class="slide level1">
+<h1>The stereographic projection</h1>
+<iframe data-src="applets/stereographic/index.html" style="width:900px; height:600px;">
+</iframe>
+</section>
+<section id="editing-spherical-images" class="slide level1">
+<h1>Editing spherical images</h1>
+<iframe data-src="applets/spherical/index.html" style="width:900px; height:600px;">
+</iframe>
+</section>
+<section id="the-spherical-droste-effect" class="slide level1">
+<h1>The (spherical) Droste effect</h1>
+<iframe data-src="applets/droste/index.html" style="width:900px; height:650px;">
+</iframe>
+<!--Is being used by *Matt Parker* in *Festival of the Spoken Nerd*.-->
+</section>
+<section id="raycasting-advanced" class="slide level1">
+<h1>Raycasting (advanced)</h1>
+<iframe data-src="applets/raycasting.html" style="width:900px; height:600px;">
+</iframe>
+</section>
+<section id="how-does-it-work" class="slide level1">
+<h1>How does it work?</h1>
+<dl>
+<dt>Observation</dt>
+<dd><span class="math inline">F: \mathbb{R}^3\to \mathbb{R}</span> evaluated along ray is a <em>univariate</em> polynomial <span class="math inline">p</span>.
+</dd>
+</dl>
+<div class="columns">
+<div class="column" style="width:55%;">
+<p>For each <strong>pixel</strong>:</p>
+<ul>
+<li>Evaluate <span class="math inline">p</span> at <em>Chebyshev nodes</em>.</li>
+<li>Obtain <em>Bernstein form</em> of <span class="math inline">p</span> through linear transformation.</li>
+<li><span class="math inline">p</span> has a root <span class="math inline">\Rightarrow</span> “Bézier path” has a root.</li>
+<li>Use recursion to isolate roots of <span class="math inline">p</span>.</li>
+</ul>
+</div><div class="column" style="width:45%;">
+<iframe data-src="applets/raycastingexpl.html" style="width:500px; height:500px; float: right;">
+</iframe>
+</div>
+</div>
+</section>
+<section class="slide level1">
+
+<div class="columns">
+<div class="column" style="text-align: center;" style="width:50%;">
+<p><img data-src="2.png" style="width:100.0%" /> <iframe data-src="applets/glass.html" style="width:100%; height: 400px;"></iframe></p>
+</div><div class="column" style="text-align: center;" style="width:50%;">
+<p><img data-src="4.png" style="width:100.0%" /> <img data-src="3.png" style="width:100.0%" /></p>
+</div>
+</div>
+</section>
+<section id="merging-algebraic-surfaces" class="slide level1">
+<h1>Merging algebraic surfaces</h1>
+<iframe data-src="applets/morpher/morpher.html" style="width:1000px; height:600px;">
+</iframe>
+</section>
+<section id="further-applications-of-cindygl" class="slide level1">
+<h1>Further applications of <code>CindyGL</code></h1>
+<div class="showcase">
+<div>
+<a href="applets/cindyeditor.html?draw=N%20%3D%20251%3B%20%2F%2F%20maximal%20number%20of%20iterations%0Acolorplot(%0A%20%20c%20%3D%20((x%2Bi*y)*exp(-mod(seconds()%2C10))%2B(-0.7436439%20%2B%200.1318259*i))%3B%0A%20%20z%20%3D%200%3B%20n%20%3D%200%3B%0A%20%20repeat(N%2C%20k%2C%0A%20%20%20%20if(%7Cz%7C%20%3C%3D%204%2C%0A%20%20%20%20%20%20%20z%3Dz*z%2Bc%3B%0A%20%20%20%20%20%20%20n%20%3D%20k%3B%0A%20%20%20%20)%3B%0A%20%20)%3B%0A%20%20grey(n%2FN)%0A)%3B&init=resetclock()%3B&gslp=%5B%5D"><img src="outlook/limit.png">Fractals &amp; Limit sets</a>
+</div>
+<div>
+<a href="https://montaga.github.io/tdot/index.html"><img src="outlook/tdot.png">Feedbackloops</a>
+</div>
+<div>
+<a href="http://localhost:8123/web/09_ME/2"><img src="outlook/volumetric.png">Volumetric Rendering</a>
+</div>
+<div>
+<a href="https://cindyjs.org/examples/cindygl/31_fft.html"><img src="outlook/fft.png">FFT</a>
+</div>
+<div>
+<a href="https://cindyjs.org/gallery/cindygl/ComplexExplorer/index.html"><img src="outlook/zeta.png">Complex Analysis</a>
+</div>
+<div>
+<a href="http://localhost/cindyjs/examples/cindygl/47_analyticlandscape.html"><img src="outlook/landscape.png">Analytic Landscapes</a>
+</div>
+<div>
+<a href="https://cindyjs.org/gallery/main/ReactionDiffusion/"><img src="outlook/react.png">Partial Differential Equations</a>
+</div>
+<div>
+<a href="http://localhost:8123/web/07_MW/2"><img src="outlook/fluid.png">Fluid Simulation</a>
+</div>
+<div>
+<a href="https://cindyjs.org/gallery/main/Jugglers/"><img src="outlook/spiral.png">Video-Deformations with Henry Segerman</a>
+</div>
+<div>
+<a href="http://localhost:8123/web/04_EI/2"><img src="outlook/lic.png">Vectorfields (LIC)</a>
+</div>
+<div>
+<a href="https://cindyjs.org/gallery/main/CoxeterTilings/"><img src="outlook/tiling.png">Hyperbolic Geometry</a>
+</div>
+<div>
+<a href="https://cindyjs.org/examples/cindygl/48_molecules.html"><img src="outlook/nbody.png">N-body Simulation</a>
+</div>
+<div>
+<a href="https://cindyjs.org/examples/cindygl/40_waveintersection.html"><img src="outlook/quasi.png">Quasicrystals</a>
+</div>
+<!--<div><a href="http://cindyjs.org/examples/cindygl/17_images_blur.html"><img src="outlook/blur.png">Image Filters</a></div>-->
+<div>
+<a href="http://localhost:8123/web/01_AR/2"><img src="outlook/montecarlo.png">Monte Carlo Raytracing</a>
+</div>
+<div>
+<a href="http://localhost:8123/web/14_WZW/2"><img src="outlook/gol.png">Celluar Automata</a>
+</div>
+</div>
+</section>
+<section id="thank-you" class="slide level1">
+<h1>Thank you!</h1>
+<p>More information on <a href="https://cindyjs.org/">cindyjs.org</a>.</p>
+<p>Tutorial for CindyGL: <a href="https://cindyjs.org/docs/cindygltutorial/">cindyjs.org/docs/cindygltutorial/</a>.</p>
+<p>Applications in app: <a href="https://interactive.app.tum.de/">interactive.app.tum.de</a>.</p>
+</section>
+<section class="slide level1">
+
+<h3 id="references">References</h3>
+<p><span style="font-size:55%">Images: Andreas Heddergott and pexel.</span> <span style="color:#ffffff; font-size: 0%; position: absolute;"> <span class="citation" data-cites="stussak2009realsurf">(Stussak 2009)</span> <!--[@jobard2002lagrangian]--> <!--[@epstein]--> <!--[@montag]--> <span class="citation" data-cites="montag2018bringing">(Montag and Richter-Gebert 2018)</span> <span class="citation" data-cites="Sagraloff2016ComputingRR">(Sagraloff and Mehlhorn 2016)</span> <span class="citation" data-cites="cindyjs">(Gagern et al. 2016)</span> <span class="citation" data-cites="cindygl">(Montag and Richter-Gebert 2016)</span> <!--[@olsen2010geometry]--> <!--[@herlihy2011art]--> <span class="citation" data-cites="schleimer2016squares">(Schleimer and Segerman 2016)</span> <!--[@pycuda]--> </span></p>
+<div id="refs" class="references">
+<div id="ref-cindyjs">
+<p>Gagern, Martin von, Ulrich Kortenkamp, Jürgen Richter-Gebert, and Michael Strobel. 2016. “CindyJS.” In <em>International Congress on Mathematical Software</em>, 319–26. Springer.</p>
+</div>
+<div id="ref-cindygl">
+<p>Montag, Aaron, and Jürgen Richter-Gebert. 2016. “CindyGL: Authoring GPU-Based Interactive Mathematical Content.” In <em>International Congress on Mathematical Software</em>, 359–65. Springer.</p>
+</div>
+<div id="ref-montag2018bringing">
+<p>Montag, Aaron, and Jürgen Richter-Gebert. 2018. “Bringing Together Dynamic Geometry Software and the Graphics Processing Unit.” <a href="http://arxiv.org/abs/1808.04579">http://arxiv.org/abs/1808.04579</a>.</p>
+</div>
+<div id="ref-Sagraloff2016ComputingRR">
+<p>Sagraloff, Michael, and Kurt Mehlhorn. 2016. “Computing Real Roots of Real Polynomials.” <em>J. Symb. Comput.</em> 73: 46–86.</p>
+</div>
+<div id="ref-schleimer2016squares">
+<p>Schleimer, Saul, and Henry Segerman. 2016. “Squares That Look Round: Transforming Spherical Images.” <em>arXiv Preprint arXiv:1605.01396</em>.</p>
+</div>
+<div id="ref-stussak2009realsurf">
+<p>Stussak, C. 2009. “RealSurf-a GPU-Based Realtime Ray Caster for Algebraic Surfaces.” In <em>Proc. Spring Conf. Computer Graphics.</em></p>
+</div>
+</div>
+</section>
+    </div>
+  </div>
+
+  <script src="reveal.js/lib/js/head.min.js"></script>
+  <script src="reveal.js/js/reveal.js"></script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        // Display controls in the bottom right corner
+        controls: false,
+        // Display a presentation progress bar
+        progress: true,
+        // Push each slide change to the browser history
+        history: true,
+        // Transition style
+        transition: 'fade', // none/fade/slide/convex/concave/zoom
+
+        // Optional reveal.js plugins
+        dependencies: [
+          { src: 'reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: 'reveal.js/plugin/zoom-js/zoom.js', async: true },
+          { src: 'reveal.js/plugin/notes/notes.js', async: true }
+        ]
+      });
+    </script>
+    </body>
+</html>

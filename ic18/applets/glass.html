@@ -1,0 +1,548 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Cindy JS</title>    
+    <script type="text/javascript" src="Cindy.js"></script>
+    <script type="text/javascript" src="CindyGL.js"></script>
+    <script type="text/javascript" src="symbolic.js"></script>
+  </head>
+    
+  <style type="text/css">
+    body {
+      margin:0px;  
+    }
+    
+    html,body { margin: 0px; padding: 0px;
+      font-family: Trebuchet MS, Tahoma, Arial, Helvetica, sans-serif;
+      font-size: 16px;
+    }
+    
+    #overlay{
+      left:20px;
+      top:20px;
+    }
+
+
+    #overlay{
+      position: absolute;
+      background:rgba(200,200,200,0.5);
+      border-radius: 25px;
+      padding: 10px; 
+    }
+    
+    
+    #inp {
+      background: rgba(255, 255, 255, 0.3);
+      border: none;
+    }
+
+    #sel {
+      background: rgba(255, 255, 255, 0.3);
+      border: none;
+      width: 10em;
+    }
+
+
+    #CSCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      width: 100vw;
+    }
+
+      
+  </style>
+  <body style="font-family:Arial;">
+      <script id="csmousedown" type="text/x-cindyscript">
+        sx = mouse().x;
+        sy = mouse().y;
+        dragging = sx < .5;
+      </script>
+      <script id="csmouseup" type="text/x-cindyscript">
+        dragging = false;
+      </script>
+      
+      <script id="csinit" type="text/x-cindyscript">
+      speciala = 1;
+      smootha(x) := if(x<speciala,
+        (-1/(speciala+.01))*(x-speciala)^2+speciala,
+        (1/(1.01-speciala))*(x-speciala)^2+speciala      
+      );
+      
+      seta(na) := (
+        a = na;
+        speciala = na;
+        PA.y = (na-.5)*.7;
+      );
+      
+      
+      setzoom(zoom) := (
+        PC.y = (zoom);
+      );
+      
+      seta(1);
+      setzoom(0.1);
+      
+      //initialize some variables
+      mat = [[-0.9285, 0.0767, 0.3633], [-0.3713, -0.1917, -0.9085], [0, 0.9784, -0.2065]];
+      sx = mouse().x;
+      sy = mouse().y;
+      dragging = false;
+      N = 5;
+      zoom = 2.2;
+      lastzoom = zoom;
+      lastsun = [1,2,3.2];
+      a = 1;
+      alpha = .7;
+      
+      dx = 0; dy =.0;
+      
+      sx = mouse().x;
+      sy = mouse().y;
+      dragging = false;
+    
+    
+      phi = 1.7;
+      lambda = 0.3;
+      dx = .05; dy =-.02;
+      
+      createimage("acc",512,512);
+      colorplot("acc",(0,0,0,0));
+      
+      //fun is the user defined trivariate polynomial
+      fun(x, y, z) := -(4*((a*(1+sqrt(5))/2)^2*x^2-y^2)*((a*(1+sqrt(5))/2)^2*y^2-z^2)*((a*(1+sqrt(5))/2)^2*z^2-x^2)-1*(1+2*(a*(1+sqrt(5))/2))*(x^2+y^2+z^2-1)^2);
+      
+      //F takes vec3 instead of 3 variables
+      F(p) := (p=p/zoom;fun(p.x, p.y, p.z));
+          
+      //casteljau algorithm to evaluate and subdivide polynomials in Bernstein form.
+      //poly is a vector containing the coefficients, i.e. p(x) = sum(0..N, i, poly_(i+1) * b_(i,N)(x)) where b_(i,N)(x) = choose(N, i)*x^i*(1-x)^(N-1)
+      casteljau(poly, x) := (
+        regional(alpha, beta);
+        alpha = 1-x;
+        beta = x;
+        forall(0..N, k,
+          repeat(N-k,
+            poly_# = alpha*poly_# + beta*poly_(#+1);
+          );
+        );
+        poly //the bernstein-coefficients of the polynomial in the interval [x,1]
+      );
+
+      //evaluates a polynomial, represented as vector of coefficients in bernstein-form
+      eval(poly, x) := casteljau(poly, x)_1;
+      
+      //this function has to be called whenever fun changes
+      init() := (
+        dx = 0; dy = 0;
+        colorplot("acc",(0,0,0,0));
+        diff(fun(x,y,z), x, dxF(x,y,z) := #);
+        diff(fun(x,y,z), y, dyF(x,y,z) := #);
+        diff(fun(x,y,z), z, dzF(x,y,z) := #);
+        
+          newN = degree(fun(x,y,z), x, y, z);
+          if(newN==-1, newN=1000);
+          if(newN!=N,
+            N = newN;
+            //The following line is DIRTY, but it makes the application run smooth for high degrees. :-)
+            //Nethertheless, it might cause render errors for high degree surfaces. In fact, only a subset of the surface is rendered.
+            //Adapt limit according to hardware.
+            //values of kind 4*n-1 are good values, as it means to use vectors of length 4*n.
+            N = min(N,7); 
+            
+            //N+1 Chebyshev nodes for interval (0, 1)
+            li = apply(1..(N+1), k, (cos((2 * k - 1) / (2 * (N+1)) * pi)+1)/2);
+            
+            //A is the matrix of the linear map that evaluates a polynomial in bernstein-form at the Chebyshev nodes
+            A = apply(li, node,
+              //the i-th column contains the values of the (i,N) bernstein polynomial evaluated at the Chebyshev nodes
+              apply(0..N, i, eval(
+                apply(0..N, if(#==i,1,0)), // e_i = [0,0,0,1,0,0]
+                node //evaluate  b_(i,N)(node)
+              )) 
+            );
+            
+            B = (inverse(A)); //B interpolates polynomials (in Bernstein basis), given the values [p(li_1), p(li_2), ...]
+          )
+          
+      );
+      init();
+      
+      //B3 is a matrix that interpolates quadratic polynomials (in monomial basis), given the values [p(-2), p(0), p(2)]
+      B3 = inverse(apply([-2, 0, 2], c, apply(0 .. 2, i, c ^ i))); 
+
+      //use symbolic differentation function
+      dF(p) := (p=p/zoom; (
+          dxF(p.x,p.y,p.z),
+          dyF(p.x,p.y,p.z),
+          dzF(p.x,p.y,p.z)
+      ));
+      
+      
+      hitground(x, v) := (
+        if(v.z<0,
+          t = -(x.z+1)/v.z; 
+          if(0<t, hitx=x+t*v; hitnormal=[0,0,1]);
+        )
+      );
+      
+      
+            nsign(a, b) := ( //Descartes rule of sign for the interval (a,b)
+              //obtain the coefficients in bernstein basis of F along the ray in interval (a,b) by interpolation within this interval
+              poly = B * apply(li,
+                F((1-#)*a+#*b) //evaluate along Chebyshev nodes for (a,b)
+              );
+              //count the number of sign changes
+              ans = 0;
+              //last = poly_1;
+              forall(2..(N+1), k,
+                //if(last == 0, last = poly_k;); this (almost) never happens
+                if(min(poly_(k-1), poly_k) <= 0 & 0 <= max(poly_(k-1), poly_k), //sign switch; avoid products due numerics
+                  ans = ans + 1;
+                );
+              );
+              ans //return value   
+            );
+            
+            
+            //bisect F( ) in [x0, x1] assuming that F(x0) and F(x1) have opposite signs
+            bisectf(x0, x1) := (
+                regional(v0, v1, m, vm);
+                v0 = F(x0);
+                v1 = F(x1);
+                repeat(13,
+                    m = (x0 + x1) / 2; vm = F(m);
+                    if (min(v0,vm) <= 0 & 0 <= max(v0, vm), //sgn(v0)!=sgn(vm); avoid products due numerics
+                        (x1 = m; v1 = vm;),
+                        (x0 = m; v0 = vm;)
+                    );
+                );
+                m //return value   
+            );
+            
+            
+            //id encodes a node in a binary tree using heap-indices
+            //1 is root node and node v has children 2*v and 2*v+1
+            //computes s=2^depth of a node id: Compute floor(log_2(id));
+            //purpose: id corresponds interval [id-s,id+1-s]/s
+            gets(id) := (
+              s = 1;
+              repeat(15,
+                if(2*s<=id,
+                  s = 2*s;
+                )
+              );
+              s //return value
+            );
+            
+            //determines the next node in the binary tree that would be visited by a regular in DFS
+            //if the children of id are not supposed to be visited
+            //In interval logic: finds the biggest unvisited interval directly right of the interval of id.
+            next(id) := (
+              id = id+1;
+              //now: remove zeros from right (in binary representation) while(id&1) id=id>>1;
+              repeat(15,
+                if(mod(id,2)==0, 
+                  id = floor(id/2);
+                )
+              );
+              if(id==1, 0, id) //return value - id 0 means we stop our DFS
+            );
+            
+      hitsurface(x, v) := (
+        regional(a, b, c, D, x0, x1);
+        //inside sphere?
+        //||x+t*v||=1 <=> t^2*(v*v)+t*(2*x*v)+(x*x-1)=0
+        a=(v*v);
+        b=(2*x*v);
+        c=(x*x-1);
+        D = b^2-4*a*c;
+        if(D>0,
+          r0 = (-b+re(sqrt(D)))/(2*a);
+          r1 = (-b-re(sqrt(D)))/(2*a);
+          l = x+v*max(min(r0, r1),0);
+          u = x+v*max(max(r0, r1),0);
+          
+          
+          id = 1; 
+          //maximum number of steps
+          intersect = false;
+          done = false;
+          if(min(r0,r1)>0 & F(l) < 0,
+            intersect = true;
+            hitx = l;
+            hitnormal = l;
+            done = true;
+          );
+          repeat(min(newN*7,50),
+            //id=0 means we are done; do only a DFS-step if we are not finished yet
+            if(!intersect & !done & id>0,
+              s = gets(id); //s = floor(log_2(id))
+              
+              //the intervals [a,b] are chossen such that (id in binary notation)
+              //id = 1   => [a,b]=[l,u]
+              //id = 10  => [a,b]=[l,(u+l)/2]
+              //id = 100 => [a,b]=[l,(u+3*l)/4]
+              //id = 11  => [a,b]=[(u+l)/2,u]
+              //...
+              x0 = l + (u-l)*((id+0)/s-1);
+              x1 = l + (u-l)*((id+1)/s-1);
+              
+              //how many sign changes has F(·) in (x0, x1)?
+              cnt = nsign(x0,x1);
+              x01 = x1-x0;
+              if(cnt == 1 % x01*x01<1e-6, //in this case we found a root (or it is likely to have a multiple root)
+                //=>colorize and break DFS
+                intersect = true;
+                id = next(id),
+              if(cnt == 0, //there is no root
+                id = next(id), //break DFS
+                
+                //otherwise cnt>=2: there are cnt - 2*k roots.
+                id = 2*id;  //visit first child within DFS
+              )
+          );  
+          ));
+          if(intersect & !done,
+            hitx = bisectf(x0, x1);
+            hitnormal = dF(hitx);
+            hitnormal = hitnormal/|hitnormal|;
+            
+        //    if(hitnormal*v>0, 
+        //      hitnormal=-hitnormal;
+        //    ); //the normal should always point into the direction we came
+          );
+        );
+      );
+      
+      </script>
+      
+      <script id="csdraw" type="text/x-cindyscript">
+      //the following is executed for every rendered frame
+      if (dragging,
+          dx = 3 * (sx - mouse().x); dy = 3 * (sy - mouse().y);,
+          //dx = .9*dx; dy = .9*dy;
+          //errc(mat);
+          dx = 0; dy = 0;
+      );
+      
+      sx = mouse().x;
+      sy = mouse().y;
+      
+      
+      //the 3 sliders at the left.
+      PA.x = 0.55;
+      if (PA.y > .4, PA.y = .4);
+      if (PA.y < -.4, PA.y = -.4);
+      a = smootha((.5 + PA.y/.7));
+
+      PB.x = 0.6;
+      if (PB.y > .4, PB.y = .4);
+      if (PB.y < -.4, PB.y = -.4);
+      sp = ((PB.y) / .8);
+
+      PC.x = 0.65;
+      if (PC.y > .4, PC.y = .4);
+      if (PC.y < -.4, PC.y = -.4);
+      zoom = exp(3 * PC.y - 1);
+      
+      sun = [.3,sin(2*sp)+.1,cos(2*sp)];
+      sun = sun/|sun|;
+      
+      
+      if(|(dx,dy)|>1e-2 % lastzoom!=zoom % sun!=lastsun % a!=lasta,
+        colorplot("acc",(0,0,0,0)),
+        dx = dy = 0;
+      );
+      lastsun = sun;
+      lastzoom = zoom;
+      lasta = a;
+      //the rotation matrix: It is modified either if the user is dragging or time passes
+      phi = phi + dx;
+      lambda = lambda + dy;
+      if(lambda>pi/2, lambda=pi/2);
+      if(lambda<-0.15, lambda=-0.15);
+      mat =  
+      (
+        (1,0,0),
+        (0,0,1),
+        (0,1,0)
+      )*
+      (
+          (cos(phi), 0, -sin(phi)),
+          (0, 1, 0),
+          (sin(phi), 0, cos(phi))
+      )*
+      (
+          (1, 0, 0),
+          (0, cos(lambda), -sin(lambda)),
+          (0, sin(lambda), cos(lambda))
+      );
+      
+      randomunitvector() := [random()*2-1, random()*2-1, random()*2-1];
+      hitnormal = [0,0,1];
+      
+      pixelwidth = 1.4/700;
+      
+      n1 = 1;
+      n2 = 1.45;
+
+      colorplot("acc",
+        acc = imagergba("acc",#);
+        pixel = #;
+        //if(acc.a>.99,acc = acc*0.9);//avoid "overwhite" on 8-bit systems
+        repeat(2,
+          p = pixel+2*((random(),random())-(.5,.5))*pixelwidth;
+          rd = (sin(.4*p.x), sin(.4*p.y), cos(.4*p.x)*cos(.4*p.y)); //unit length vector of ray direction
+          v = mat*rd;
+          x = mat*[0,0,-6];
+          absorption = [1,1,1];
+          sky = false;
+          repeat(8, nr,
+            if(!sky,
+              //hitx = [0,0,0];
+              hitnormal = [0,0,0];
+              hitground(x, v);
+              hitsurface(x, v);
+              
+              rv = randomunitvector();
+              repeat(2, if(rv*rv>1, rv = randomunitvector()));
+              rv = rv/|rv|;
+              if(hitnormal*hitnormal == 0,
+                //no hit
+                sky = true;
+                //if(nr == 1, v = v+rv;); //artificial scattering for sky
+                ,
+                //some hit
+                x = hitx;
+                if(|hitx.z+1|<1e-2,
+                  v = rv;
+                  if(hitnormal*v<0,
+                    hitnormal = -hitnormal;
+                  );
+                  if(hitnormal*v<0,
+                    v = v - 2*(hitnormal*v)*hitnormal; //2.3 instead of 2 in order to simulate a more "reflective" material
+                  );
+                  v = sun+randomunitvector()/5;
+                  absorption = absorption*.2;
+                ,
+                    
+                    n = hitnormal;
+                    eta = if(n*v>0, n2/n1, n1/n2);
+                    k = 1 - eta^2 * (1 - (n*v)^2);
+                    if(n*v<0, n = -n); 
+                  if(k>0 & random()<min(k,.95), //pseudo-pseudo fresnel, with no sophisticated reason, but it looks good :-)
+                    
+                      absorption.r = absorption.r*.65;
+                      absorption.g = absorption.g*.7;
+                      absorption.b = absorption.b*.6;
+                    
+                      //refract from GLSL 1.1
+                      //see for example https://stackoverflow.com/questions/20801561/glsl-refract-function-explanation-available
+                      v = eta*v-(eta*(n*v)-re(sqrt(k)))*n;
+                      
+                      ,
+                      //(total) reflextion
+                      v = v - 2*(n*v)*n;
+                  );
+                  
+                  x = x + 1e-2*v;//probably pass through surface
+                );
+                v = v/|v|;
+              );
+            );
+          );
+          
+          
+          acc = acc + if(sky,
+            //(max((x*[1,2,1]/2)^4,0),max((x*[-1,1,2]/2)^6,0),max((x*[1,-1,2]/2)^4,0),1),
+            color = absorption*(.7+4*(max((v*sun),0)^4));
+            [color_1,color_2,color_3,1], 
+            [0,0,0,1]
+          )/255;
+        );
+        acc
+    );
+      
+      //gamma = 1;
+      colorplot(
+        d = imagergba("acc",#);
+        c = [d.r,d.g,d.b]/d.a;
+        c
+        //[re(c_1^gamma),re(c_2^gamma),re(c_3^gamma)]
+      );
+      
+      //drawtext((-.65, -.45), "degree: $" + if(newN<100,newN,"\infty") +"$");
+      
+      //lines for the sliders
+      draw((.55, .4), (.55, -.4), color -> (0, 0, 0));
+      draw((.6, .4), (.6, -.4), color -> (0, 0, 0));
+      draw((.65, .4), (.65, -.4), color -> (0, 0, 0));  
+      </script>
+
+      <div  id="CSCanvas" style="border:0px"></div>
+      
+      <script type="text/javascript">
+          var cdy = CindyJS({canvasname:"CSCanvas",
+                                  scripts: "cs*",
+                                  animation: {autoplay: true},
+                                  use : ["CindyGL","katex", "symbolic"],
+                                  geometry: [ { name:"PA", kind:"P", type:"Free", pos: [.5,.37,1], narrow: true, color: [1,1,1], size:8 },
+                                              { name:"PB", kind:"P", type:"Free", pos: [.5,.5,1], narrow: true, color: [1,1,1], size:8 },
+                                              { name:"PC", kind:"P", type:"Free", pos: [.5,.1,1], narrow: true, color: [1,1,1], size:8 } ],
+                                  ports: [{
+                                    id: "CSCanvas",
+                                    //width: 700,
+                                    //height: 500,
+                                    transform: [ { visibleRect: [ -0.7, -0.5, 0.7, 0.5 ] } ]
+                                  }]
+                      });
+          </script>
+          
+          
+          <div id="overlay">
+           <p>
+         F(x,y,z) = <input type="text" id="inp" value="-(4*((a*(1+sqrt(5))/2)^2*x^2-y^2)*((a*(1+sqrt(5))/2)^2*y^2-z^2)*((a*(1+sqrt(5))/2)^2*z^2-x^2)-1*(1+2*(a*(1+sqrt(5))/2))*(x^2+y^2+z^2-1)^2)"  onkeypress="if((event.which ? event.which : event.keyCode)==13) { cdy.evokeCS('fun(x,y,z) := (' + this.value + '); init();'); }" size="10" style="font-size:18px">
+         <select id="sel"><option data-a="1" value="(x^2+y^2+z^2-(0.5+a)^2)^2-(3*((0.5+a)^2)-1)/(3-((0.5+a)^2))*(1-z-sqrt(2)*x)*(1-z+sqrt(2)*x)*(1+z+sqrt(2)*y)*(1+z-sqrt(2)*y)">Kummer Quartic</option>
+       <option data-a="1" selected value="-(4*((a*(1+sqrt(5))/2)^2*x^2-y^2)*((a*(1+sqrt(5))/2)^2*y^2-z^2)*((a*(1+sqrt(5))/2)^2*z^2-x^2)-1*(1+2*(a*(1+sqrt(5))/2))*(x^2+y^2+z^2-1)^2)">Barth Sextic</option>
+       <option data-a="0" value="-2*a/125+x^8+y^8+z^8-2*x^6-2*y^6-2*z^6+1.25*x^4+1.25*y^4+1.25*z^4-0.25*x^2-0.25*y^2-0.25*z^2+0.03125">Chmutov Octic</option>
+       <option data-a="1" data-zoom="-.1" value="a*(-1/4*(1-sqrt(2))*(x^2+y^2)^2+(x^2+y^2)*((1-1/sqrt(2))*z^2+1/8*(2-7*sqrt(2)))-z^4+(0.5+sqrt(2))*z^2-1/16*(1-12*sqrt(2)))^2-(cos(0*pi/4)*x+sin(0*pi/4)*y-1)*(cos(pi/4)*x+sin(pi/4)*y-1)*(cos(2*pi/4)*x+sin(2*pi/4)*y-1)*(cos(3*pi/4)*x+sin(3*pi/4)*y-1)*(cos(4*pi/4)*x+sin(4*pi/4)*y-1)*(cos(5*pi/4)*x+sin(5*pi/4)*y-1)*(cos(6*pi/4)*x+sin(6*pi/4)*y-1)*(cos(7*pi/4)*x+sin(7*pi/4)*y-1)">
+         Endraß Octic
+       </option>
+       <option data-zoom=".2" value="x^2+y^2+z^2-1">Ball</option>
+       <option data-zoom=".2" value="x^6+y^6+z^6-1">Cube</option>
+       <option data-zoom=".2" value="x^2+z^2-1/3*(1+y)^3*(1-y)^3">Citric</option>
+       <option data-zoom=".1" value="x^2+y^2+z^3-z^2">Ding Dong</option>
+       <option data-zoom="0" value="x^3+x^2*z^2-y^2">Hummingbird</option>
+       <option data-zoom=".2" value="x^2-x^3+y^2+y^4+z^3-z^4">Vis a Vis</option>
+       <option data-zoom=".1" value="(x^2+9/4*y^2+z^2-1)^3-x^2*z^3-9/80*y^2*z^3">Sweet</option>
+       <option data-zoom=".2" data-a="1/4" value="k=a*2;(x+(k/2-1))*(x^2+y^2+z^2-k^2/4)+z^2">Parabolic Ring Cyclide</option>
+       <option data-a="0" data-zoom="-.15" value="cos(x)*sin(y) + cos(y)*sin(z) + cos(z)*sin(x) + a">Gyroid</option>
+       <option data-a="0" data-zoom="-.15" value="cos(x)+cos(y)+cos(z)+a">Schwarz P</option>
+       <option data-a=".5" data-zoom=".1"  value="r=a; R=1; (x^2+y^2+z^2+R^2-r^2)^2-4*R^2*(x^2+y^2)">Torus</option>
+       <option data-a=".4" data-zoom="-.1" value = "r=a/2; R=.9; ((sin(x)^2+y^2+z^2+R^2-r^2)^2-4*R^2*(sin(x)^2+y^2))*((cos(x)^2+y^2+z^2+R^2-r^2)^2-4*R^2*(cos(x)^2+z^2))">Interleaved Tori</option>
+     </select>
+       </p>
+     </div>
+     
+      <script type="text/javascript">
+      var select = document.getElementById("sel");
+      select.addEventListener('change', function(event) {
+        document.getElementById('inp').value = this.value;
+        cdy.evokeCS('fun(x,y,z) := (' + this.value + '); init();');
+
+        var a = this.options[this.selectedIndex].getAttribute("data-a") || .5;
+        cdy.evokeCS('seta(' + a + ')');
+
+        var zoom = this.options[this.selectedIndex].getAttribute("data-zoom");
+        if(zoom) cdy.evokeCS('setzoom(' + zoom + ')');
+
+      }, false);
+      </script>
+
+
+  </body>
+</html>

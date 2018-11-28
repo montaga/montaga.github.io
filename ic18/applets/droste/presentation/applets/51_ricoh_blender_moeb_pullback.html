@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>Webcam in Cindy JS</title>
+<meta charset="UTF-8">
+<script type="text/javascript" src="Cindy.js"></script>
+<script type="text/javascript" src="CindyGL.js"></script>
+<style type="text/css">
+  html,body { margin: 0px; padding: 0px; }
+  html,body { width: 100%; height: 100%; }
+  #overlay{
+    position: absolute;
+    left:10px;
+    top:10px;
+    background:rgba(200,200,200,0.5);
+    border-radius: 25px;
+    padding: 10px; 
+  }
+  #inp {
+    background: rgba(255, 255, 255, 0.3);
+    border: none;
+  }
+  
+  #sel {
+    background: rgba(255, 255, 255, 0.3);
+    border: none;
+  }
+</style>
+<script id="csinit" type="text/x-cindyscript">
+video = camera video();
+
+//M = [[1,1],[1,-1]];
+Z = [[1,0],[0,1]];
+
+M = [[1,1],[1,-1]]*[[-i,0],[0,1]];
+//M = [[-1,0],[0,1]] * [[1,1],[1,-1]];
+
+
+//f(z) := z;
+
+
+project2square(z) :=  z/max(|re(z)|,|im(z)|);
+
+
+f(z) := (z);
+
+//0 -> a, oo -> b, 1 -> c
+moebhelp(a, b, c) := (
+  alpha = (c-b)/(a-b);
+  beta = (c-a)/(b-a);
+  [[alpha*a, beta*b],[alpha, beta]]
+);
+
+genmoeb(v0, v1, v2, w0, w1, w2) := (
+  moebhelp(w0, w1, w2)*inverse(moebhelp(v0, v1, v2))
+);
+
+anti(z) := (-1/conjugate(z));
+
+complex2sphere(z) := (
+  l2 = |z|*|z|;
+  (2*re(z)/(1+l2), 2*im(z)/(1+l2), (-1+l2)/(1+l2))
+);
+
+sphere2complex(s) := (
+  s = s/|s|;
+  (s_1 + i*s_2)/(1-s_3)
+);
+
+latlon2complex(latlon) := (
+  //phi = latlon_1;
+  //alpha = phi/2+pi/4
+  tan(latlon_1/2+pi/4)*(cos(latlon_2) + i *sin(latlon_2))
+);
+
+moeb(M, z) := (
+  regional(w);
+  w = M*[z, 1];
+  w_1/w_2
+);
+
+screen2complex(M, pixel) := (
+  //moeb(M, latlon2complex(1.5*[pixel_2, pixel_1]))
+  moeb(M, ((pixel_1 + i*pixel_2)))
+);
+
+complex2latlon(z) := (
+  //lambda = arctan2(re(z), im(z));
+  //alpha = arctan(|z|);
+  //2*alpha + pi/2-phi = pi
+  //phi = 2*alpha - pi/2;
+  (2*arctan(|z|)-pi/2, arctan2(re(z), im(z)))
+);
+
+readcamera(latlon) := (
+  imagergba([-pi,-pi/2], [pi,-pi/2], video, (-latlon_2, latlon_1), repeat->true);
+);
+
+
+setcenter() := (
+  Z = inverse(M);
+  //M = [[1,0],[0,1]];
+);
+
+
+dragging = false;
+m0 = [0,1];
+</script>
+
+<script id="csmousedown" type="text/x-cindyscript">
+M0 = M;
+m0 = mouse();
+p0 = screen2complex(M, m0);
+
+dragging = true;
+</script>
+
+<script id="csmouseup" type="text/x-cindyscript">
+dragging = false;
+</script>
+
+<script id="csdraw" type="text/x-cindyscript">
+
+if(dragging & |mouse()-m0|>.01,
+  p1 = screen2complex(M0, mouse());
+  a1 = sphere2complex(cross(complex2sphere(p0), complex2sphere(p1)));
+  a2 = sphere2complex(-cross(complex2sphere(p0), complex2sphere(p1)));
+
+  M = genmoeb(
+    p1, a1, a2,
+    p0, a1, a2
+  )*M0;
+
+);
+
+if (image ready(video),
+  //draw image (A, B, video);
+  
+  colorplot(
+    z = screen2complex(M, #);
+    //z = moeb(Z, z);
+    z = f(z);
+    //z = moeb(inverse(Z), z);
+    readcamera(complex2latlon(z));
+  );
+  
+  /*
+  colorplot(
+    imagergba([-1,-720/1280], [1,-720/1280], video, #)
+  );*/
+);
+
+
+//draw(circle(A,.48));
+//errc(A.xy);
+</script>
+<script type="text/javascript">
+var cdy = CindyJS({
+  ports: [{id: "CSCanvas", transform:[{visibleRect:[-1,-1,1,1]}]}],
+  scripts: "cs*",
+  language: "en",
+  autoplay: true,
+  defaultAppearance: {
+  },
+  geometry: [
+    //{name:"A", type:"Free", pos:[0,0], visible:true},
+  ],
+  use: ["CindyGL"]
+});
+</script>
+</head>
+
+<body style="font-family:Arial;">
+  <div id="CSCanvas" style="width:100vw; height:100vh; border:0px;"></div>
+  <div id="overlay">
+  <div>
+    <p>
+  Enter or select a pullback function from the list
+</p>
+  <p>
+  f(z) = <input type="text" id="inp" value="z"  onkeypress="if((event.which ? event.which : event.keyCode)==13) { cdy.evokeCS('f(z) := (' + this.value + ');'); }" size="14" style="font-size:18px">
+
+  <select id="sel" style="width:8em;">
+    <option>z</option>
+    <option>z/5</option>
+    <option>z+sin(seconds())</option>
+    <option>z^2</option>
+    <option value="z^(3/2+sin(seconds())/2)">animated squaring</option>
+    <option>z^5-1</option>
+    <option>exp(z)</option>
+    <option value="exp(mod(log(z),1+2*pi*i))">Droste</option>
+    <option value="exp(mod((log(z)+mod(seconds()/2,1)),1+2*pi*i)-1/2)">Droste +zoom</option>
+    <option value="modulus = (1+2*pi*i); alpha = modulus/(2*pi*i); l = log(z)*alpha; exp(mod(l + i*im((2*pi*i)*alpha)*floor(re(l)), modulus))">twisted Droste</option>
+    <option value="modulus = (1+2*pi*i); alpha = modulus/(2*pi*i); l = log(z)*alpha; exp(mod(l + mod(seconds()/2,1) + i*im((2*pi*i)*alpha)*floor(re(l)), modulus))">twisted Droste +zoom</option>
+    <option value="
+    offset = -1+re(log(project2square(z)));
+    exp(mod(log(z) - offset, 2+2*pi*i) + offset)
+    ">squared Droste</option>
+    <option value="
+    offset = -1.1+re(log(project2square(z)));
+    modulus = (2+2*pi*i); alpha = modulus/(2*pi*i); l = log(z)*alpha;
+    exp(mod(l - offset + i*im((2*pi*i)*alpha)*floor(re(l)), modulus) + offset)">twisted squared Droste</option>
+    </option>
+    <option value="a=0; repeat(37, a=a*a+z); a">Mandelbrot set</option>
+  </select>
+</p>
+<!--<p><button onclick="cdy.evokeCS('setcenter()')">set current center to 0</button></p>-->
+  <script type="text/javascript">
+  var select = document.getElementById("sel");
+  select.addEventListener('change', function(event) {
+    document.getElementById('inp').value = this.value;
+    cdy.evokeCS('f(z) := (' + this.value + ');');
+  }, false);
+  </script>
+  
+  <div>
+</body>
+
+</html>
