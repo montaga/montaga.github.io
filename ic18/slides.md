@@ -213,7 +213,7 @@ For each **pixel**:
 
 --------------
 
-# Merging algebraic surfaces
+# Morphing algebraic surfaces
 
 <iframe data-src="applets/morpher/morpher.html" style="width:1000px; height:600px;"></iframe>
 
