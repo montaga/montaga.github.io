@@ -116,7 +116,7 @@ If *colorplot* outputs a three component-vector, the color is obtained by additi
 
 # Deformation of images
 
-<iframe data-src="applets/cindyeditor.html?draw=colorplot(%0A%20%20%20%20imagergb(%22image%22%2C%0A%20%20%20%20%09(x%2Cy)%20%20%20%20%20%20%20%20%0A%20%20%20%20)%0A)%3B&init=resetclock()%3B&gslp=%5B%5D" class="cindyweb"></iframe>
+<iframe data-src='applets/cindyeditor.html?draw=colorplot(%0A%20%20%20%20imagergb("image"%2C%0A%20%20%20%20%09(x%2Cy)%20%20%20%20%20%20%20%20%0A%20%20%20%20)%0A)%3B&init=resetclock()%3B%0A%0Acamera%20%3D%20webcam%20%3D%20cameravideo()%3B&gslp=%5B%5D' class="cindyweb"></iframe>
 
 For each pixel we look up a color in a texture at the given coordinates.
 
@@ -124,7 +124,7 @@ For each pixel we look up a color in a texture at the given coordinates.
 
 # Deformation of images (complex)
 
-<iframe data-src="applets/cindyeditor.html?draw=colorplot(%0A%20%20%20%20imagergb(%22image%22%2C%0A%20%20%20%20%09z%0A%20%20%20%20)%0A)%3B&init=resetclock()%3B%0A%0Acamera%20%3D%20cameravideo()%3B&gslp=%5B%7B%22alpha%22%3A1%2C%22color%22%3A%5B1%2C0%2C0%5D%2C%22labeled%22%3Atrue%2C%22name%22%3A%22A%22%2C%22size%22%3A5%2C%22type%22%3A%22Free%22%2C%22pos%22%3A%5B1%2C0.7514970059880242%2C0.7193113772455091%5D%7D%5D" class="cindyweb"></iframe>
+<iframe data-src='applets/cindyeditor.html?draw=colorplot(%0A%20%20%20%20imagergb("image"%2C%0A%20%20%20%20%09z%0A%20%20%20%20)%0A)%3B&init=resetclock()%3B%0A%0Awebcam%20%3D%20camera%20%3D%20cameravideo()%3B&gslp=%5B%7B"alpha"%3A1%2C"color"%3A%5B1%2C0%2C0%5D%2C"labeled"%3Atrue%2C"name"%3A"A"%2C"size"%3A5%2C"type"%3A"Free"%2C"pos"%3A%5B1%2C0.7514970059880242%2C0.7193113772455091%5D%7D%5D' class="cindyweb"></iframe>
 
 . . .
 
@@ -246,10 +246,6 @@ For each **pixel**:
 More information on [cindyjs.org](https://cindyjs.org/).
 
 Tutorial for CindyGL: [cindyjs.org/docs/cindygltutorial/](https://cindyjs.org/docs/cindygltutorial/).
-
-Applications in app: [interactive.app.tum.de](https://interactive.app.tum.de/).
-
---------------
 
 ### References
 <span style="font-size:55%">Images: Andreas Heddergott and pexel.</span>

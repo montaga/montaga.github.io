@@ -160,13 +160,13 @@ data-src="applets/cindyeditor.html?draw=%2F%2F%20a%20single%20circular%20sinusoi
 </section>
 <section id="deformation-of-images" class="slide level1">
 <h1>Deformation of images</h1>
-<iframe data-src="applets/cindyeditor.html?draw=colorplot(%0A%20%20%20%20imagergb(%22image%22%2C%0A%20%20%20%20%09(x%2Cy)%20%20%20%20%20%20%20%20%0A%20%20%20%20)%0A)%3B&amp;init=resetclock()%3B&amp;gslp=%5B%5D" class="cindyweb">
+<iframe data-src="applets/cindyeditor.html?draw=colorplot(%0A%20%20%20%20imagergb(&quot;image&quot;%2C%0A%20%20%20%20%09(x%2Cy)%20%20%20%20%20%20%20%20%0A%20%20%20%20)%0A)%3B&amp;init=resetclock()%3B%0A%0Acamera%20%3D%20webcam%20%3D%20cameravideo()%3B&amp;gslp=%5B%5D" class="cindyweb">
 </iframe>
 <p>For each pixel we look up a color in a texture at the given coordinates.</p>
 </section>
 <section id="deformation-of-images-complex" class="slide level1">
 <h1>Deformation of images (complex)</h1>
-<iframe data-src="applets/cindyeditor.html?draw=colorplot(%0A%20%20%20%20imagergb(%22image%22%2C%0A%20%20%20%20%09z%0A%20%20%20%20)%0A)%3B&amp;init=resetclock()%3B%0A%0Acamera%20%3D%20cameravideo()%3B&amp;gslp=%5B%7B%22alpha%22%3A1%2C%22color%22%3A%5B1%2C0%2C0%5D%2C%22labeled%22%3Atrue%2C%22name%22%3A%22A%22%2C%22size%22%3A5%2C%22type%22%3A%22Free%22%2C%22pos%22%3A%5B1%2C0.7514970059880242%2C0.7193113772455091%5D%7D%5D" class="cindyweb">
+<iframe data-src="applets/cindyeditor.html?draw=colorplot(%0A%20%20%20%20imagergb(&quot;image&quot;%2C%0A%20%20%20%20%09z%0A%20%20%20%20)%0A)%3B&amp;init=resetclock()%3B%0A%0Awebcam%20%3D%20camera%20%3D%20cameravideo()%3B&amp;gslp=%5B%7B&quot;alpha&quot;%3A1%2C&quot;color&quot;%3A%5B1%2C0%2C0%5D%2C&quot;labeled&quot;%3Atrue%2C&quot;name&quot;%3A&quot;A&quot;%2C&quot;size&quot;%3A5%2C&quot;type&quot;%3A&quot;Free&quot;%2C&quot;pos&quot;%3A%5B1%2C0.7514970059880242%2C0.7193113772455091%5D%7D%5D" class="cindyweb">
 </iframe>
 <div class="fragment">
 <p>Also access to the webcam is possible</p>
@@ -292,10 +292,6 @@ data-src="applets/cindyeditor.html?draw=%2F%2F%20a%20single%20circular%20sinusoi
 <h1>Thank you!</h1>
 <p>More information on <a href="https://cindyjs.org/">cindyjs.org</a>.</p>
 <p>Tutorial for CindyGL: <a href="https://cindyjs.org/docs/cindygltutorial/">cindyjs.org/docs/cindygltutorial/</a>.</p>
-<p>Applications in app: <a href="https://interactive.app.tum.de/">interactive.app.tum.de</a>.</p>
-</section>
-<section class="slide level1">
-
 <h3 id="references">References</h3>
 <p><span style="font-size:55%">Images: Andreas Heddergott and pexel.</span> <span style="color:#ffffff; font-size: 0%; position: absolute;"> <span class="citation" data-cites="stussak2009realsurf">(Stussak 2009)</span> <!--[@jobard2002lagrangian]--> <!--[@epstein]--> <!--[@montag]--> <span class="citation" data-cites="montag2018bringing">(Montag and Richter-Gebert 2018)</span> <span class="citation" data-cites="Sagraloff2016ComputingRR">(Sagraloff and Mehlhorn 2016)</span> <span class="citation" data-cites="cindyjs">(Gagern et al. 2016)</span> <span class="citation" data-cites="cindygl">(Montag and Richter-Gebert 2016)</span> <!--[@olsen2010geometry]--> <!--[@herlihy2011art]--> <span class="citation" data-cites="schleimer2016squares">(Schleimer and Segerman 2016)</span> <!--[@pycuda]--> </span></p>
 <div id="refs" class="references">

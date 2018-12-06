@@ -15,6 +15,7 @@ spherical = false;
 reset() :=(
   Z = [[1,0],[0,1]];
   M = [[1,0],[0,1]];
+  M = [[-1,-i],[i,1]]*[[-1,0],[0,1]];
   azoom = 0;
   pts = [];
 
@@ -209,6 +210,7 @@ if(spherical,
   <select id="input" class="options" multiple="multiple" onchange="javascript:change();">
     <option selected value="image">Use static image</a>
     <option value="webcam">Use webcam</a>
+    <option value="sphericalimage">static spherical image</a>
     <option value="spherical">Spherical webcam (Theta)</a>
     <option value="sphericalblender">Spherical (Theta Blender)</a>
   </select>
@@ -258,7 +260,7 @@ if(spherical,
     language: "en",
     csconsole: false,
     autoplay: true,
-    images: {image: "image.jpg"},
+    images: {image: "image.jpg", spherical: "spherical.jpg"},
     defaultAppearance: {
     },
     geometry: [
@@ -292,12 +294,12 @@ if(spherical,
   function change() {
     var input = readselected("input");
     if(lastinput!=input) {
-      document.getElementById("selectionmode").selectedIndex = 0;
+      document.getElementById("selectionmode").selectedIndex = 1;
     }
     var selectionmode = readselected("selectionmode");
     var transformmode = readselected("transformmode");
-    var spherical = (input=="spherical" || input=="sphericalblender");
-    var imagemode = (input=="image");
+    var spherical = (input=="spherical" || input=="sphericalblender" || input=="sphericalimage");
+    var imagemode = (input=="image" % input=="sphericalimage");
     cdy.evokeCS(`
       spherical = ${spherical};
       imagemode = ${imagemode};
@@ -342,6 +344,14 @@ if(spherical,
         readcamera(z) := (
           latlon = complex2latlon(z);
           imagergb([-pi-0.005,0], [pi+0.005,0], video, (latlon_2, (latlon_1+pi/2)*(2*imagesize(video)_2/imagesize(video)_1)));
+        );
+      `);
+    } else if(input=="sphericalimage") {
+      cdy.evokeCS(`
+        image="spherical";
+        readcamera(z) := (
+          latlon = complex2latlon(z);
+          imagergb([-pi-0.005,0], [pi+0.005,0], image, (latlon_2, (-latlon_1+pi/2)*(2*imagesize(image)_2/imagesize(image)_1)));
         );
       `);
     }
@@ -449,7 +459,7 @@ for the Droste-area and press ENTER when you are done");
       } else if(selectionmode=="greenscreen") {
       cdy.evokeCS(`f(z):=(
               z = ${spherical? 'moeb(T, z)' :  '(z-center)'};
-              z = z/exp(4*zoom+mod(goffset,zoom)); //zoom in
+              z = z/exp(2*zoom+mod(goffset,zoom)); //zoom in
               run = true;
               col = [0,0,0];
               gv = 1;
