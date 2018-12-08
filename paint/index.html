@@ -19,13 +19,14 @@
         
         
       <script id="csinit" type="text/x-cindyscript">
-      L = (-4,-4);
-      R = (4,-4);
-      createimage("seed", 1024, 1024);
-      createimage("loop", 1024, 1024);
+      hasrefl = false;
+      L = (-3,-3);
+      R = (3,-3);
+      createimage("seed", 2048, 2048);
+      createimage("loop", 2048, 2048);
 
 colorplot(L,R,"seed",
-          if(|#|<.1,[1,0,0,1],[0,0,0,0])
+          if(|#|<.04,[.3,.3,.3,1],[0,0,0,0])
          );
 
 resetclock();
@@ -35,7 +36,7 @@ menu = false;
 
 //Trafos = Trafos;
 savedtrafos = [];
-functions = ["↗", "⇉", "↺", "↔", [1,0,0], [0,1,0], [0,0,1], [1,1,1]];
+functions = ["⥅", "⇉", "↺", "⇹", [1,.6,.3], [.2,.8,.2], [.3,.3,.7], [1,1,1],"⎌", " "];
 
 addtrafo(T) := (
   //if(Trafos == Trafos0, Trafos = []);
@@ -93,7 +94,7 @@ colorplot(L,R,"loop",
           forall(1..N, k, 
                  other = imagergba(L,R,interpolate->dointerpolate,"loop",Trafos_k*[#_1,#_2,1]);
                  if(other.a>mother.a,// & (other.a1 % isifs),
-                    mother = other*other.a;
+                    mother = other*(other.a+3)/4;
                     tmp = mother_3;
                     
                   /*  mother_1=1-mother_1;
@@ -103,6 +104,8 @@ colorplot(L,R,"loop",
                 );
           if(preview & !stationary,
             mother = [0,0,0,0];
+            //mother.a = mother.a-.1;
+            //mother = mother*.9;
             old = [0,0,0,0];
           );
           mt = max([seed.a, old.a, mother.a]);
@@ -124,11 +127,11 @@ if(menu & |mouse()-menucenter|>.5,
   );
 
 if(menu,
-   fillcircle(menucenter, .3, color->[1,1,1], alpha->0.3);
+   fillcircle(menucenter, .25, color->[1,1,1], alpha->0.3);
 
    mk = mod(round(arctan2(mouse()-menucenter)*length(functions)/(2*pi))-1,length(functions))+1;
    forall(1..length(functions),k,
-          c = menucenter+.15*gauss(exp(k*2*pi*i/length(functions)))+(0,-.05);
+          c = menucenter+.15*gauss(exp(k*2*pi*i/length(functions)));
           
           if(length(functions_k)==3,
           //color
@@ -138,6 +141,7 @@ if(menu,
           
           
           ,
+          c = c+(0,-.05);
           S=35;
           drawtext(size->S,align->"mid",c+(.01,0)/5, functions_k, color->[1,1,1]);
           drawtext(size->S,align->"mid",c+(-.01,0)/5, functions_k, color->[1,1,1]);
@@ -155,7 +159,7 @@ if(menu,
 drawtext((-3,0), mode, color->[1,1,1]);
 drawtext((-3,-1), step, color->[1,1,1]);
 
-if(mode=="↗",
+if(mode=="⥅",
    if(step==0,
       draw(p0);
       p1 = mouse();
@@ -181,7 +185,7 @@ if(mode=="↗",
      );
   );
   
-  if(mode=="↔",
+  if(mode=="⇹",
      if(step==0,
         drawtext((-3,0.5), "select preimage point for reflection");
         p0=mouse();
@@ -195,6 +199,26 @@ if(mode=="↗",
           draw(o, color->[1,1,1], alpha->.3);
           if(|mouse()-o|<.05, p1=o);//snap
         );
+        
+        //snap to other refl if there is some
+        
+        if(hasrefl & othergoodv!=0 & p1 != p0,
+          cangle = arctan2(p1-p0);
+          tangle0 = arctan2(othergoodv)+pi;
+          
+          //draw(p0, p0+gauss(exp(i*tangle0)), color->red);
+            forall([0°,30°,60°,90°,120°,180°], k,
+              forall([-1,1],sign,
+                tangle = mod(tangle0+sign*k+pi,360°)-pi;
+                errc(tangle);
+                errc(cangle);
+                if(|tangle-cangle|<10°,
+                  errc("snap!");
+                  p1 = p0+|p1-p0|*gauss(exp(i*tangle)); //snap
+                );
+              );
+            );
+          );
         
         draw(p0,p1, arrow->true, alpha->.8, size->4, color->[1,1,1]);
         draw(p1,p0, arrow->true, alpha->.8, size->4, color->[1,1,1]);
@@ -252,9 +276,7 @@ if(mode=="↗",
           v = p1-p0;
           v = v/|v|;
           p1 = p0+v;
-          draw(p0,p1, arrow->true, alpha->.8, size->4, color->[1,1,1]);
-          drawcircle(p0,1);
-          draw(p0,p0+(1,0));
+          
           alpha = arctan2(v);
           
           goodangles = [60°,90°,120°,-60°,-90°,-120°, 180°,0°];
@@ -264,6 +286,10 @@ if(mode=="↗",
               p1 = p0 + gauss(exp(i*gangle));
             );
           );
+          
+          draw(p0,p1, arrow->true, alpha->.8, size->4, color->[1,1,1]);
+          drawcircle(p0,1);
+          draw(p0,p0+(1,0));
           
           previewtrafo = map(p0,p1,p0,p0+(1,0));
           errc(previewtrafo);
@@ -282,17 +308,31 @@ errc(stationary);
    colorplot(L,R,"seed",
              if(|#-mouse()|<.05,[drawcolor_1,drawcolor_2,drawcolor_3,1],imagergba(L,R,interpolate->dointerpolate,"seed",#));
             );
-    
+    /*
     colorplot(L,R,"loop",
               if(|#-mouse()|<.05,[drawcolor_1,drawcolor_2,drawcolor_3,1],imagergba(L,R,interpolate->dointerpolate,"loop",#));
-             );            
+            );*/
+          colorplot(L,R,"loop",.8*imagergba(L,R,interpolate->dointerpolate,"loop",#));
+            
   );
       </script>
       <script id="csmouseclick" type="text/x-cindyscript">
       if(menu,
    mk = mod(round(arctan2(mouse()-menucenter)*length(functions)/(2*pi))-1,length(functions))+1;
    //add(functions_mk);
-   if(length(functions_mk)==3,
+   
+   if(functions_mk == "⎌",
+   //undo
+   mode = "draw";
+   menu = false;
+    if(length(savedtrafos)>=1,
+      savedtrafos = savedtrafos_(1..(length(savedtrafos)-1)
+    );
+    colorplot("loop",[0,0,0,0]);
+  );
+ ,
+  
+   if(length(functions_mk)==3, //color
     mode = "draw";
     drawcolor = functions_mk;
     menu = false;
@@ -308,7 +348,7 @@ errc(stationary);
      //Trafos = Trafos :> [[1,0,0],[0,1,-1],[0,0,1]];
      //N = length(Trafos);
    
- );
+ ));
  
 
    ,
@@ -318,16 +358,18 @@ errc(stationary);
       menucenter = mouse();
      );
 
-   if(mode=="↗",
+   if(mode=="⥅",
       if(step==0,
          addtrafo(previewtrafo);
          resetmode();
         );
      );
      
-     if(mode=="↔",
+     if(mode=="⇹",
         if(step==1,
            addtrafo(previewtrafo);
+           hasrefl = true;
+           othergoodv = goodv;
            resetmode();
           );
        );
@@ -349,7 +391,7 @@ errc(stationary);
 
    step = step+1;
 
-  );
+ );
 
 
 errc(Trafos);
