@@ -19,11 +19,10 @@
         
         
       <script id="csinit" type="text/x-cindyscript">
-      hasrefl = false;
-      L = (-3,-3);
-      R = (3,-3);
-      createimage("seed", 2048, 2048);
-      createimage("loop", 2048, 2048);
+L = (-3,-3); //corners for computed texture
+R = (3,-3);
+createimage("seed", 2048, 2048);
+createimage("loop", 2048, 2048);
 
 colorplot(L,R,"seed",
           if(|#|<.04,[.3,.3,.3,1],[0,0,0,0])
@@ -33,6 +32,7 @@ resetclock();
 
 
 menu = false;
+menucenter = (0,0);
 
 //Trafos = Trafos;
 savedtrafos = [];
@@ -43,14 +43,9 @@ addtrafo(T) := (
   savedtrafos = savedtrafos :> T;
 );
 
-
-translation(v) := (
-  [1,0,v.x],[0,1,v.y],[0,0,1]
-);
-
-
 resetmode() := (
   mode = "draw";
+  msg = "";
   step = 0;
   previewtrafo = 0;
   preview = false;
@@ -63,16 +58,16 @@ dointerpolate = true;
 isifs = false;
 
 drawcolor = [.5,.5,.8];
-apply(T, p) := (
+applytrafo(T, p) := (
   h = T*[p_1,p_2,1];
   [h_1,h_2]/h_3;
 );
       </script>
       <script id="csdraw" type="text/x-cindyscript">
-      c0 = apply(1..N,[0.1,0.1,0,0]);
 
 stationary = (mouse()==lastmouse);
 lastmouse = mouse();
+
 Trafos = savedtrafos;
 if(preview, Trafos = Trafos :> previewtrafo;);
 
@@ -85,37 +80,40 @@ if(length(Trafos)==0,
 N = length(Trafos);
 colorplot(L,R,"loop",
           seed = imagergba(L,R,interpolate->dointerpolate,"seed",#);
-          old = imagergba(L,R,interpolate->dointerpolate,"loop",#);
+          //old = imagergba(L,R,interpolate->dointerpolate,"loop",#);
 
           //colors = c0;
           //mt = 0;
-          
-          mother = [0,0,0,.1];
+
+          mother = [0,0,0,-.1];
           forall(1..N, k, 
                  other = imagergba(L,R,interpolate->dointerpolate,"loop",Trafos_k*[#_1,#_2,1]);
-                 if(other.a>mother.a,// & (other.a1 % isifs),
-                    mother = other*(other.a+3)/4;
-                    tmp = mother_3;
-                    
-                  /*  mother_1=1-mother_1;
+                 other = other*(other.a+3)/4;
+                 if(other.a>mother.a,// & (other.a1 % isifs),  
+                    mother = other;
+                    /*  mother_1=1-mother_1;
                     mother_2=1-mother_2;
                     mother_3=1-mother_3;*/
                    )
                 );
-          if(preview & !stationary,
-            mother = [0,0,0,0];
-            //mother.a = mother.a-.1;
-            //mother = mother*.9;
-            old = [0,0,0,0];
+          /*if(preview & !stationary,
+            mother = mother*.5;
           );
-          mt = max([seed.a, old.a, mother.a]);
-          if(mt==old.a,
-             old,
-             if(mt==seed.a,
-                seed,
-                mother
-               )
+          
+          if(preview, //& !stationary,
+             //mother = [0,0,0,0];
+             //mother.a = mother.a-.1;
+             old = [0,0,0,0];
             );
+          old = [0,0,0,0];
+          */
+          mother.a = mother.a*.99;
+          //mother.a = mother.a-.001;
+          mt = max(seed.a, mother.a);
+           if(mt==seed.a,
+              seed,
+              mother
+             )
          );
 
 colorplot(
@@ -132,225 +130,218 @@ if(menu,
    mk = mod(round(arctan2(mouse()-menucenter)*length(functions)/(2*pi))-1,length(functions))+1;
    forall(1..length(functions),k,
           c = menucenter+.15*gauss(exp(k*2*pi*i/length(functions)));
-          
-          if(length(functions_k)==3,
-          //color
-          
-          draw(c, size->12, color->if(round(mk)==k,[1,0.8,0],[0,0,0]), border->false);
-          draw(c, size->10, color->functions_k, border->false);
-          
-          
-          ,
-          c = c+(0,-.05);
-          S=35;
-          drawtext(size->S,align->"mid",c+(.01,0)/5, functions_k, color->[1,1,1]);
-          drawtext(size->S,align->"mid",c+(-.01,0)/5, functions_k, color->[1,1,1]);
-          drawtext(size->S,align->"mid",c+(0,.01)/5, functions_k, color->[1,1,1]);
-          drawtext(size->S,align->"mid",c+(0,-.01)/5, functions_k, color->[1,1,1]);
-          drawtext(size->S,align->"mid",c, functions_k, color->  if(round(mk)==k,[1,0.8,0],[0,0,0]));
-        
-          )
 
-          
-          
+          if(length(functions_k)==3,
+             //color
+
+             draw(c, size->12, color->if(round(mk)==k,[1,0.8,0],[0,0,0]), border->false);
+             draw(c, size->10, color->functions_k, border->false);
+
+
+             ,
+             c = c+(0,-.05);
+             S=35;
+             drawtext(size->S,align->"mid",c+(.01,0)/5, functions_k, color->[1,1,1]);
+             drawtext(size->S,align->"mid",c+(-.01,0)/5, functions_k, color->[1,1,1]);
+             drawtext(size->S,align->"mid",c+(0,.01)/5, functions_k, color->[1,1,1]);
+             drawtext(size->S,align->"mid",c+(0,-.01)/5, functions_k, color->[1,1,1]);
+             drawtext(size->S,align->"mid",c, functions_k, color->  if(round(mk)==k,[1,0.8,0],[0,0,0]));
+
+            )
+
+
+
          );
   );
-
-drawtext((-3,0), mode, color->[1,1,1]);
-drawtext((-3,-1), step, color->[1,1,1]);
 
 if(mode=="⥅",
    if(step==0,
       draw(p0);
       p1 = mouse();
-      orbit = apply(savedtrafos, T, apply(T,p0));
+      orbit = apply(savedtrafos, T, applytrafo(T,p0));
       //errc(orbit);
       forall(orbit, o,
-        draw(o, color->[1,1,1], alpha->.3);
-        if(|mouse()-o|<.05, p1=o);//snap
-      );
+             draw(o, color->[1,1,1], alpha->.3);
+             if(|mouse()-o|<.05, p1=o);//snap
+            );
       if(goodv!=0,
-        target = p0*goodv;
-        current = p1*goodv;
-        d = target-current;
-        if(|d|<.1,
-          p1 = p1+d*goodv;
+         target = p0*goodv;
+         current = p1*goodv;
+         d = target-current;
+         if(|d|<.1,
+            p1 = p1+d*goodv;
+           );
         );
-      );
       draw(p0,p1, arrow->true, alpha->.8, size->4, color->[1,1,1]);
-      
-      previewtrafo = translation(-p1+p0);
+
+      previewtrafo = map(p1, p0);
       preview = true;
-      drawtext((-3,0.5), "select image of translation");
+      msg = ("specify offset for translation");
+     );
+  );
+
+if(mode=="⇹",
+   if(step==0,
+      msg = ("select preimage point for reflection");
+      p0=mouse();
+     );
+   if(step==1,
+      draw(p0);
+      p1 = mouse();
+      orbit = apply(savedtrafos, T, applytrafo(T,p0));
+      //errc(orbit);
+      forall(orbit, o,
+             draw(o, color->[1,1,1], alpha->.3);
+             if(|mouse()-o|<.05, p1=o);//snap
+            );
+
+      //snap to other refl if there is some
+
+      if(othergoodv!=0 & p1 != p0,
+         cangle = arctan2(p1-p0);
+         tangle0 = arctan2(othergoodv)+pi;
+
+         //draw(p0, p0+gauss(exp(i*tangle0)), color->red);
+         forall([0°,30°,60°,90°,120°,180°], k,
+                forall([-1,1],sign,
+                       tangle = mod(tangle0+sign*k+pi,360°)-pi;
+                       if(|tangle-cangle|<10°,
+                          p1 = p0+|p1-p0|*gauss(exp(i*tangle)); //snap
+                         );
+                      );
+               );
+        );
+
+      draw(p0,p1, arrow->true, alpha->.8, size->4, color->[1,1,1]);
+      draw(p1,p0, arrow->true, alpha->.8, size->4, color->[1,1,1]);
+
+      mid = (p0+p1)/2;
+      v = p1-p0;
+      v = gauss(i*complex(v));
+      goodv = v/|v|;
+      draw(mid-v,mid+v);
+      previewtrafo = map(p0,mid,p0+v,p1,mid,p1+v);
+      preview = true;
+      msg = ("select image of reflection");
+     );
+  );
+
+if(mode=="⇉",
+   if(step==0,
+      //dointerpolate = true;
+      isifs = true;
+      p0 = mouse();
+      msg = ("select preimage of first point of similarity");
+     );
+   if(step==1,
+      draw(p0);
+      p1 = mouse();
+      draw(p0,p1, arrow->true, alpha->.8, size->4, color->[1,1,1]);
+      msg = ("select image of first point of similarity");
+     );
+   if(step==2,
+      p2 = mouse();
+      draw(p0,p1, arrow->true, alpha->.8, size->4, color->[1,1,1]);
+      msg = ("select preimage of second point of similarity");
+     );
+   if(step==3,
+      draw(p0);
+      p3 = mouse();
+      draw(p0,p1, arrow->true, alpha->.8, size->4, color->[1,1,1]);
+      draw(p2,p3, arrow->true, alpha->.8, size->4, color->[1,1,1]);
+
+      previewtrafo = map(p1,p3,p0,p2);
+      preview = true;
+      msg = ("select image of second point of similarity");
+     );
+  );
+
+if(mode=="↺",
+   if(step==0,
+      p0 = mouse();
+      msg = ("select center of rotation");
+     );
+   if(step==1,
+      draw(p0);
+      p1 = mouse();
+      if(p1==p0, p1 = p0+(1,0));
+      v = p1-p0;
+      v = v/|v|;
+      p1 = p0+v;
+
+      alpha = arctan2(v);
+
+      goodangles = [60°,90°,120°,-60°,-90°,-120°, 180°,0°];
+      forall(goodangles, gangle,
+             if(|alpha-gangle|<10°,
+                //alpha = gangle;
+                p1 = p0 + gauss(exp(i*gangle));
+               );
+            );
+
+      draw(p0,p1, arrow->true, alpha->.8, size->4, color->[1,1,1]);
+      drawcircle(p0,1);
+      draw(p0,p0+(1,0));
+
+      previewtrafo = map(p0,p1,p0,p0+(1,0));
+      preview = true;
+      msg = ("specify angle of transformation");
      );
   );
   
-  if(mode=="⇹",
-     if(step==0,
-        drawtext((-3,0.5), "select preimage point for reflection");
-        p0=mouse();
-       );
-     if(step==1,
-        draw(p0);
-        p1 = mouse();
-        orbit = apply(savedtrafos, T, apply(T,p0));
-        //errc(orbit);
-        forall(orbit, o,
-          draw(o, color->[1,1,1], alpha->.3);
-          if(|mouse()-o|<.05, p1=o);//snap
-        );
-        
-        //snap to other refl if there is some
-        
-        if(hasrefl & othergoodv!=0 & p1 != p0,
-          cangle = arctan2(p1-p0);
-          tangle0 = arctan2(othergoodv)+pi;
-          
-          //draw(p0, p0+gauss(exp(i*tangle0)), color->red);
-            forall([0°,30°,60°,90°,120°,180°], k,
-              forall([-1,1],sign,
-                tangle = mod(tangle0+sign*k+pi,360°)-pi;
-                errc(tangle);
-                errc(cangle);
-                if(|tangle-cangle|<10°,
-                  errc("snap!");
-                  p1 = p0+|p1-p0|*gauss(exp(i*tangle)); //snap
-                );
-              );
-            );
-          );
-        
-        draw(p0,p1, arrow->true, alpha->.8, size->4, color->[1,1,1]);
-        draw(p1,p0, arrow->true, alpha->.8, size->4, color->[1,1,1]);
-        
-        mid = (p0+p1)/2;
-        v = p1-p0;
-        v = gauss(i*complex(v));
-        goodv = v/|v|;
-        draw(mid-v,mid+v);
-        previewtrafo = map(p0,mid,p0+v,p1,mid,p1+v);
-        preview = true;
-        drawtext((-3,0.5), "select image of reflection");
-       );
-    );
-
-  if(mode=="⇉",
-     if(step==0,
-       //dointerpolate = true;
-       isifs = true;
-        p0 = mouse();
-        drawtext((-3,0.5), "select preimage of first point of similarity")
-       );
-     if(step==1,
-        draw(p0);
-        p1 = mouse();
-        draw(p0,p1, arrow->true, alpha->.8, size->4, color->[1,1,1]);
-        drawtext((-3,0.5), "select image of first point of similarity")
-       );
-       if(step==2,
-         p2 = mouse();
-         draw(p0,p1, arrow->true, alpha->.8, size->4, color->[1,1,1]);
-          drawtext((-3,0.5), "select preimage of second point of similarity")
-         );
-       if(step==3,
-          draw(p0);
-          p3 = mouse();
-          draw(p0,p1, arrow->true, alpha->.8, size->4, color->[1,1,1]);
-          draw(p2,p3, arrow->true, alpha->.8, size->4, color->[1,1,1]);
-          
-          previewtrafo = map(p1,p3,p0,p2);
-          preview = true;
-          drawtext((-3,0.5), "select image of second point of similarity")
-         );
-    );
-    
-    if(mode=="↺",
-       if(step==0,
-          p0 = mouse();
-          drawtext((-3,0.5), "select center of rotation")
-         );
-       if(step==1,
-          draw(p0);
-          p1 = mouse();
-          if(p1==p0, p1 = p0+(1,0));
-          v = p1-p0;
-          v = v/|v|;
-          p1 = p0+v;
-          
-          alpha = arctan2(v);
-          
-          goodangles = [60°,90°,120°,-60°,-90°,-120°, 180°,0°];
-          forall(goodangles, gangle,
-            if(|alpha-gangle|<10°,
-              //alpha = gangle;
-              p1 = p0 + gauss(exp(i*gangle));
-            );
-          );
-          
-          draw(p0,p1, arrow->true, alpha->.8, size->4, color->[1,1,1]);
-          drawcircle(p0,1);
-          draw(p0,p0+(1,0));
-          
-          previewtrafo = map(p0,p1,p0,p0+(1,0));
-          errc(previewtrafo);
-          preview = true;
-          drawtext((-3,0.5), "specify angle of transformation")
-         );
-       );
-
-errc(Trafos);
-
-errc(preview);
-errc(stationary);
+  errc(msg);
+  drawtext((-1,-1), msg, color->[1,1,1]);
       </script>
       <script id="csmousedrag" type="text/x-cindyscript">
       if(mode=="draw",
    colorplot(L,R,"seed",
-             if(|#-mouse()|<.05,[drawcolor_1,drawcolor_2,drawcolor_3,1],imagergba(L,R,interpolate->dointerpolate,"seed",#));
-            );
-    /*
+             if(|#-mouse()|<.05,[drawcolor_1,drawcolor_2,drawcolor_3,1],
+             imagergba(L,R,interpolate->dointerpolate,"seed",#)
+           );
+    );
+   /*
     colorplot(L,R,"loop",
               if(|#-mouse()|<.05,[drawcolor_1,drawcolor_2,drawcolor_3,1],imagergba(L,R,interpolate->dointerpolate,"loop",#));
             );*/
-          colorplot(L,R,"loop",.8*imagergba(L,R,interpolate->dointerpolate,"loop",#));
-            
+   //colorplot(L,R,"loop",.8*imagergba(L,R,interpolate->dointerpolate,"loop",#));
+
   );
       </script>
       <script id="csmouseclick" type="text/x-cindyscript">
       if(menu,
    mk = mod(round(arctan2(mouse()-menucenter)*length(functions)/(2*pi))-1,length(functions))+1;
    //add(functions_mk);
-   
+
    if(functions_mk == "⎌",
-   //undo
-   mode = "draw";
-   menu = false;
-    if(length(savedtrafos)>=1,
-      savedtrafos = savedtrafos_(1..(length(savedtrafos)-1)
-    );
-    colorplot("loop",[0,0,0,0]);
-  );
- ,
-  
-   if(length(functions_mk)==3, //color
-    mode = "draw";
-    drawcolor = functions_mk;
-    menu = false;
-   ,
-   
-   
-     mode = functions_mk;
-     if(mode==" ", mode = "draw");
-     step = 0;
-     menu = false;
-     p0 = mouse();
+      //undo
+      mode = "draw";
+      menu = false;
+      if(length(savedtrafos)>=1,
+         savedtrafos = savedtrafos_(1..(length(savedtrafos)-1)
+                                   );
+         colorplot("loop",[0,0,0,0]);
+        );
+      ,
+
+      if(length(functions_mk)==3, //color
+         mode = "draw";
+         drawcolor = functions_mk;
+         menu = false;
+         ,
 
 
-     //Trafos = Trafos :> [[1,0,0],[0,1,-1],[0,0,1]];
-     //N = length(Trafos);
-   
- ));
- 
+         mode = functions_mk;
+         if(mode==" ", mode = "draw");
+         step = 0;
+         menu = false;
+         p0 = mouse();
+
+
+         //Trafos = Trafos :> [[1,0,0],[0,1,-1],[0,0,1]];
+         //N = length(Trafos);
+
+        ));
+
 
    ,
 
@@ -365,37 +356,33 @@ errc(stationary);
          resetmode();
         );
      );
-     
-     if(mode=="⇹",
-        if(step==1,
-           addtrafo(previewtrafo);
-           hasrefl = true;
-           othergoodv = goodv;
-           resetmode();
-          );
-       );
-       
-       
-     if(mode=="⇉",
-        if(step==3,
-           addtrafo(previewtrafo);
-           resetmode();
-          );
-       );
-       
-       if(mode=="↺",
-          if(step==1,
-             addtrafo(previewtrafo);
-             resetmode();
-            );
-         );
+
+   if(mode=="⇹",
+      if(step==1,
+         addtrafo(previewtrafo);
+         othergoodv = goodv;
+         resetmode();
+        );
+     );
+
+
+   if(mode=="⇉",
+      if(step==3,
+         addtrafo(previewtrafo);
+         resetmode();
+        );
+     );
+
+   if(mode=="↺",
+      if(step==1,
+         addtrafo(previewtrafo);
+         resetmode();
+        );
+     );
 
    step = step+1;
 
- );
-
-
-errc(Trafos);
+  );
       </script>
     
         <script type="text/javascript">
