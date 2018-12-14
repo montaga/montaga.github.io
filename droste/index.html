@@ -15,6 +15,7 @@ spherical = false;
 reset() :=(
   Z = [[1,0],[0,1]];
   M = [[1,0],[0,1]];
+  M = [[-1,-i],[i,1]]*[[-1,0],[0,1]];
   azoom = 0;
   pts = [];
 
@@ -26,13 +27,14 @@ reset() :=(
 
   color = [0,1,0];
 
-  zoom = exp(0);
+  
   doffset = 0;
   goffset = 0;
   resetclock();
   lasttick = seconds();
 );
 reset();
+zoom = exp(0);
 
 project2square(z) :=  z/max(|re(z)|,|im(z)|);
 
@@ -202,13 +204,14 @@ if(spherical,
 </script>
 </head>
 <body onload="change()">
-    <h1>The (spherical) Droste effect</h1>
+<div id="menu" class="overlay">
 <div class="parameters">
 <div>
   Input source:
   <select id="input" class="options" multiple="multiple" onchange="javascript:change();">
     <option selected value="image">Use static image</a>
     <option value="webcam">Use webcam</a>
+    <option value="sphericalimage">Static spherical image</a>
     <option value="spherical">Spherical webcam (Theta)</a>
     <option value="sphericalblender">Spherical (Theta Blender)</a>
   </select>
@@ -226,7 +229,6 @@ if(spherical,
   <option value="droste" selected>Droste</option>
   <option value="twisteddroste">Twisted Droste</option>
   <option value="manualf">Enter a manual function</option>
-">twisted Droste</option>
 </select>
 </div>
 </div>
@@ -235,24 +237,21 @@ if(spherical,
   <span id="speedoption">speed: <input type="range" id="doffset" min="-1.1" max="1.1" step="0.1" value="0"></input></span>
   <span id="toleranceoption" hidden>tolerance: <input type="range" id="tolerance" min="0.0001" max=".5" step="0.001" value="0.1"></input></span>
 </p>
-<p id="dragdrop">
+<!--<p id="dragdrop">
   You can apply the effect on your images if you <b>drag and drop</b> them here!
-</p>
+</p>-->
 <p id="foption" hidden>
   f(z) = <input type="text" id="finp" value="z^2" onkeypress="if((event.which ? event.which : event.keyCode)==13) { change() }" size="24"></input>
 </p>
-  <p>
-  <div id="outer">
-    <div id="CSCanvas" onwheel="cdy.evokeCS('onScroll(' + event.deltaY  + ')');"></div>
-  </div>
-  </p>
   <div class="buttons">
-    <div class="mybutton" id="reset">Reset Droste</div>
-    <div class="mybutton" id="fs">Enter Fullscreen</div>
+    <div class="mybutton" id="reset">⎌ Reset</div>
+    <div class="mybutton" id="fs">⇱ Fullscreen</div>
+    <div class="mybutton" id="showinfo">ⓘ Information</div>
   </div>
-  <p>
+</div>
+<div id="info" class="overlay">
   <div class="author">  
-    Author: <a href="https://www-m10.ma.tum.de/bin/view/Lehrstuhl/AaronMontag">Aaron Montag<p> <img src="author.jpg"></p></img></a>
+    Author: <a href="http://aaron.montag.info">Aaron Montag<p> <img src="author.jpg"></p></img></a>
   </div>
   </p>
   
@@ -272,7 +271,10 @@ In 2002 the Dutch mathematicians Hendrik Lenstra and Bart de Smit <a href="http:
   <p>
     Matt Parker and Henry Segerman made <a href="https://www.youtube.com/watch?v=Yp12c3-IL-I">an awesome demonstration of this effect in a YouTube-video.</a>
   </p>
-
+</div>
+    <div id="CSCanvas" onwheel="cdy.evokeCS('onScroll(' + event.deltaY  + ')');"></div>
+  
+  
   
   <script type="text/javascript">
   
@@ -282,7 +284,7 @@ In 2002 the Dutch mathematicians Hendrik Lenstra and Bart de Smit <a href="http:
     language: "en",
     csconsole: false,
     autoplay: true,
-    images: {image: "image.jpg"},
+    images: {image: "image.jpg", spherical: "spherical.jpg"},
     defaultAppearance: {
     },
     geometry: [
@@ -316,12 +318,12 @@ In 2002 the Dutch mathematicians Hendrik Lenstra and Bart de Smit <a href="http:
   function change() {
     var input = readselected("input");
     if(lastinput!=input) {
-      document.getElementById("selectionmode").selectedIndex = 0;
+      document.getElementById("selectionmode").selectedIndex = 1;
     }
     var selectionmode = readselected("selectionmode");
     var transformmode = readselected("transformmode");
-    var spherical = (input=="spherical" || input=="sphericalblender");
-    var imagemode = (input=="image");
+    var spherical = (input=="spherical" || input=="sphericalblender" || input=="sphericalimage");
+    var imagemode = (input=="image" % input=="sphericalimage");
     cdy.evokeCS(`
       spherical = ${spherical};
       imagemode = ${imagemode};
@@ -333,6 +335,7 @@ In 2002 the Dutch mathematicians Hendrik Lenstra and Bart de Smit <a href="http:
       
     if(input=="image"){
       cdy.evokeCS(`
+        image = "image";
         h = imagesize(image)_2/imagesize(image)_1;
         readcamera(z) := (
           imagergb([-1,-h], [1,-h], image, (re(z), im(z)), repeat->true);
@@ -348,7 +351,9 @@ In 2002 the Dutch mathematicians Hendrik Lenstra and Bart de Smit <a href="http:
         );
       `);
     } else if(input=="spherical") {
+      document.getElementById("zoom").value = 1;
       cdy.evokeCS(`
+        zoom = exp(1);
         readcamera(z) := (
           regional(latlon, phi, lambda);
           latlon = complex2latlon(i*z);
@@ -362,10 +367,22 @@ In 2002 the Dutch mathematicians Hendrik Lenstra and Bart de Smit <a href="http:
         );
       `);
     } else if(input=="sphericalblender") {
+      document.getElementById("zoom").value = 1;
       cdy.evokeCS(`
+        zoom = exp(1);
         readcamera(z) := (
           latlon = complex2latlon(z);
           imagergb([-pi-0.005,0], [pi+0.005,0], video, (latlon_2, (latlon_1+pi/2)*(2*imagesize(video)_2/imagesize(video)_1)));
+        );
+      `);
+    } else if(input=="sphericalimage") {
+      document.getElementById("zoom").value = 1;
+      cdy.evokeCS(`
+        zoom = exp(1);
+        image="spherical";
+        readcamera(z) := (
+          latlon = complex2latlon(z);
+          imagergb([-pi-0.005,0], [pi+0.005,0], image, (latlon_2, (-latlon_1+pi/2)*(2*imagesize(image)_2/imagesize(image)_1)));
         );
       `);
     }
@@ -473,7 +490,7 @@ for the Droste-area and press ENTER when you are done");
       } else if(selectionmode=="greenscreen") {
       cdy.evokeCS(`f(z):=(
               z = ${spherical? 'moeb(T, z)' :  '(z-center)'};
-              z = z/exp(4*zoom+mod(goffset,zoom)); //zoom in
+              z = z/exp(2*zoom+mod(goffset,zoom)); //zoom in
               run = true;
               col = [0,0,0];
               gv = 1;
@@ -592,6 +609,14 @@ for the Droste-area and press ENTER when you are done");
   };
   document.getElementById("reset").onclick = function() {
       cdy.evokeCS(`reset();`);
+  };
+  document.getElementById("showinfo").onclick = function() {
+      var el = document.getElementById("info");
+      if (el.style.display === "none") {
+        el.style.display = "block";
+      } else {
+        el.style.display = "none";
+      }
   };
   
 
