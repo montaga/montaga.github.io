@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        
+        <title>Exported from https://cindyjs.org/editor/</title>
+        <style type="text/css">
+            body {
+                margin: 0px;
+                padding: 0px;
+            }
+            
+            #CSCanvas {
+                width: 100vw; height: 100vh;
+            }
+        </style>
+        <script type="text/javascript" src="Cindy.js"></script>
+        <script type="text/javascript" src="CindyGL.js"></script>
+        
+        
+      <script id="csinit" type="text/x-cindyscript">
+L = (-2,-2); //corners for computed texture
+R = (2,-2);
+createimage("seed", 2048, 2048);
+createimage("loop", 2048, 2048);
+
+colorplot(L,R,"loop",
+          if(|#|<.04,[.3,.3,.3,1],[0,0,0,0])
+         );
+
+resetclock();
+
+
+menu = false;
+menucenter = (0,0);
+
+//Trafos = Trafos;
+savedtrafos = [];
+functions = ["⥅", "⇉", "↺", "⇹", [1,.6,.3], [.2,.8,.2], [.3,.3,.7], [1,1,1],"⎌", " "];
+
+addtrafo(T) := (
+  //if(Trafos == Trafos0, Trafos = []);
+  savedtrafos = savedtrafos :> T;
+);
+
+resetmode() := (
+  mode = "draw";
+  msg = "";
+  step = 0;
+  previewtrafo = 0;
+  preview = false;
+  lastmouse = (0,123123);
+);
+
+goodv = 0;
+resetmode();
+dointerpolate = true;
+isifs = false;
+
+drawcolor = [.5,.5,.8];
+applytrafo(T, p) := (
+  h = T*[p_1,p_2,1];
+  [h_1,h_2]/h_3;
+);
+      </script>
+      <script id="csdraw" type="text/x-cindyscript">
+
+stationary = (mouse()==lastmouse);
+lastmouse = mouse();
+
+Trafos = savedtrafos;
+if(preview, Trafos = Trafos :> previewtrafo;);
+
+if(length(Trafos)==0,
+   Trafos = [
+     [ [1,0,0],[0,1,0],[0,0,1]]
+   ];
+  );
+
+N = length(Trafos);
+colorplot(L,R,"loop",
+          /*color = if(preview,
+            imagergba(L,R,interpolate->dointerpolate,"seed",#),
+            imagergba(L,R,interpolate->dointerpolate,"loop",#)
+          );*/
+          
+          color = imagergba(L,R,interpolate->dointerpolate,if(preview,"seed","loop"),#);
+          
+          //if(preview, color = color+[.1,.0,0,.1]);
+          
+          //old = imagergba(L,R,interpolate->dointerpolate,"loop",#);
+
+          //colors = c0;
+          //mt = 0;
+
+          
+          forall(1..N, k, 
+                 other = imagergba(L,R,interpolate->dointerpolate,"loop",Trafos_k*[#_1,#_2,1]);
+                 //other = other*(other.a+3)/4;
+                 
+                 if(preview, other = other*.95,
+                   other.a = other.a-.1;
+                 );
+                 if(other.a>color.a,// & (other.a1 % isifs),  
+                    color = other;
+                    /*  mother_1=1-mother_1;
+                    mother_2=1-mother_2;
+                    mother_3=1-mother_3;*/
+                   )
+                );
+          /*if(preview & !stationary,
+            mother = mother*.5;
+          );
+          
+          if(preview, //& !stationary,
+             //mother = [0,0,0,0];
+             //mother.a = mother.a-.1;
+             old = [0,0,0,0];
+            );
+          old = [0,0,0,0];
+          */
+          //if(preview,color.a = color.a*.99);
+          color
+         );
+
+colorplot(
+  imagergb(L,R,interpolate->dointerpolate,"loop",#)
+);
+
+if(menu & |mouse()-menucenter|>.5,
+   menu = false;
+  );
+
+if(menu,
+   fillcircle(menucenter, .25, color->[1,1,1], alpha->0.3);
+
+   mk = mod(round(arctan2(mouse()-menucenter)*length(functions)/(2*pi))-1,length(functions))+1;
+   forall(1..length(functions),k,
+          c = menucenter+.15*gauss(exp(k*2*pi*i/length(functions)));
+
+          if(length(functions_k)==3,
+             //color
+
+             draw(c, size->12, color->if(round(mk)==k,[1,0.8,0],[0,0,0]), border->false);
+             draw(c, size->10, color->functions_k, border->false);
+
+
+             ,
+             c = c+(0,-.05);
+             S=35;
+             drawtext(size->S,align->"mid",c+(.01,0)/5, functions_k, color->[1,1,1]);
+             drawtext(size->S,align->"mid",c+(-.01,0)/5, functions_k, color->[1,1,1]);
+             drawtext(size->S,align->"mid",c+(0,.01)/5, functions_k, color->[1,1,1]);
+             drawtext(size->S,align->"mid",c+(0,-.01)/5, functions_k, color->[1,1,1]);
+             drawtext(size->S,align->"mid",c, functions_k, color->  if(round(mk)==k,[1,0.8,0],[0,0,0]));
+
+            )
+
+
+
+         );
+  );
+
+if(mode=="⥅",
+   if(step==0,
+      draw(p0);
+      p1 = mouse();
+      orbit = apply(savedtrafos, T, applytrafo(T,p0));
+      //errc(orbit);
+      forall(orbit, o,
+             draw(o, color->[1,1,1], alpha->.3);
+             if(|mouse()-o|<.05, p1=o);//snap
+            );
+      if(goodv!=0,
+         target = p0*goodv;
+         current = p1*goodv;
+         d = target-current;
+         if(|d|<.1,
+            p1 = p1+d*goodv;
+           );
+        );
+      draw(p0,p1, arrow->true, alpha->.8, size->4, color->[1,1,1]);
+
+      previewtrafo = map(p1, p0);
+      preview = true;
+      msg = ("specify offset for translation");
+     );
+  );
+
+if(mode=="⇹",
+   if(step==0,
+      msg = ("select preimage point for reflection");
+      p0=mouse();
+     );
+   if(step==1,
+      draw(p0);
+      p1 = mouse();
+      orbit = apply(savedtrafos, T, applytrafo(T,p0));
+      //errc(orbit);
+      forall(orbit, o,
+             draw(o, color->[1,1,1], alpha->.3);
+             if(|mouse()-o|<.05, p1=o);//snap
+            );
+
+      //snap to other refl if there is some
+
+      if(othergoodv!=0 & p1 != p0,
+         cangle = arctan2(p1-p0);
+         tangle0 = arctan2(othergoodv)+pi;
+
+         //draw(p0, p0+gauss(exp(i*tangle0)), color->red);
+         forall([0°,30°,60°,90°,120°,180°], k,
+                forall([-1,1],sign,
+                       tangle = mod(tangle0+sign*k+pi,360°)-pi;
+                       if(|tangle-cangle|<10°,
+                          p1 = p0+|p1-p0|*gauss(exp(i*tangle)); //snap
+                         );
+                      );
+               );
+        );
+
+      draw(p0,p1, arrow->true, alpha->.8, size->4, color->[1,1,1]);
+      draw(p1,p0, arrow->true, alpha->.8, size->4, color->[1,1,1]);
+
+      mid = (p0+p1)/2;
+      v = p1-p0;
+      v = gauss(i*complex(v));
+      goodv = v/|v|;
+      draw(mid-v,mid+v);
+      previewtrafo = map(p0,mid,p0+v,p1,mid,p1+v);
+      preview = true;
+      msg = ("select image of reflection");
+     );
+  );
+
+if(mode=="⇉",
+   if(step==0,
+      //dointerpolate = true;
+      isifs = true;
+      p0 = mouse();
+      msg = ("select preimage of first point of similarity");
+     );
+   if(step==1,
+      draw(p0);
+      p1 = mouse();
+      draw(p0,p1, arrow->true, alpha->.8, size->4, color->[1,1,1]);
+      msg = ("select image of first point of similarity");
+     );
+   if(step==2,
+      p2 = mouse();
+      draw(p0,p1, arrow->true, alpha->.8, size->4, color->[1,1,1]);
+      msg = ("select preimage of second point of similarity");
+     );
+   if(step==3,
+      draw(p0);
+      p3 = mouse();
+      draw(p0,p1, arrow->true, alpha->.8, size->4, color->[1,1,1]);
+      draw(p2,p3, arrow->true, alpha->.8, size->4, color->[1,1,1]);
+
+      previewtrafo = map(p1,p3,p0,p2);
+      preview = true;
+      msg = ("select image of second point of similarity");
+     );
+  );
+
+if(mode=="↺",
+   if(step==0,
+      p0 = mouse();
+      msg = ("select center of rotation");
+     );
+   if(step==1,
+      draw(p0);
+      p1 = mouse();
+      if(p1==p0, p1 = p0+(1,0));
+      v = p1-p0;
+      v = v/|v|;
+      p1 = p0+v;
+
+      alpha = arctan2(v);
+
+      goodangles = [60°,90°,120°,-60°,-90°,-120°, 180°,0°];
+      forall(goodangles, gangle,
+             if(|alpha-gangle|<10°,
+                //alpha = gangle;
+                p1 = p0 + gauss(exp(i*gangle));
+               );
+            );
+
+      draw(p0,p1, arrow->true, alpha->.8, size->4, color->[1,1,1]);
+      drawcircle(p0,1);
+      draw(p0,p0+(1,0));
+
+      previewtrafo = map(p0,p1,p0,p0+(1,0));
+      preview = true;
+      msg = ("specify angle of transformation");
+     );
+  );
+  
+  errc(msg);
+  drawtext((-1,-1), msg, color->[1,1,1]);
+      </script>
+      <script id="csmousedrag" type="text/x-cindyscript">
+      if(mode=="draw",
+   colorplot(L,R,"loop",
+             if(|#-mouse()|<.05,[drawcolor_1,drawcolor_2,drawcolor_3,seconds()+50],
+             imagergba(L,R,interpolate->dointerpolate,"loop",#)
+           );
+    );
+   /*
+    colorplot(L,R,"loop",
+              if(|#-mouse()|<.05,[drawcolor_1,drawcolor_2,drawcolor_3,1],imagergba(L,R,interpolate->dointerpolate,"loop",#));
+            );*/
+   //colorplot(L,R,"loop",.8*imagergba(L,R,interpolate->dointerpolate,"loop",#));
+
+  );
+      </script>
+      <script id="csmouseclick" type="text/x-cindyscript">
+      if(menu,
+   mk = mod(round(arctan2(mouse()-menucenter)*length(functions)/(2*pi))-1,length(functions))+1;
+   //add(functions_mk);
+
+   if(functions_mk == "⎌",
+      //undo
+      mode = "draw";
+      menu = false;
+      if(length(savedtrafos)>=1,
+         savedtrafos = savedtrafos_(1..(length(savedtrafos)-1)
+                                   );
+         //colorplot("loop",[0,0,0,0]);
+        );
+      ,
+
+      if(length(functions_mk)==3, //color
+         //colorplot("seed", [0,0,0,0]);
+         mode = "draw";
+         drawcolor = functions_mk;
+         menu = false;
+         ,
+
+
+         mode = functions_mk;
+         if(mode==" ", mode = "draw");
+         step = 0;
+         menu = false;
+         p0 = mouse();
+         
+         errc("copy current loop to seed");
+         colorplot(L,R,"seed", imagergba(L,R,"loop",#));
+         
+
+
+         //Trafos = Trafos :> [[1,0,0],[0,1,-1],[0,0,1]];
+         //N = length(Trafos);
+
+        ));
+
+
+   ,
+
+   if(mode=="draw",
+      menu = true;
+      menucenter = mouse();
+     );
+
+   if(mode=="⥅",
+      if(step==0,
+         addtrafo(previewtrafo);
+         resetmode();
+        );
+     );
+
+   if(mode=="⇹",
+      if(step==1,
+         addtrafo(previewtrafo);
+         othergoodv = goodv;
+         resetmode();
+        );
+     );
+
+
+   if(mode=="⇉",
+      if(step==3,
+         addtrafo(previewtrafo);
+         resetmode();
+        );
+     );
+
+   if(mode=="↺",
+      if(step==1,
+         addtrafo(previewtrafo);
+         resetmode();
+        );
+     );
+
+   step = step+1;
+
+  );
+      </script>
+    
+        <script type="text/javascript">
+          var cdy = CindyJS({
+            scripts: "cs*",
+            angleUnit: "°",
+            exclusive: "true",
+            geometry: [
+
+            ],
+            ports: [
+              {id: "CSCanvas", transform: [{visibleRect: [-2, -2, 2, 2]}], background: "rgb(168,176,192)"}
+            ],
+            csconsole: false,
+            use: [
+              "CindyGL"
+            ],
+            autoplay: true,
+            behavior: [
+
+            ]
+          });
+        </script>
+    </head>
+    <body>
+        <div id="CSCanvas"></div>
+    </body>
+    </html>
+  
