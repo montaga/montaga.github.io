@@ -323,7 +323,7 @@ In 2002 the Dutch mathematicians Hendrik Lenstra and Bart de Smit <a href="http:
     var selectionmode = readselected("selectionmode");
     var transformmode = readselected("transformmode");
     var spherical = (input=="spherical" || input=="sphericalblender" || input=="sphericalimage");
-    var imagemode = (input=="image" % input=="sphericalimage");
+    var imagemode = (input=="image" || input=="sphericalimage");
     cdy.evokeCS(`
       spherical = ${spherical};
       imagemode = ${imagemode};

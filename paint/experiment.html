@@ -40,6 +40,9 @@ functions = ["⥅", "⇉", "↺", "⇹", [1,.6,.3], [.2,.8,.2], [.3,.3,.7], [1,1
 
 addtrafo(T) := (
   //if(Trafos == Trafos0, Trafos = []);
+  colorplot(L,R,"loop",
+    imagergba(L,R,interpolate->dointerpolate,"seed",#)
+  );
   savedtrafos = savedtrafos :> T;
 );
 
@@ -98,7 +101,7 @@ colorplot(L,R,"loop",
                  other = imagergba(L,R,interpolate->dointerpolate,"loop",Trafos_k*[#_1,#_2,1]);
                  //other = other*(other.a+3)/4;
                  
-                 if(preview, other = other*.95,
+                 if(preview, other = other*.9,
                    other.a = other.a-.1;
                  );
                  if(other.a>color.a,// & (other.a1 % isifs),  
