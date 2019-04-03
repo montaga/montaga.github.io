@@ -2,18 +2,15 @@
     <html>
     <head>
         <meta charset="UTF-8">
-        
+    <!-- Author: Aaron Montag-->    
         <title>Exported from https://cindyjs.org/editor/</title>
         <style type="text/css">
             body {
                 margin: 0px;
                 padding: 0px;
             }
-            
-            #CSCanvas {
-                width: 100vw; height: 100vh;
-            }
         </style>
+        <link rel="stylesheet" href="CindyJS.css">
         <script type="text/javascript" src="Cindy.js"></script>
         <script type="text/javascript" src="CindyGL.js"></script>
         
@@ -24,11 +21,11 @@ L = (-3,-3); //corners for computed texture
 R = (3,-3);
 createimage("seed", 2048, 2048);
 createimage("loop", 2048, 2048);
-
+/*
 colorplot(L,R,"seed",
           if(|#|<.04,[.3,.3,.3,1],[0,0,0,0])
          );
-
+*/
 resetclock();
 
 
@@ -45,6 +42,7 @@ addtrafo(T) := (
 );
 
 resetmode() := (
+  //mode = "nothing";
   mode = "draw";
   msg = "";
   step = 0;
@@ -80,41 +78,19 @@ if(length(Trafos)==0,
 
 N = length(Trafos);
 colorplot(L,R,"loop",
-          seed = imagergba(L,R,interpolate->dointerpolate,"seed",#);
-          //old = imagergba(L,R,interpolate->dointerpolate,"loop",#);
-
-          //colors = c0;
-          //mt = 0;
-
-          mother = [0,0,0,-.1];
+          best = imagergba(L,R,interpolate->dointerpolate,"seed",#);
           forall(1..N, k, 
                  other = imagergba(L,R,interpolate->dointerpolate,"loop",Trafos_k*[#_1,#_2,1]);
-                 other = other*(other.a+3)/4;
-                 if(other.a>mother.a,// & (other.a1 % isifs),  
-                    mother = other;
-                    /*  mother_1=1-mother_1;
-                    mother_2=1-mother_2;
-                    mother_3=1-mother_3;*/
+                 //other = other*(other.a+3)/4;
+                 other = other*other.a;
+                 if(|abs(det(Trafos_k))-1|<.001,// likely to be an euclidean map
+                    other = other*.99;//fade out
+                 );
+                 if(other.a>best.a, 
+                    best = other;
                    )
                 );
-          /*if(preview & !stationary,
-            mother = mother*.5;
-          );
-          
-          if(preview, //& !stationary,
-             //mother = [0,0,0,0];
-             //mother.a = mother.a-.1;
-             old = [0,0,0,0];
-            );
-          old = [0,0,0,0];
-          */
-          mother.a = mother.a*.99;
-          //mother.a = mother.a-.001;
-          mt = max(seed.a, mother.a);
-           if(mt==seed.a,
-              seed,
-              mother
-             )
+          best
          );
 
 colorplot(
@@ -134,7 +110,6 @@ if(menu,
 
           if(length(functions_k)==3,
              //color
-
              draw(c, size->12, color->if(round(mk)==k,[1,0.8,0],[0,0,0]), border->false);
              draw(c, size->10, color->functions_k, border->false);
 
@@ -147,11 +122,7 @@ if(menu,
              drawtext(size->S,align->"mid",c+(0,.01)/5, functions_k, color->[1,1,1]);
              drawtext(size->S,align->"mid",c+(0,-.01)/5, functions_k, color->[1,1,1]);
              drawtext(size->S,align->"mid",c, functions_k, color->  if(round(mk)==k,[1,0.8,0],[0,0,0]));
-
             )
-
-
-
          );
   );
 
@@ -290,7 +261,6 @@ if(mode=="↺",
      );
   );
   
-  errc(msg);
   drawtext((-1,-1), msg, color->[1,1,1]);
       </script>
       <script id="csmousedrag" type="text/x-cindyscript">
@@ -318,8 +288,7 @@ if(mode=="↺",
       mode = "draw";
       menu = false;
       if(length(savedtrafos)>=1,
-         savedtrafos = savedtrafos_(1..(length(savedtrafos)-1)
-                                   );
+         savedtrafos = savedtrafos_(1..(length(savedtrafos)-1));
          colorplot("loop",[0,0,0,0]);
         );
       ,
@@ -332,21 +301,16 @@ if(mode=="↺",
 
 
          mode = functions_mk;
-         if(mode==" ", mode = "draw");
+         if(mode==" ", mode = "nothing");
          step = 0;
          menu = false;
          p0 = mouse();
-
-
-         //Trafos = Trafos :> [[1,0,0],[0,1,-1],[0,0,1]];
-         //N = length(Trafos);
-
         ));
 
 
    ,
 
-   if(mode=="draw",
+   if(mode=="draw" % mode=="nothing",
       menu = true;
       menucenter = mouse();
      );
@@ -366,7 +330,6 @@ if(mode=="↺",
         );
      );
 
-
    if(mode=="⇉",
       if(step==3,
          addtrafo(previewtrafo);
@@ -382,29 +345,22 @@ if(mode=="↺",
      );
 
    step = step+1;
-
   );
       </script>
     
         <script type="text/javascript">
           var cdy = CindyJS({
             scripts: "cs*",
-            angleUnit: "°",
-            exclusive: "true",
-            geometry: [
-
-            ],
+            geometry: [],
             ports: [
-              {id: "CSCanvas", transform: [{visibleRect: [-2, -2, 2, 2]}], background: "rgb(168,176,192)"}
+              {id: "CSCanvas", fill: "window", transform: [{visibleRect: [-2, -2, 2, 2]}]}
             ],
             csconsole: false,
             use: [
               "CindyGL"
             ],
             autoplay: true,
-            behavior: [
-
-            ]
+            behavior: []
           });
         </script>
     </head>
