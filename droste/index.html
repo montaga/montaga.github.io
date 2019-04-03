@@ -36,8 +36,6 @@ reset() :=(
 reset();
 zoom = exp(0);
 
-project2square(z) :=  z/max(|re(z)|,|im(z)|);
-
 
 //0 -> a, oo -> b, 1 -> c
 moebhelp(a, b, c) := (
@@ -328,65 +326,66 @@ In 2002 the Dutch mathematicians Hendrik Lenstra and Bart de Smit <a href="http:
       spherical = ${spherical};
       imagemode = ${imagemode};
     `);
-    if(!imagemode & !video) {
+    if(!imagemode && !video) {
       cdy.evokeCS(`video = camera video();`);
       video = true;
     }
-      
-    if(input=="image"){
-      cdy.evokeCS(`
-        image = "image";
-        h = imagesize(image)_2/imagesize(image)_1;
-        readcamera(z) := (
-          imagergb([-1,-h], [1,-h], image, (re(z), im(z)), repeat->true);
-        );
-      `);
-    } else if(input=="webcam") {
-      cdy.evokeCS(`
-        h = imagesize(video)_2/imagesize(video)_1;
-        h = if(isreal(h), h, 9/16);
-        errc(h);
-        readcamera(z) := (
-          imagergb([-1,-h], [1,-h], video, (re(z), im(z)), repeat->true);
-        );
-      `);
-    } else if(input=="spherical") {
-      document.getElementById("zoom").value = 1;
-      cdy.evokeCS(`
-        zoom = exp(1);
-        readcamera(z) := (
-          regional(latlon, phi, lambda);
-          latlon = complex2latlon(i*z);
-          phi = latlon_1;
-          lambda = -latlon_2;
-          t1 = (-.505,.065) + (cos(lambda), sin(lambda))*(pi/2-phi)*.2779; //phi>0
-          t2 = (.505,.065) + (cos(pi-lambda), sin(pi-lambda))*(pi/2+phi)*.2779; //phi<0
-          w1 = exp(20*phi);
-          w2 = exp(-20*phi);  
-          (w1/(w1+w2) * imagergb([-1,-720/1280], [1,-720/1280], video, t1) + w2/(w1+w2) * imagergb([-1,-720/1280], [1,-720/1280], video, t2));
-        );
-      `);
-    } else if(input=="sphericalblender") {
-      document.getElementById("zoom").value = 1;
-      cdy.evokeCS(`
-        zoom = exp(1);
-        readcamera(z) := (
-          latlon = complex2latlon(z);
-          imagergb([-pi-0.005,0], [pi+0.005,0], video, (latlon_2, (latlon_1+pi/2)*(2*imagesize(video)_2/imagesize(video)_1)));
-        );
-      `);
-    } else if(input=="sphericalimage") {
-      document.getElementById("zoom").value = 1;
-      cdy.evokeCS(`
-        zoom = exp(1);
-        image="spherical";
-        readcamera(z) := (
-          latlon = complex2latlon(z);
-          imagergb([-pi-0.005,0], [pi+0.005,0], image, (latlon_2, (-latlon_1+pi/2)*(2*imagesize(image)_2/imagesize(image)_1)));
-        );
-      `);
+    if(lastinput!=input) {
+      if(input=="image"){
+        cdy.evokeCS(`
+          image = "image";
+          h = imagesize(image)_2/imagesize(image)_1;
+          readcamera(z) := (
+            imagergb([-1,-h], [1,-h], image, (re(z), im(z)), repeat->true);
+          );
+        `);
+      } else if(input=="webcam") {
+        cdy.evokeCS(`
+          h = imagesize(video)_2/imagesize(video)_1;
+          h = if(isreal(h), h, 9/16);
+          errc(h);
+          readcamera(z) := (
+            imagergb([-1,-h], [1,-h], video, (re(z), im(z)), repeat->true);
+          );
+        `);
+      } else if(input=="spherical") {
+        document.getElementById("zoom").value = 1;
+        cdy.evokeCS(`
+          zoom = exp(1);
+          readcamera(z) := (
+            regional(latlon, phi, lambda);
+            latlon = complex2latlon(i*z);
+            phi = latlon_1;
+            lambda = -latlon_2;
+            t1 = (-.505,.065) + (cos(lambda), sin(lambda))*(pi/2-phi)*.2779; //phi>0
+            t2 = (.505,.065) + (cos(pi-lambda), sin(pi-lambda))*(pi/2+phi)*.2779; //phi<0
+            w1 = exp(20*phi);
+            w2 = exp(-20*phi);  
+            (w1/(w1+w2) * imagergb([-1,-720/1280], [1,-720/1280], video, t1) + w2/(w1+w2) * imagergb([-1,-720/1280], [1,-720/1280], video, t2));
+          );
+        `);
+      } else if(input=="sphericalblender") {
+        document.getElementById("zoom").value = 1;
+        cdy.evokeCS(`
+          zoom = exp(1);
+          readcamera(z) := (
+            latlon = complex2latlon(z);
+            imagergb([-pi-0.005,0], [pi+0.005,0], video, (latlon_2, (latlon_1+pi/2)*(2*imagesize(video)_2/imagesize(video)_1)));
+          );
+        `);
+      } else if(input=="sphericalimage") {
+        document.getElementById("zoom").value = 1;
+        cdy.evokeCS(`
+          zoom = exp(1);
+          image="spherical";
+          readcamera(z) := (
+            latlon = complex2latlon(z);
+            imagergb([-pi-0.005,0], [pi+0.005,0], image, (latlon_2, (-latlon_1+pi/2)*(2*imagesize(image)_2/imagesize(image)_1)));
+          );
+        `);
+      }
     }
-
+    
     if(selectionmode=="rectangle") {
       cdy.evokeCS(`
         if(selectionmode,
