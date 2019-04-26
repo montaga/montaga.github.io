@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <style type="text/css">
+            body {
+                margin: 0px;
+                padding: 0px;
+            }
+            
+            #CSCanvas {
+              /*width: 100vh;*/
+              height: 100vh;
+              flex-grow: 20;
+              /*background-color: rgba(120, 0, 0, 0.5);*/
+            }
+            
+            #container {
+              width: 100%;
+              height: 100%;
+              display: flex;
+            }
+            
+            #controls {
+              flex-grow: 1;
+              display: flex;
+              flex-direction: column;
+              align-items: stretch;
+            }
+            
+            .box {
+              background-color: lightgray;
+              margin: 10px;
+              flex-grow: 1;
+            }
+            
+            .box:hover {
+              background-color: gray;
+            }
+            
+        </style>
+        <script type="text/javascript" src="Cindy.js"></script>
+        <script type="text/javascript" src="CindyGL.js"></script>
+        
+        <script id="csinit" type="text/x-cindyscript">
+          use8bittextures(); //makes everything a bit faster
+          
+          identity = [[1,0,0],[0,1,0],[0,0,1]];
+          
+          upperleft=(screenbounds()_1).xy;
+          lowerright=(screenbounds()_3).xy;
+          resolutionX=round(screenresolution()*(lowerright.x-upperleft.x));
+          resolutionY=round(screenresolution()*(upperleft.y-lowerright.y));
+          L = (screenbounds()_4).xy; //corners for computed texture
+          R = (screenbounds()_3).xy;
+
+          createimage("seed", resolutionX, resolutionY);
+          createimage("loop", resolutionX, resolutionY);
+
+          addtrafo(T) := (
+            savedtrafos = savedtrafos :> T;
+          );
+
+          dointerpolate = true;
+
+          applytrafo(T, p) := (
+            h = T*[p_1,p_2,1];
+            [h_1,h_2]/h_3;
+          );
+          
+          drawmode() := (
+            mode = "draw";
+            msg = "use mouse or fingers to draw something";
+            preview = false;
+            taptoadd = false;
+            previewtrafo = identity;
+          );
+          
+          trafomode() := (
+            mode = "trafo";
+            msg = "use mouse or fingers to specify transformation";
+          );
+          
+          undo() := (
+            if(length(savedtrafos)>=1,
+              savedtrafos = savedtrafos_(1..(length(savedtrafos)-1));
+            );
+          );
+          
+          reset() := (
+            colorplot(L,R,"seed",
+                  if(|#|<.03,[.3,.3,.3,1],[0,0,0,0])
+            );
+            colorplot(L,R,"loop",[0,0,0,0]);
+
+            //Trafos = Trafos;
+            savedtrafos = [];
+    
+            down = dict();
+            cur = dict();
+            lastmouse = dict();
+
+            usedfingers = [];
+            taptoadd = false;
+
+            drawmode();
+          );
+          reset();
+    
+        
+updateT() := (
+  cur = put(cur, multiid(), mouse(id->multiid()));
+  if(taptoadd,
+    if(|get(cur, multiid())-get(down, multiid())|>.05, taptoadd = false; preview = true;);
+  );
+  
+  start = [];
+  end = [];
+  
+  usedfingers = usedfingers ++ (multiidlist() -- usedfingers);//enlarge set of usedfingers
+  errc(usedfingers);
+  forall(usedfingers, id,
+    start = start :> get(down, id);
+    end = end :> get(cur, id);
+  );
+  n = length(usedfingers);
+  T = identity;
+  if(n == 1,
+    T = map(start_1, end_1);
+  );
+  if(n == 2,
+    T = map(start_1, start_2, end_1, end_2);
+  );
+  if(n == 3,
+    T = map(start_1, start_2, start_3, end_1, end_2, end_3);
+  );
+  if(n >= 4,
+    T = map(start_1, start_2, start_3, start_4, end_1, end_2, end_3, end_4);
+  );
+  previewtrafo = inverse(T);
+);
+
+
+        </script>
+        
+        <script id="csdraw" type="text/x-cindyscript">
+        
+
+        Trafos = savedtrafos;
+        if(preview, Trafos = Trafos :> previewtrafo;);
+        if(taptoadd, Trafos = Trafos :> candidatetoadd;);
+
+        if(length(Trafos)==0,
+           Trafos = [identity];
+          );
+
+        N = length(Trafos);
+        colorplot(L,R,"loop",
+                  seed = imagergba(L,R,interpolate->dointerpolate,"seed",#);
+                  best = seed;
+                  forall(1..N, k,
+                         origin = Trafos_k*[#_1,#_2,1];
+                         other = imagergba(L,R,interpolate->dointerpolate, "loop", origin);
+                         if(other.a>best.a,// & (other.a1 % isifs),  
+                            best = other;
+                          );
+                        );
+                  best.a = .95*best.a;
+                  best
+        );
+        colorplot(
+          imagergba(L,R,interpolate->dointerpolate,"loop",#)
+        );
+          
+          drawtext((-.9,0), msg);
+          
+          if(mode=="trafo",
+            forall(1..length(start), k,
+              draw(start_k, end_k, arrow->true);
+            );
+          );
+              </script>
+              
+              <script id="csmultidown" type="text/x-cindyscript">
+                if(mode=="trafo",
+                  usedfingers = [];
+                  down = put(down, multiid(), mouse(id->multiid()));
+                  
+                  if(!taptoadd, preview = true;);
+                  updateT();
+                  
+                  msg = "move mouse/fingers to specify transformation";
+                  
+                );
+              </script>
+
+              <script id="csmultidrag" type="text/x-cindyscript">
+                if(mode=="trafo", updateT());
+                if(mode=="draw",
+                  drawcolor = hue(multiid()*sqrt(2));//TODO
+                  
+                  p0 = get(lastmouse, multiid());
+                  p1 = mouse(id->multiid());
+                  v = (p0-p1);
+                  v = v/|v|;
+                  
+                  online(x) := (
+                    (|(v.y,-v.x)*(x-p0)|<.1 & (v*(x-p0))*(v*(x-p1))<0) % |x-p0|<.1 % |x-p1|<.1
+                  );
+                  
+                  if(!isundefined(p0) & !isundefined(p0) & !isundefined(v),
+                    colorplot(L,R,"seed",
+                       if(online(#),
+                        [drawcolor_1,drawcolor_2,drawcolor_3,1],
+                        imagergba(L,R,interpolate->dointerpolate,"seed",#)
+                      );
+                    );
+                  );
+                  
+                  
+                  lastmouse = put(lastmouse,multiid(),mouse(id->multiid()));
+                );
+              </script>
+              
+              <script id="csmultiup" type="text/x-cindyscript">
+              if(mode=="trafo",
+                updateT();
+                if(taptoadd,
+                  addtrafo(candidatetoadd);
+                  msg = "added trafo. Use mouse/fingers to specify another trafo";
+                  taptoadd = false;
+                );
+                if(T!=identity,
+                  msg = "tap to add transformation. Otherwise: try again";
+                  taptoadd = true;
+                  candidatetoadd = previewtrafo;
+                  preview = false;
+                );
+                
+              );
+              
+              lastmouse = dict();
+              lasttime = dict();
+              </script>
+              
+        <script type="text/javascript">
+          var cdy = CindyJS({
+            scripts: "cs*",
+            angleUnit: "°",
+            geometry: [
+              //{name: "A", type: "Free", pos: [-0.14375, 0.265, 1]}
+            ],
+            ports: [{
+              id: "CSCanvas",
+              transform: [{visibleRect: [-10, -10, 10, 10]}],
+              grid: 1,
+              axes: true
+            }],
+            csconsole: false,
+            use: ["CindyGL"],
+            autoplay: true,
+
+          });
+        </script>
+    </head>
+    <body>
+      <div id="container">
+        <div id="controls">
+          <div class="box" onclick="cdy.evokeCS('drawmode()');">
+            Paint!
+          </div>
+          <div class="box" onclick="cdy.evokeCS('trafomode()');">
+            Transformations
+          </div>
+          <div class="box" onclick="cdy.evokeCS('undo()');">
+            undo last transformation
+          </div>
+          <div class="box" onclick="cdy.evokeCS('reset()');">
+            Reset
+          </div>
+          <div>
+            made by Aaron Montag <br> (CC BY-NC-SA 4.0)
+          </div>
+        </div>
+        <div id="CSCanvas"></div>
+      </div>
+    </body>
+  </html>
