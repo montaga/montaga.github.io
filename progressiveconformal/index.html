@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+    <title>Cindy JS</title>
+    <script type="text/javascript" src="Cindy.js"></script>
+    <script type="text/javascript" src="CindyGL.js"></script>
+  </head>
+
+	<body style="font-family:Arial;">
+
+    <h1>A conformal Kaleidoscope</h1>
+
+
+    <script id="csinit" type="text/x-cindyscript">
+      use("CindyGL");
+			iL = (1,-.6);
+			iR = (1.35,-.6);
+
+
+			cross(a, b) := (a_2*b_3-a_3*b_2, a_3*b_1-a_1*b_3, a_1*b_2-a_2*b_1);
+
+			pt2color(z) := (z_1, z_2, 0);
+			color2pt(c) := (c_1, c_2);
+
+      init(p, q, r) := (
+        sign(a) := if(a>0, 1, if(a<0,-1,0));
+
+        spaceType=(sign(q*r+p*r+p*q-p*q*r));//1/p+1/q+1/r-1;
+
+        tmp = (cos(pi/q)+cos(pi/p)*cos(pi/r))/sin(pi/p);
+
+        nb=(1,0,0);
+        nc=(-cos(pi/p), sin(pi/p),0.);
+        na=(-cos(pi/r),-tmp,if(spaceType==0, 0.25, sqrt(abs((tmp+sin(pi/r))*(-tmp+sin(pi/r))))));
+				A = project(cross(nb, nc));
+				B = project(cross(nc, na));
+				C = project(cross(na, nb));
+
+				res = 16;
+				cit = 0;
+				confmap = "fun"+res;
+      );
+
+
+      reflectIfNegative(pos, n) := ( //reflectIfNegatives pos along n if necessary
+        pos -2*min(0., n*pos)*(n.x,n.y,n.z*spaceType)
+      );
+
+      fold(p) := (
+        repeat(20,
+          p = reflectIfNegative(reflectIfNegative(reflectIfNegative(p,
+            na),
+            nb),
+            nc);
+        );
+        p
+      );
+
+      embed(pos) := ( //embed in sphere, RP2, hyperbolid
+        r2 = pos*pos;
+        if(spaceType==1,
+          (pos.x, pos.y, re(sqrt(1-r2))),
+        if(spaceType==0,
+          (pos.x, pos.y, 1),
+        //spaceType==-1
+          (2*pos.x, 2*pos.y, 1+r2)/(1-r2) //poincare to hyperbolid x*x+y*y-z*z=-1
+        ))
+      );
+
+      project(p) := ( //project from sphere, RP2, hyperbolid back to original space
+        if(spaceType==1,
+          (p.x, p.y)/(abs(p)),
+        if(spaceType==0,
+          (p.x, p.y)/(p.z),
+        //spaceType ==-1
+          p = p/abs(sqrt(p.z*p.z-p.y*p.y-p.x*p.x));
+          (p.x, p.y)/(1+p.z)
+        ))
+      );
+
+      color(pos) := (
+        p = embed(pos);
+        r2 = pos*pos;
+        if(abs(spaceType) == 1 & r2>=1.,
+          gray(1.), //outside poincare disc or projected circle
+          fp = project(fold(p)); //corresponding point in fundamental cell
+
+
+          //hue(.3*t+fp.x+fp.y)
+          imagergb(iL, iR, "texture", color2pt(imagergb((-1,-1),(1,-1), confmap, fp)), mipmap->true)
+          *(.7*min(p.z,1)+.3)  //looks a bit more sphere like
+          *if(showfundamentaldomain & na*p>0 & nb*p>0 & nc*p>0, .7, 1)
+        )
+      );
+
+			refll(x, a, b) := (
+			  n = (a.y-b.y,b.x-a.x);
+			  x - (((x-a)*n)/(n*n))*n
+			);
+
+			readc(pos) := (
+				regional(p,q,ct);
+			  p = embed(pos);
+				q = reflectIfNegative(reflectIfNegative(reflectIfNegative(p,
+					na),
+					nb),
+					nc);
+				ct = color2pt(imagergb(interpolate->true, (-1,-1), (1,-1), confmap, project(q)));
+				if(p*na<0,  ct = refll(ct, Q.xy, R.xy));
+				if(p*nb<0,  ct = refll(ct, R.xy, P.xy));
+				if(p*nc<0,  ct = refll(ct, P.xy, Q.xy));
+			  if(|pos,A|<pw,ct=P.xy);
+			  if(|pos,B|<pw,ct=Q.xy);
+			  if(|pos,C|<pw,ct=R.xy);
+			  ct
+			);
+
+
+      init(2,3,6);
+
+			AMAP = map(A, B, C, P, Q, R);
+
+			cres = 16;
+			while(cres<=1024,
+				createimage("fun"+cres, cres, cres);
+				colorplot((-1,-1), (1,-1), "fun"+cres,
+					p = #;
+					hom = AMAP*[p_1, p_2, 1];
+					pt2color( (hom_1, hom_2)/hom_3 )
+				);
+				cres = cres*2;
+			);
+
+			enhanceconformalmapping() := (
+				cit=cit+1;
+				if(cit>30 & res<512,
+					cit = 0;
+					res = res*2;
+				);
+				pw = 2/res;
+				if(spaceType==1,//spherical
+					colorplot((-1,-1),(1,-1), "fun"+res,
+				    p = embed(#);
+						d1 = cross(p, -(1,2,3));
+						d2 = cross(p, d1);
+						d1 = pw*d1/abs(d1);
+						d2 = pw*d2/abs(d2);
+				    pt2color((1/4)*( //create map that is conformal on the surface of the sphere
+				      readc(project(p+d1))+
+				      readc(project(p-d1))+
+				      readc(project(p+d2))+
+				      readc(project(p-d2))
+				    ))
+				  );
+					,
+					//euclidean or hyperbolic
+					colorplot((-1,-1),(1,-1),"fun"+res,
+				    pos = #;
+				    pt2color((1/4)*( //euclidean and poincare are conformal
+				      readc(pos+pw*(1,0))+
+				      readc(pos+pw*(0,1))+
+				      readc(pos+pw*(-1,0))+
+				      readc(pos+pw*(0,-1))
+				    ))
+				  );
+				);
+				confmap = "fun"+res;
+			);
+
+
+      showfundamentaldomain = false;
+
+      //supersampling
+      createimage("image", 1000, 1000);
+    </script>
+
+    <script id="csmousedown" type="text/x-cindyscript">
+      showfundamentaldomain = true;
+    </script>
+    <script id="csmouseup" type="text/x-cindyscript">
+      showfundamentaldomain = false;
+    </script>
+
+    <script id="csmove" type="text/x-cindyscript">
+        draw((1.1,.1),(1.1,.8),color->(0,0,0),size->2);
+        draw((1.2,.1),(1.2,.8),color->(0,0,0),size->2);
+        draw((1.3,.1),(1.3,.8),color->(0,0,0),size->2);
+        y=CA.y;y=round(min((max((y,.1)),.8))*10)/10;CA.xy=(1.1,y);
+        y=CB.y;y=round(min((max((y,.1)),.8))*10)/10;CB.xy=(1.2,y);
+        y=CC.y;y=round(min((max((y,.1)),.8))*10)/10;CC.xy=(1.3,y);
+
+        pa=CA.y*10+1;
+        pb=CB.y*10+1;
+        pc=CC.y*10+1;
+
+        p = round(pa);
+        q = round(pb);
+        r = round(pc);
+        drawtext(CA+(0.02,0.02),round(pa));
+        drawtext(CB+(0.02,0.02),round(pb));
+        drawtext(CC+(0.02,0.02),round(pc));
+
+				data = [p, q, r, P.xy, Q.xy, R.xy];
+				if(data!=olddata,
+					olddata = data;
+					init(p, q, r);
+				);
+    </script>
+
+    <script id="csdraw" type="text/x-cindyscript">
+
+
+		repeat(5,
+			enhanceconformalmapping();
+		);
+
+      //draw((0,0), color->(color((1,1))));
+
+      colorplot([-1,-1], [1,-1], "image", color(#));
+      drawimage([-1,-1], [1,-1], "image");
+
+			drawimage(iL, iR, "texture");
+
+      if(showfundamentaldomain,
+        draw(A, color->(1,0,0));
+        draw(B, color->(0,1,0));
+        draw(C, color->(0,0,1));
+				fill(polygon([P,Q,R]), color->[0,0,0], alpha->.5)
+      );
+			P.alpha = Q.alpha = R.alpha = if(showfundamentaldomain,1,.6);
+
+    </script>
+
+    <div  id="CSCanvas"></div>
+    <script type="text/javascript">
+
+        cdy = CindyJS({canvasname:"CSCanvas",
+                    scripts: "cs*",
+                    geometry: [
+    {name:"CDelta", type:"Free", pos:[0, 0],color:[0,0,0],pinned:false,size:1},
+    {name:"CA", type:"Free", pos:[1.2,.1],color:[1,0,0],pinned:false,size:6},
+    {name:"CB", type:"Free", pos:[1.3,.2],color:[0,1,0],pinned:false,size:6},
+    {name:"CC", type:"Free", pos:[1.3,.5],color:[0,0,1],pinned:false,size:6},
+
+		{name:"P", type:"Free", pos:[1.04,-.565],color:[1,0,0],pinned:false,size:5},
+		{name:"Q", type:"Free", pos:[1.32,-.565],color:[0,1,0],pinned:false,size:5},
+		{name:"R", type:"Free", pos:[1.04,-.285],color:[0,0,1],pinned:false,size:5},
+                    ],
+                    animation: {autoplay: true},
+                    images: {texture: "checker.png"},
+                    ports: [{
+                      id: "CSCanvas",
+                      width: 600,
+                      height: 500,
+                      transform: [ { visibleRect: [-1, -1, 1.4, 1] } ]
+                    }]
+                  });
+    </script>
+	</body>
+</html>
