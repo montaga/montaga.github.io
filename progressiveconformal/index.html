@@ -96,7 +96,7 @@
 
 			refll(x, a, b) := (
 			  n = (a.y-b.y,b.x-a.x);
-			  x - (((x-a)*n)/(n*n))*n
+			  x - 2*(((x-a)*n)/(n*n))*n
 			);
 
 			readc(pos) := (
