@@ -1,0 +1,247 @@
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+    <title>Cindy JS</title>
+    <script type="text/javascript" src="Cindy.js"></script>
+    <script type="text/javascript" src="CindyGL.js"></script>
+  </head>
+
+	<body style="font-family:Arial;">
+
+    <h1>A conformal Kaleidoscopic pen</h1>
+Use drag on the area on the left in order to draw.
+
+    <script id="csinit" type="text/x-cindyscript">
+      use("CindyGL");
+			iL = (1,-.6);
+			iR = (1.35,-.6);
+resetclock();
+
+			cross(a, b) := (a_2*b_3-a_3*b_2, a_3*b_1-a_1*b_3, a_1*b_2-a_2*b_1);
+
+			pt2color(z) := (z_1, z_2, 0);
+			complex2color(z) := (re(z), im(z), 0);
+			color2pt(c) := (c_1, c_2);
+
+      init(p, q, r) := (
+
+        sign(a) := if(a>0, 1, if(a<0,-1,0));
+
+        spaceType=(sign(q*r+p*r+p*q-p*q*r));//1/p+1/q+1/r-1;
+
+        tmp = (cos(pi/q)+cos(pi/p)*cos(pi/r))/sin(pi/p);
+
+        nb=(1,0,0);
+        nc=(-cos(pi/p), sin(pi/p),0.);
+        na=(-cos(pi/r),-tmp,if(spaceType==0, 0.25, sqrt(abs((tmp+sin(pi/r))*(-tmp+sin(pi/r))))));
+				A = project(cross(nb, nc));
+				B = project(cross(nc, na));
+				C = project(cross(na, nb));
+
+				res = 256;
+      );
+
+
+      reflectIfNegative(pos, n) := ( //reflectIfNegatives pos along n if necessary
+				if(n*pos<0, cnt=cnt+1);
+        pos -2*min(0., n*pos)*(n.x,n.y,n.z*spaceType)
+      );
+
+      fold(p) := (
+				cnt = 0;
+        repeat(20,
+          p = reflectIfNegative(reflectIfNegative(reflectIfNegative(p,
+            na),
+            nb),
+            nc);
+        );
+        p
+      );
+
+      embed(pos) := ( //embed in sphere, RP2, hyperbolid
+        r2 = pos*pos;
+        if(spaceType==1,
+          (pos.x, pos.y, re(sqrt(1-r2))),
+        if(spaceType==0,
+          (pos.x, pos.y, 1),
+        //spaceType==-1
+          (2*pos.x, 2*pos.y, 1+r2)/(1-r2) //poincare to hyperbolid x*x+y*y-z*z=-1
+        ))
+      );
+
+      project(p) := ( //project from sphere, RP2, hyperbolid back to original space
+        if(spaceType==1,
+          (p.x, p.y)/(abs(p)),
+        if(spaceType==0,
+          (p.x, p.y)/(p.z),
+        //spaceType ==-1
+          p = p/abs(sqrt(p.z*p.z-p.y*p.y-p.x*p.x));
+          (p.x, p.y)/(1+p.z)
+        ))
+      );
+
+      color(pos) := (
+        p = embed(pos);
+        r2 = pos*pos;
+        if(abs(spaceType) == 1 & r2>=1.,
+          gray(1.), //outside poincare disc or projected circle
+          fp = project(fold(p)); //corresponding point in fundamental cell
+
+
+          //hue(.3*seconds()+fp.x+fp.y)
+					gray(cos(cnt*pi)/2+1/3)+.2*hue(.1*seconds()+fp.x+fp.y)
+          //imagergb(iL, iR, "texture", color2pt(imagergb((-1,-1),(1,-1), "fun", fp)), mipmap->true)
+          *(.7*min(p.z,1)+.3)  //looks a bit more sphere like
+          *if(showfundamentaldomain & na*p>0 & nb*p>0 & nc*p>0, .7, 1)
+        )
+      );
+
+			refll(x, a, b) := (
+			  n = (a.y-b.y,b.x-a.x);
+			  x - 2*(((x-a)*n)/(n*n))*n
+			);
+
+			readc(pos) := (
+				regional(p,q,cur, ct);
+			  p = q= pos;
+				cur = imagergb((-1,-1), (1,-1),"normaldst", pos);
+				if(cur.z>0&cur.z<.1,
+					n = (cur.x, cur.y);
+					q = p - 2*n*cur.z;
+				);
+				ct = color2pt(imagergb((-1,-1), (1,-1), "fun", q));
+
+				if(cur.z>0&cur.z<.1,
+					ct = gauss(1/conjugate(complex(ct)));
+					//ct = [0,0];
+				);
+
+				//if(|ct|>1,ct=ct/|ct|);
+			  ct
+			);
+
+
+      init(2,4,6);
+
+			createimage("fun", res, res);
+
+			enhanceconformalmapping() := (
+				pw = 2/res;
+
+					colorplot((-1,-1),(1,-1),"fun",
+				    pos = #;
+				    pt2color((1/5)*(
+							readc(pos+pw*(0,0))+
+				      readc(pos+pw*(1,0))+
+				      readc(pos+pw*(0,1))+
+				      readc(pos+pw*(-1,0))+
+				      readc(pos+pw*(0,-1))
+				    ))
+				);
+			);
+
+
+      showfundamentaldomain = false;
+
+      //supersampling
+      createimage("image", 1000, 1000);
+			createimage("normaldst", 1000, 1000);
+			colorplot("normaldst",
+				[0,0,1]
+			);
+    </script>
+
+
+		<script id="csmousedrag" type="text/x-cindyscript">
+		//CA.pinned=CB.pinned=CC.pinned=(mouse().x<1);
+       radius = .2;
+       colorplot((-1,-1),(1,-1),"fun",
+         if(|mouse()-#|<radius & imagergb((-1,-1),(1,-1),"normaldst", #).z>=0,
+           z = complex(#-mouse())/radius;
+           //z=z^2;
+           complex2color(z),
+           imagergb((-1,-1),(1,-1),"fun", #)
+         )
+       );
+
+       colorplot((-1,-1),(1,-1),"normaldst",
+			 	cdst = |mouse()-#|-radius;
+				v = #-mouse(); v=v/|v|;
+         if(cdst<0,
+           [v.x, v.y, cdst]
+					 ,
+           cur = imagergb((-1,-1),(1,-1),"normaldst", #);
+					 if(cur.z<cdst, cur, [v.x, v.y, cdst]);
+         )
+       );
+
+
+       </script>
+    <script id="csmove" type="text/x-cindyscript">
+        draw((1.1,.1),(1.1,.8),color->(0,0,0),size->2);
+        draw((1.2,.1),(1.2,.8),color->(0,0,0),size->2);
+        draw((1.3,.1),(1.3,.8),color->(0,0,0),size->2);
+        y=CA.y;y=round(min((max((y,.1)),.8))*10)/10;CA.xy=(1.1,y);
+        y=CB.y;y=round(min((max((y,.1)),.8))*10)/10;CB.xy=(1.2,y);
+        y=CC.y;y=round(min((max((y,.1)),.8))*10)/10;CC.xy=(1.3,y);
+
+        pa=CA.y*10+1;
+        pb=CB.y*10+1;
+        pc=CC.y*10+1;
+
+        p = round(pa);
+        q = round(pb);
+        r = round(pc);
+        drawtext(CA+(0.02,0.02),round(pa));
+        drawtext(CB+(0.02,0.02),round(pb));
+        drawtext(CC+(0.02,0.02),round(pc));
+
+				data = [p, q, r];
+				if(data!=olddata,
+					olddata = data;
+					init(p, q, r);
+				);
+    </script>
+
+    <script id="csdraw" type="text/x-cindyscript">
+
+
+		repeat(10,
+			enhanceconformalmapping();
+		);
+
+      //draw((0,0), color->(color((1,1))));
+
+      colorplot([-1,-1], [1,-1], "image",
+				if(imagergb((-1,-1),(1,-1), "normaldst", #).z<0,
+					color(color2pt(imagergb((-1,-1),(1,-1), "fun", #)))
+					,
+					[1,1,1]
+				));
+      drawimage([-1,-1], [1,-1], "image");
+
+    </script>
+
+    <div  id="CSCanvas"></div>
+    <script type="text/javascript">
+        cdy = CindyJS({canvasname:"CSCanvas",
+                    scripts: "cs*",
+                    geometry: [
+    //{name:"CDelta", type:"Free", pos:[0, 0],color:[0,0,0],pinned:false,size:1},
+    {name:"CA", type:"Free", pos:[1.2,.1],color:[1,0,0],pinned:false,size:6},
+    {name:"CB", type:"Free", pos:[1.3,.3],color:[0,1,0],pinned:false,size:6},
+    {name:"CC", type:"Free", pos:[1.3,.5],color:[0,0,1],pinned:false,size:6}
+                    ],
+                    animation: {autoplay: true},
+                    ports: [{
+                      id: "CSCanvas",
+                      width: 600,
+                      height: 500,
+                      transform: [ { visibleRect: [-1, -1, 1.4, 1] } ]
+                    }]
+                  });
+    </script>
+	</body>
+</html>
