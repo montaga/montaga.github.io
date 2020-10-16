@@ -74,16 +74,19 @@ pattern(p) := (
 );
 
 
-
+down = false;
 resetclock(); 
       </script>
-      <script id="csmove" type="text/x-cindyscript">
-        resetclock();  //access remote points again (exponential decay)
+      <script id="csmousedown" type="text/x-cindyscript">
+      down = true;
+      </script>
+      <script id="csmouseup" type="text/x-cindyscript">
+      down = false;
       </script>
       <script id="csdraw" type="text/x-cindyscript">
-      
+if(down, resetclock()); //access remote points to accelerate global convergence
 pw = 2/res; //pixelwidth
-fw = max(pw, min(10*pw,exp(-0.2*seconds()))); //consider remote points in the beginning
+fw = max(pw, 20*pw*exp(-seconds())); //consider remote points in the beginning
 
 
 repeat(5,
