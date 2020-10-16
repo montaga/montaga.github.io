@@ -1,0 +1,150 @@
+
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        
+        <title>A conformal mapping between triangles</title>
+        <style type="text/css">
+            body {
+                margin: 0px;
+                padding: 0px;
+            }
+            
+        </style>
+        <script type="text/javascript" src="Cindy.js"></script>
+        <script type="text/javascript" src="CindyGL.js"></script>
+        
+        
+        
+      <script id="csinit" type="text/x-cindyscript">
+res = 512;
+createimage("fun", 2*res, res);
+
+pt2color(p) := (
+	(p_1, p_2, 0)
+);
+
+color2pt(c) := (
+	(c_1, c_2)
+);
+
+
+//initial map for "fun"
+AMAP = map(A, B, C, P, Q, R);
+colorplot("fun",
+  p = #;
+  hom = AMAP*[p_1, p_2, 1];
+  pt2color( (hom_1, hom_2)/hom_3 )
+);
+
+
+ccw(a, b, c) := ( //counterclockwise
+  det([[a_1, a_2, 1],[b_1, b_2, 1],[c_1, c_2, 1]])>0
+);
+
+inside(x, a, b, c) := ( //is x in the triangle abc?
+  ccw(a, b, x) & ccw(b, c, x) & ccw(c, a, x)
+);
+
+refl(x, a, b) := (
+  n = (a.y-b.y,b.x-a.x);
+  x - 2*(((x-a)*n)/(n*n))*n
+);
+
+
+
+readc(p) := ( //p gets maped to t according to "fun" if inside ABC. If outside, then Schwarz reflection principle is applied
+  q = p;
+  if(!ccw(p, A.xy, B.xy), q = refl(p, A.xy, B.xy)); //outside side AB
+  if(!ccw(p, B.xy, C.xy), q = refl(p, B.xy, C.xy)); //outside side BC
+  if(!ccw(p, C.xy, A.xy), q = refl(p, C.xy, A.xy)); //outside side CA
+  t = color2pt(imagergb(interpolate->true, "fun", q));
+  if(!ccw(p, A.xy, B.xy), t = refl(t, P.xy, Q.xy)); //outside side AB
+  if(!ccw(p, B.xy, C.xy), t = refl(t, Q.xy, R.xy)); //outside side BC
+  if(!ccw(p, C.xy, A.xy), t = refl(t, R.xy, P.xy)); //outside side CA
+  t
+);
+
+pattern(p) := (
+  grid = max(max(.7,sin((p_1)*2*pi*10)), max(.7,sin((p_2)*2*pi*10)));
+  z = complex(p-(P.xy+Q.xy+R.xy)/3);
+  rbg = grid*hue(im(log(z))/(2*pi));
+  [rbg_1, rbg_2, rbg_3, 1] //add alpha 1
+);
+
+
+
+resetclock(); 
+      </script>
+      <script id="csmove" type="text/x-cindyscript">
+        resetclock();  //access remote points again (exponential decay)
+      </script>
+      <script id="csdraw" type="text/x-cindyscript">
+      
+pw = 2/res; //pixelwidth
+fw = max(pw, min(10*pw,exp(-0.2*seconds()))); //consider remote points in the beginning
+
+
+repeat(5,
+  colorplot("fun", 
+    p=#;
+    /*pt2color(
+      (1/4)*( //avg of neighbours
+        readc(p+pw*(1,0))+
+        readc(p+pw*(0,1))+
+        readc(p+pw*(-1,0))+
+        readc(p+pw*(0,-1))
+    )));*/
+    
+    pt2color(
+      (1/8)*( //avg of neighbours + remote neighbours (fast convergence)
+        readc(p+pw*(1,0))+
+        readc(p+pw*(0,1))+
+        readc(p+pw*(-1,0))+
+        readc(p+pw*(0,-1)) +
+        //remote points
+        readc(p+fw*(1,0))+
+        readc(p+fw*(0,1))+
+        readc(p+fw*(-1,0))+
+        readc(p+fw*(0,-1))
+    )));
+);
+
+
+
+colorplot(
+  rbga = [0,0,0,0];
+  x = #;
+  if(inside(x, P.xy, Q.xy, R.xy), rbga = pattern(x));
+  if(inside(x, A.xy, B.xy, C.xy), rbga = pattern(color2pt(imagergb("fun", x))));
+  rbga
+);
+      </script>
+    
+        <script type="text/javascript">
+          var cdy = CindyJS({
+            scripts: "cs*",
+            geometry: [
+              {labeled: true, name: "A", type: "Free", pos: [-1, -1, 1.1]},
+              {labeled: true, name: "B", type: "Free", pos: [2, -1, 1.1]},
+              {labeled: true, name: "C", type: "Free", pos: [0, 1, 1.1]},
+              {labeled: true, name: "P", type: "Free", pos: [-2, -1, 1.1]},
+              {labeled: true, name: "Q", type: "Free", pos: [-1, 0, 1.1]},
+              {labeled: true, name: "R", type: "Free", pos: [-2, 1, 1.1]}
+            ],
+            ports: [
+              {id: "CSCanvas", transform: [{visibleRect: [-2, -1, 2, 1]}], background: "rgb(168,176,192)", width: "1024", height: "512"}
+            ],
+            use: [
+              "CindyGL"
+            ],
+            autoplay: true,
+          });
+        </script>
+    </head>
+    <body>
+        <div id="CSCanvas"></div>
+    </body>
+    </html>
+  
