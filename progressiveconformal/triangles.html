@@ -74,44 +74,46 @@ pattern(p) := (
 );
 
 
-down = false;
-resetclock(); 
+reset = true;
       </script>
       <script id="csmousedown" type="text/x-cindyscript">
-      down = true;
+      reset = true;
       </script>
       <script id="csmouseup" type="text/x-cindyscript">
-      down = false;
+      reset = true;
       </script>
       <script id="csdraw" type="text/x-cindyscript">
-if(down, resetclock()); //access remote points to accelerate global convergence
+if(reset, fw = 30*2/res; reset=false;); //access remote points to accelerate global convergence
 pw = 2/res; //pixelwidth
-fw = max(pw, 20*pw*exp(-seconds())); //consider remote points in the beginning
-
 
 repeat(5,
+  
+  fw = max(pw, fw*.996); //consider remote points in the beginning, exponential decay
   colorplot("fun", 
     p=#;
-    /*pt2color(
-      (1/4)*( //avg of neighbours
-        readc(p+pw*(1,0))+
-        readc(p+pw*(0,1))+
-        readc(p+pw*(-1,0))+
-        readc(p+pw*(0,-1))
-    )));*/
-    
-    pt2color(
-      (1/8)*( //avg of neighbours + remote neighbours (fast convergence)
-        readc(p+pw*(1,0))+
-        readc(p+pw*(0,1))+
-        readc(p+pw*(-1,0))+
-        readc(p+pw*(0,-1)) +
-        //remote points
-        readc(p+fw*(1,0))+
-        readc(p+fw*(0,1))+
-        readc(p+fw*(-1,0))+
-        readc(p+fw*(0,-1))
-    )));
+    if(fw<1.1*pw,
+      pt2color(
+        (1/4)*( //avg of neighbours
+          readc(p+pw*(1,0))+
+          readc(p+pw*(0,1))+
+          readc(p+pw*(-1,0))+
+          readc(p+pw*(0,-1))
+      ));
+      ,
+      pt2color(
+        (1/8)*( //avg of neighbours + remote neighbours (fast convergence)
+          readc(p+pw*(1,0))+
+          readc(p+pw*(0,1))+
+          readc(p+pw*(-1,0))+
+          readc(p+pw*(0,-1)) +
+          //remote points
+          readc(p+fw*(1,0))+
+          readc(p+fw*(0,1))+
+          readc(p+fw*(-1,0))+
+          readc(p+fw*(0,-1))
+      ))
+    )
+  );
 );
 
 
