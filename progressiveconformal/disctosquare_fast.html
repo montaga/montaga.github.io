@@ -1,0 +1,167 @@
+
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        
+        <title>A conformal mapping between triangles</title>
+        <style type="text/css">
+            body {
+                margin: 0px;
+                padding: 0px;
+            }
+            
+        </style>
+        <script type="text/javascript" src="Cindy.js"></script>
+        <script type="text/javascript" src="CindyGL.js"></script>
+        
+        
+        
+      <script id="csinit" type="text/x-cindyscript">
+res =512;
+createimage("fun", res, res);
+
+pt2color(p) := (
+	(p_1, p_2, 0)
+);
+
+color2pt(c) := (
+	(c_1, c_2)
+);
+
+
+//initial map for "fun": id
+colorplot("fun",
+  p = #;
+  pt2color( p )
+);
+
+
+ccw(a, b, c) := ( //counterclockwise
+  det([[a_1, a_2, 1],[b_1, b_2, 1],[c_1, c_2, 1]])>0
+);
+
+inside(x, a, b, c) := ( //is x in the triangle abc?
+  ccw(a, b, x) & ccw(b, c, x) & ccw(c, a, x)
+);
+
+refl(x, a, b) := (
+  n = (a.y-b.y,b.x-a.x);
+  x - 2*(((x-a)*n)/(n*n))*n
+);
+
+crefl(p) := p/(p*p); //reflection along unit circle
+
+srefl(p) := (
+  regional(q);
+  q = p;
+  if(p.x >  |p.y|, q = ( 2-q.x, q.y)); //reflection along edges of unit square
+  if(p.x < -|p.y|, q = (-2-q.x, q.y));
+  if(p.y >  |p.x|, q = (q.x,  2-q.y));
+  if(p.y < -|p.x|, q = (q.x, -2-q.y));
+  q
+);
+
+
+readc(p) := ( //p gets maped to t according to "fun" if inside ABC. If outside, then Schwarz reflection principle is applied
+  regional(q);
+  q = p;
+  if(|p|>1, q = crefl(q));
+  t = color2pt(imagergb(interpolate->true, "fun", q));
+  if(|p|>1, t = srefl(t));
+  t
+);
+
+pattern(p) := (
+  grid = if(sin(p_1*(2*pi)*8)*sin(p_2*(2*pi)*8)<0,.6,.9);
+  z = complex(p);
+  rbg = grid*hue(im(log(z))/(2*pi));
+  //rbg = grid*hue(3*|z|);
+  [rbg_1, rbg_2, rbg_3, 1] //add alpha 1
+);
+
+
+reset = true;
+      </script>
+      <script id="csmousedown" type="text/x-cindyscript">
+      reset = true;
+      </script>
+      <script id="csmouseup" type="text/x-cindyscript">
+      reset = true;
+      </script>
+      <script id="csdraw" type="text/x-cindyscript">
+if(reset, fw = 30*2/res; reset=false;); //access remote points to accelerate global convergence
+pw = 2/res; //pixelwidth
+repeat(10,
+  
+  fw = max(pw, fw*.995); //consider remote points in the beginning, exponential decay
+
+  colorplot("fun", 
+    p=#;
+    if(fw<1.1*pw,
+      pt2color(
+        (1/4)*( //avg of neighbours
+          readc(p+pw*(1,0))+
+          readc(p+pw*(0,1))+
+          readc(p+pw*(-1,0))+
+          readc(p+pw*(0,-1))
+      ));
+      ,
+      pt2color(
+        (1/8)*( //avg of neighbours + remote neighbours (fast convergence)
+          readc(p+pw*(1,0))+
+          readc(p+pw*(0,1))+
+          readc(p+pw*(-1,0))+
+          readc(p+pw*(0,-1)) +
+          //remote points
+          readc(p+fw*(1,0))+
+          readc(p+fw*(0,1))+
+          readc(p+fw*(-1,0))+
+          readc(p+fw*(0,-1))
+      ))
+    )
+  );
+);
+
+/*
+//square and disc
+colorplot( 
+  rbga = [0,0,0,0];
+  p = 2*#+(1,0);
+  x = 2*#+(-1,0);
+  if(|p|<1, rbga = pattern(color2pt(imagergb("fun", p))));
+  if(|x.x|<1 & |x.y|<1, rbga = pattern(x));
+  rbga
+);
+*/
+//disc only
+
+colorplot(
+  rbga = [0,0,0,0];
+  p = #;
+  if(|p|<1, rbga = pattern(color2pt(imagergb("fun", p))));
+  rbga
+);
+
+
+      </script>
+    
+        <script type="text/javascript">
+          var cdy = CindyJS({
+            scripts: "cs*",
+            geometry: [],
+            ports: [
+              {id: "CSCanvas", transform: [{visibleRect: [-1, -1, 1, 1]}], background: "rgb(168,176,192)", width: "512", height: "512"}
+            ],
+            use: [
+              "CindyGL"
+            ],
+            autoplay: true,
+          });
+        </script>
+    </head>
+    <body>
+        <div id="CSCanvas"></div>
+    </body>
+    </html>
+  
